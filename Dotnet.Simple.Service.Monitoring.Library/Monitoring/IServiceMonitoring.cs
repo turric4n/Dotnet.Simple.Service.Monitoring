@@ -6,6 +6,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
 {
     public interface IServiceMonitoring
     {
-        void Launch();
+        void SetUp();
     }
 }

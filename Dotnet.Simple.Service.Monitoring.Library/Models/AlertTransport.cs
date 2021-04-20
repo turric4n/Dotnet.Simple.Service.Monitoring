@@ -4,9 +4,10 @@ using System.Text;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Models
 {
-    public class AlertBehaviour
+    public enum AlertTransport
     {
-        public bool Alert;
-        public AlertTransport AlertTransport;
+        Email,
+        Telegram,
+        Slack
     }
 }

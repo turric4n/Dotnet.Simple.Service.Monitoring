@@ -16,6 +16,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
             _healthChecksBuilder = healthChecksBuilder;
             _healthCheck = healthCheck;
         }
-        public abstract void Launch();
+        protected abstract void Validate();
+        public abstract void SetUp();
     }
 }

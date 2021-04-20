@@ -85,6 +85,10 @@
               "target": "Package",
               "version": "[5.0.1, )"
             },
+            "CuttingEdge.Conditions.NetStandard": {
+              "target": "Package",
+              "version": "[1.2.0, )"
+            },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
               "version": "[5.0.1, )"

@@ -133,6 +133,15 @@
           "lib/netstandard2.0/Confluent.Kafka.dll": {}
         }
       },
+      "CuttingEdge.Conditions.NetStandard/1.2.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/CuttingEdge.Conditions.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/CuttingEdge.Conditions.dll": {}
+        }
+      },
       "Elasticsearch.Net/7.9.0": {
         "type": "package",
         "dependencies": {
@@ -2548,6 +2557,18 @@
         "lib/netstandard1.3/Confluent.Kafka.xml",
         "lib/netstandard2.0/Confluent.Kafka.dll",
         "lib/netstandard2.0/Confluent.Kafka.xml"
+      ]
+    },
+    "CuttingEdge.Conditions.NetStandard/1.2.0": {
+      "sha512": "CcPWdCfZQTKx24zqFmPVT/LfFRuMw4JVaXluwq3PIQ6wzSfyGxSbrQbvnw0J1py245fUQPP3ZQtIt0lhZeNgEw==",
+      "type": "package",
+      "path": "cuttingedge.conditions.netstandard/1.2.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "cuttingedge.conditions.netstandard.1.2.0.nupkg.sha512",
+        "cuttingedge.conditions.netstandard.nuspec",
+        "lib/netstandard2.0/CuttingEdge.Conditions.dll"
       ]
     },
     "Elasticsearch.Net/7.9.0": {
@@ -7943,6 +7964,7 @@
       "AspNetCore.HealthChecks.SqlServer >= 5.0.2",
       "AspNetCore.HealthChecks.Sqlite >= 5.0.1",
       "AspNetCore.HealthChecks.Uris >= 5.0.1",
+      "CuttingEdge.Conditions.NetStandard >= 1.2.0",
       "Microsoft.Extensions.DependencyInjection >= 5.0.1",
       "Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions >= 5.0.5",
       "Microsoft.Extensions.Options.ConfigurationExtensions >= 5.0.0"
@@ -8034,6 +8056,10 @@
           "AspNetCore.HealthChecks.Uris": {
             "target": "Package",
             "version": "[5.0.1, )"
+          },
+          "CuttingEdge.Conditions.NetStandard": {
+            "target": "Package",
+            "version": "[1.2.0, )"
           },
           "Microsoft.Extensions.DependencyInjection": {
             "target": "Package",
