@@ -13,12 +13,11 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
         private readonly IServiceCollection _serviceCollection;
         private readonly IHealthChecksBuilder _healthChecksBuilder;
 
-        public StandardStackMonitoring(IServiceCollection serviceCollection)
+        public StandardStackMonitoring(IHealthChecksBuilder healthChecksBuilder)
         {
-            _serviceCollection = serviceCollection;
-            _healthChecksBuilder = serviceCollection.AddHealthChecks();
+            _healthChecksBuilder = healthChecksBuilder;
         }
-        public void AddMonitoring(ServiceMonitor monitor)
+        public void AddMonitoring(ServiceHealthCheck monitor)
         {
             
         }

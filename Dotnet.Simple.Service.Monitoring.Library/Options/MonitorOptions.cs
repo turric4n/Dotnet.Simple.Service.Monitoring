@@ -10,6 +10,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Options
     public class MonitorOptions
     {
         public MonitoringSettings Settings { get; set; }
-        public List<ServiceMonitor> Monitors { get; set; }
+        public List<ServiceHealthCheck> HealthChecks { get; set; }
     }
 }

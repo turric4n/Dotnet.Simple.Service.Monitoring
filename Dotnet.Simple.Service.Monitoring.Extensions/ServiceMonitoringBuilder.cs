@@ -20,7 +20,7 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
             _stackMonitoring = stackMonitoring;
             _options = options;
         }
-        public IServiceMonitoringBuilder Add(ServiceMonitor monitor)
+        public IServiceMonitoringBuilder Add(ServiceHealthCheck monitor)
         {
             _stackMonitoring.AddMonitoring(monitor);
             return this;
@@ -28,10 +28,13 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
 
         public IServiceMonitoringBuilder UseSettings()
         {
-            foreach (var monitor in _options.Value.Monitors)
+            if (_options.Value == null) return this;
+
+            foreach (var monitor in _options.Value.HealthChecks)
             {
                 _stackMonitoring.AddMonitoring(monitor);
-            } 
+            }
+
             return this;
         }
 

@@ -8,6 +8,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
 {
     public interface IStackMonitoring
     {
-        void AddMonitoring(ServiceMonitor monitor);
+        void AddMonitoring(ServiceHealthCheck monitor);
     }
 }

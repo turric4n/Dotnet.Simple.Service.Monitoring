@@ -8,7 +8,7 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
 {
     public interface IServiceMonitoringBuilder
     {
-        IServiceMonitoringBuilder Add(ServiceMonitor monitor);
+        IServiceMonitoringBuilder Add(ServiceHealthCheck monitor);
         IServiceMonitoringBuilder UseSettings();
         IServiceMonitoringBuilder AddUI();
     }
