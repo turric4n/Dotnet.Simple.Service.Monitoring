@@ -22,8 +22,8 @@ jobs:
     - name: pwd     
       run: pwd     
     - name: Restore dependencies
-      run: dotnet restore /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.csproj
+      run: dotnet restore Dotnet.Simple.Service.Monitoring.csproj
     - name: Build
-      run: dotnet build --no-restore /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.csproj
+      run: dotnet build --no-restore Dotnet.Simple.Service.Monitoring.csproj
     - name: Test
-      run: dotnet test --no-build --verbosity normal /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.Tests/Dotnet.Simple.Service.Monitoring.Tests.csproj
+      run: dotnet test --no-build --verbosity normal ../Dotnet.Simple.Service.Monitoring.Tests/Dotnet.Simple.Service.Monitoring.Tests.csproj
