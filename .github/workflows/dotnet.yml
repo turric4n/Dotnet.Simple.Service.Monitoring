@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
-      run: dotnet restore /home/runner/work/Dotnet.Simple.Service.Monitoring
+      run: dotnet restore /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.sln
     - name: Build
-      run: dotnet build --no-restore /home/runner/work/Dotnet.Simple.Service.Monitoring
+      run: dotnet build --no-restore /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.sln
     - name: Test
-      run: dotnet test --no-build --verbosity normal /home/runner/work/Dotnet.Simple.Service.Monitoring
+      run: dotnet test --no-build --verbosity normal /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.sln
