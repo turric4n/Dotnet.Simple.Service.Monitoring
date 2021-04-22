@@ -17,8 +17,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
+    - name: Change directory
+      run: cd /home/runner/work/Dotnet.Simple.Service.Monitoring
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore 
     - name: Build
       run: dotnet build --no-restore
     - name: Test
