@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Simple.Service.Monit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Simple.Service.Monitoring.Extensions", "..\Dotnet.Simple.Service.Monitoring.Extensions\Dotnet.Simple.Service.Monitoring.Extensions.csproj", "{7979F12D-EE08-4943-8971-63145BD4A1FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Simple.Service.Monitoring.Library", "..\Dotnet.Simple.Service.Monitoring.Library\Dotnet.Simple.Service.Monitoring.Library.csproj", "{525AC8F3-DE65-4EC1-AD99-CD4ED34CE327}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dotnet.Simple.Service.Monitoring.Library", "..\Dotnet.Simple.Service.Monitoring.Library\Dotnet.Simple.Service.Monitoring.Library.csproj", "{525AC8F3-DE65-4EC1-AD99-CD4ED34CE327}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dotnet.Simple.Service.Monitoring.Tests", "..\Dotnet.Simple.Service.Monitoring.Tests\Dotnet.Simple.Service.Monitoring.Tests.csproj", "{D1E518F8-8311-4BC0-80A1-D7392BE13964}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{525AC8F3-DE65-4EC1-AD99-CD4ED34CE327}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{525AC8F3-DE65-4EC1-AD99-CD4ED34CE327}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{525AC8F3-DE65-4EC1-AD99-CD4ED34CE327}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1E518F8-8311-4BC0-80A1-D7392BE13964}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1E518F8-8311-4BC0-80A1-D7392BE13964}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1E518F8-8311-4BC0-80A1-D7392BE13964}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1E518F8-8311-4BC0-80A1-D7392BE13964}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Dotnet.Simple.Service.Monitoring.Library.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

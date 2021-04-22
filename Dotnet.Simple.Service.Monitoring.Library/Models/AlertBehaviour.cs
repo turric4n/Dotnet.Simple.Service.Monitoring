@@ -6,7 +6,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models
 {
     public class AlertBehaviour
     {
-        public bool Alert;
-        public AlertTransport AlertTransport;
+        public bool Alert { get; set; }
+        public AlertTransport AlertTransport { get; set; }
     }
 }

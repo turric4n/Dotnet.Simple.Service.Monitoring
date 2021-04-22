@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using CuttingEdge.Conditions;
 using Dotnet.Simple.Service.Monitoring.Library.Models;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
+namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
     public class HttpServiceMonitoring : ServiceMonitoringBase
     {
@@ -16,7 +16,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
         {
         }
 
-        protected override void Validate()
+        protected internal override void Validate()
         {
             foreach (var host in this._healthCheck.EndpointOrHost.Split(','))
             {
@@ -26,14 +26,15 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
                     .IsNotNull();
                 Condition.Requires(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode)
                     .IsGreaterThan(0);
-                Condition.Requires(Uri.IsWellFormedUriString(host, UriKind.Absolute))
+                Condition
+                    .WithExceptionOnFailure<MalformedUriException>()
+                    .Requires(Uri.IsWellFormedUriString(host, UriKind.Absolute))
                     .IsTrue();
             }
         }
 
-        public override void SetUp()
+        protected internal override void SetMonitoring()
         {
-            Validate();
             var urilist = new List<Uri>();
             this._healthCheck.EndpointOrHost.Split(',')
                 .ToList()
@@ -64,11 +65,8 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring
                         {
                             options.UseTimeout(TimeSpan.FromSeconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpResponseTimesSeconds));
                         }
-                    });
+                    }, _healthCheck.Name);
                 });
-
-            //if (this._healthCheck.AlertBehaviour.)
-            //this._healthChecksBuilder.Services.
         }
 
     }

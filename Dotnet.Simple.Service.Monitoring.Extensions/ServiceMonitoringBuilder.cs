@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Dotnet.Simple.Service.Monitoring.Library.Models;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Dotnet.Simple.Service.Monitoring.Library.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,7 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
         public IServiceMonitoringBuilder Add(ServiceHealthCheck monitor)
         {
             _stackMonitoring.AddMonitoring(monitor);
+
             return this;
         }
 
