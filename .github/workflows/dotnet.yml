@@ -17,8 +17,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.x
-    - name: Restore dependencies        
+    - name: ls     
       run: ls -ltra
+    - name: pwd     
+      run: pwd     
     - name: Restore dependencies
       run: dotnet restore /home/runner/work/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.csproj
     - name: Build
