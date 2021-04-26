@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 using CuttingEdge.Conditions;
@@ -40,12 +41,31 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Pu
 
         protected internal override void Validate()
         {
-            Condition.Requires(_emailTransportSettings.From)
+            Condition.WithExceptionOnFailure<EmailAlertingValidationError>()
+                .Requires(new MailAddress(_emailTransportSettings.From))
                 .IsNotNull();
-            Condition.Requires(_emailTransportSettings.SmtpHost)
+            Condition.WithExceptionOnFailure<EmailAlertingValidationError>()
+                .Requires(Uri.CheckHostName(_emailTransportSettings.SmtpHost))
+                .IsNotEqualTo(UriHostNameType.Unknown);
+            Condition.WithExceptionOnFailure<EmailAlertingValidationError>()
+                .Requires(_emailTransportSettings.To)
                 .IsNotNull();
-            Condition.Requires(_emailTransportSettings.To)
-                .IsNotNull();
+
+            foreach (var mailto in _emailTransportSettings.To.Split(','))
+            {
+                Condition.Requires(new MailAddress(mailto))
+                    .IsNotNull();
+            }
+
+            if (_emailTransportSettings.Authentication)
+            {
+                Condition.WithExceptionOnFailure<EmailAlertingValidationError>()
+                    .Requires(_emailTransportSettings.Username)
+                    .IsNotNull();
+                Condition.WithExceptionOnFailure<EmailAlertingValidationError>()
+                    .Requires(_emailTransportSettings.Password)
+                    .IsNotNull();
+            }
         }
 
         protected internal override void SetPublishing()
