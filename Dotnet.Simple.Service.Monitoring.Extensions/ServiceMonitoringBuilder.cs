@@ -38,36 +38,31 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
             {
                 _stackMonitoring.AddMonitoring(monitor);
 
-                if (monitor.PublishAlerts)
+                if (monitor.Alert)
                 {
-                    AlertTransportSettings transport = null;
+                    
 
-                    switch (monitor.TransportMethod)
+                    monitor.AlertBehaviour?.ForEach(ab =>
                     {
-                        case AlertTransportMethod.Dummy:
-                            break;
-                        case AlertTransportMethod.Email:
-                            transport = _options.Value.EmailTransportSettings
-                                .FirstOrDefault(x => x.TransportName == monitor.AlertTransportName);
-                            transport ??= _options.Value.EmailTransportSettings.First();
-                            break;
-                        case AlertTransportMethod.Telegram:
-                            transport = _options.Value.EmailTransportSettings
-                                .FirstOrDefault(x => x.TransportName == monitor.AlertTransportName);
-                            transport ??= _options.Value.EmailTransportSettings.First();
-                            break;
-                        case AlertTransportMethod.Slack:
-                            transport = _options.Value.EmailTransportSettings
-                                .FirstOrDefault(x => x.TransportName == monitor.AlertTransportName);
-                            transport ??= _options.Value.EmailTransportSettings.First();
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                    if (transport != null)
-                    {
-                        _stackMonitoring.AddPublishing(transport, monitor);
-                    }
+                        AlertTransportSettings transport = null;
+                        switch (ab.TransportMethod)
+                        {
+                            case AlertTransportMethod.Email:
+                                transport = _options.Value.EmailTransportSettings
+                                    .FirstOrDefault(x => x.Name == ab.TransportName);
+                                break;
+                            case AlertTransportMethod.Telegram:
+                                transport = _options.Value.TelegramTransportSettings
+                                    .FirstOrDefault(x => x.Name == ab.TransportName);
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                        if (transport != null)
+                        {
+                            _stackMonitoring.AddPublishing(transport, monitor);
+                        }
+                    });
                 }
             }
 

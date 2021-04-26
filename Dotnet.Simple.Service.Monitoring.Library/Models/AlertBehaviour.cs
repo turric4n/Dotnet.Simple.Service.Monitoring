@@ -11,9 +11,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models
         public string TransportName { get; set; }
         public bool AlertOnce { get; set; }
         public bool AlertOnServiceRecovered { get; set; }
-        public TimeSpan StartAlertingOn { get; set; }
-        public TimeSpan StopAlertingOn { get; set; }
         public TimeSpan AlertEvery { get; set; }
-        public TimeSpan AlertOn { get; set; }
     }
 }
