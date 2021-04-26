@@ -1,7 +1,10 @@
 ﻿using System;
 using Dotnet.Simple.Service.Monitoring.Library.Models;
+using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -13,7 +16,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             _healthChecksBuilder = healthChecksBuilder;
         }
-        public void AddMonitoring(ServiceHealthCheck monitor)
+        public IStackMonitoring AddMonitoring(ServiceHealthCheck monitor)
         {
             HttpServiceMonitoring mymonitor = null;
 
@@ -33,6 +36,21 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             }
             mymonitor?.SetUp();
+            return this;
+        }
+
+        public IStackMonitoring AddPublishing(AlertTransportSettings alertTransportSettings, ServiceHealthCheck monitor)
+        {
+            PublisherBase publisher = null;
+
+            if (alertTransportSettings is EmailTransportSettings)
+            {
+                publisher = new EmailAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+            }
+
+            publisher?.SetUp();
+
+            return this;
         }
     }
 }

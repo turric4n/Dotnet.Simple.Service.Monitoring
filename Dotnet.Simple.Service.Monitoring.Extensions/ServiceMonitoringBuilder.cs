@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Dotnet.Simple.Service.Monitoring.Library.Models;
+using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Dotnet.Simple.Service.Monitoring.Library.Options;
@@ -35,6 +37,38 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
             foreach (var monitor in _options.Value.HealthChecks)
             {
                 _stackMonitoring.AddMonitoring(monitor);
+
+                if (monitor.PublishAlerts)
+                {
+                    AlertTransportSettings transport = null;
+
+                    switch (monitor.TransportMethod)
+                    {
+                        case AlertTransportMethod.Dummy:
+                            break;
+                        case AlertTransportMethod.Email:
+                            transport = _options.Value.EmailTransportSettings
+                                .FirstOrDefault(x => x.TransportName == monitor.AlertTransportName);
+                            transport ??= _options.Value.EmailTransportSettings.First();
+                            break;
+                        case AlertTransportMethod.Telegram:
+                            transport = _options.Value.EmailTransportSettings
+                                .FirstOrDefault(x => x.TransportName == monitor.AlertTransportName);
+                            transport ??= _options.Value.EmailTransportSettings.First();
+                            break;
+                        case AlertTransportMethod.Slack:
+                            transport = _options.Value.EmailTransportSettings
+                                .FirstOrDefault(x => x.TransportName == monitor.AlertTransportName);
+                            transport ??= _options.Value.EmailTransportSettings.First();
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    if (transport != null)
+                    {
+                        _stackMonitoring.AddPublishing(transport, monitor);
+                    }
+                }
             }
 
             return this;

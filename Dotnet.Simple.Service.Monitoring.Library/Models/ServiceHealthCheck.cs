@@ -13,8 +13,10 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models
         public ServiceType ServiceType { get; set; }
         public string EndpointOrHost { get; set; }
         public int Port { get; set; }
-        public int MonitoringInterval { get; set; }
+        public TimeSpan MonitoringInterval { get; set; }
         public HealthCheckConditions HealthCheckConditions { get; set; }
-        public AlertBehaviour AlertBehaviour { get; set; }
+        public bool PublishChecks { get; set; }
+        public bool Alert { get; set; }
+        public List<AlertBehaviour> AlertBehaviour { get; set; }
     }
 }

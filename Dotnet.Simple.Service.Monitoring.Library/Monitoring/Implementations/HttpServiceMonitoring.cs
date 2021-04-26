@@ -61,9 +61,9 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
                                 throw new ArgumentOutOfRangeException();
                         }
 
-                        if (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpResponseTimesSeconds > 0)
+                        if (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs > 0)
                         {
-                            options.UseTimeout(TimeSpan.FromSeconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpResponseTimesSeconds));
+                            options.UseTimeout(TimeSpan.FromMilliseconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs));
                         }
                     }, _healthCheck.Name);
                 });

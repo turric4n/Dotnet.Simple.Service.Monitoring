@@ -1,3 +1,4 @@
+using System;
 using Dotnet.Simple.Service.Monitoring.Library.Models;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations;
@@ -31,13 +32,13 @@ namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpResponseTimesSeconds = 1,
+                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https://www.google.com",
-                MonitoringInterval = 1,
+                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.HttpEndpoint
             };
             //Act
@@ -61,13 +62,13 @@ namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpResponseTimesSeconds = 1,
+                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https:/www.google.com",
-                MonitoringInterval = 1,
+                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.HttpEndpoint
             };
             //Act
@@ -91,13 +92,13 @@ namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpResponseTimesSeconds = 1,
+                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https://www.google.com,https://www.yahoo.com",
-                MonitoringInterval = 1,
+                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.HttpEndpoint
             };
             //Act
@@ -120,13 +121,13 @@ namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpResponseTimesSeconds = 1,
+                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https://www.google.com,http://www.yahoo.com,notanendpoint",
-                MonitoringInterval = 1,
+                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.HttpEndpoint
             };
             //Act

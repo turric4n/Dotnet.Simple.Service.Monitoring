@@ -14,7 +14,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models
     public class HttpBehaviour
     {
         public int HttpExpectedCode { get; set; }
-        public int HttpResponseTimesSeconds { get; set; }
+        public int HttpExpectedResponseTimeMs { get; set; }
         public HttpVerb HttpVerb { get; set; }
     }
 }
