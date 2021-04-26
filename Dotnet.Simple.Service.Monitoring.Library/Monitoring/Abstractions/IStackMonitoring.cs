@@ -1,4 +1,5 @@
-﻿using Dotnet.Simple.Service.Monitoring.Library.Models;
+﻿using System.Collections.Generic;
+using Dotnet.Simple.Service.Monitoring.Library.Models;
 using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
@@ -7,5 +8,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
     {
         IStackMonitoring AddMonitoring(ServiceHealthCheck monitor);
         IStackMonitoring AddPublishing(AlertTransportSettings alertTransportSettings, ServiceHealthCheck monitor);
+        List<PublisherBase> GetPublishers();
     }
 }

@@ -13,6 +13,7 @@ using NUnit.Framework;
 
 namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
 {
+    [TestFixture(Category = "Unit")]
     public class EmailAlertPublisherShould
     {
         private IHealthChecksBuilder healthChecksBuilder;
@@ -75,9 +76,10 @@ namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
             emailAlertingPublisher =
                 new EmailAlertingPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-            // Act // Assert
+            // Assert
             Assert.DoesNotThrow(() =>
             {
+                // Act
                 emailAlertingPublisher.SetUp();
             });
         }
@@ -126,9 +128,10 @@ namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
             emailAlertingPublisher =
                 new EmailAlertingPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-            // Act // Assert
+            // Assert
             Assert.Throws<FormatException>(() =>
             {
+                // Act
                 emailAlertingPublisher.SetUp();
             });
         }

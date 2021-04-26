@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dotnet.Simple.Service.Monitoring.Library.Models;
 using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -11,10 +12,12 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
     public class StandardStackMonitoring : IStackMonitoring
     {
         private readonly IHealthChecksBuilder _healthChecksBuilder;
+        private readonly List<PublisherBase> _publishers;
 
         public StandardStackMonitoring(IHealthChecksBuilder healthChecksBuilder)
         {
             _healthChecksBuilder = healthChecksBuilder;
+            _publishers = new List<PublisherBase>();
         }
         public IStackMonitoring AddMonitoring(ServiceHealthCheck monitor)
         {
@@ -46,11 +49,20 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
             if (alertTransportSettings is EmailTransportSettings)
             {
                 publisher = new EmailAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                lock (_publishers)
+                {
+                    _publishers.Add(publisher);
+                }
             }
 
             publisher?.SetUp();
 
             return this;
+        }
+
+        public List<PublisherBase> GetPublishers()
+        {
+            return _publishers;
         }
     }
 }

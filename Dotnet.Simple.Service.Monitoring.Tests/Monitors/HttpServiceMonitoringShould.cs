@@ -7,6 +7,7 @@ using NUnit.Framework;
 
 namespace Dotnet.Simple.Service.Monitoring.Tests.Monitors
 {
+    [TestFixture(Category = "Unit")]
     public class HttpServiceMonitoringShould
     {
         private IHealthChecksBuilder healthChecksBuilder;

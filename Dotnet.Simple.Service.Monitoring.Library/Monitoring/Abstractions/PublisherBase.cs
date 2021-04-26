@@ -15,7 +15,7 @@ using Nest;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
-    public abstract class PublisherBase : IHealthCheckPublisher
+    public abstract class PublisherBase : IHealthCheckPublisher, IObservable<HealthReport>
     {
         protected readonly IHealthChecksBuilder _healthChecksBuilder;
         protected readonly ServiceHealthCheck _healthCheck;
@@ -23,6 +23,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
         protected DateTime lastpublish;
         protected HealthStatus laststatus;
         protected AlertTransportSettings _alertTransportSettings;
+        protected List<IObserver<HealthReport>> _observers;
 
         protected PublisherBase(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
@@ -32,6 +33,26 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
             _healthChecksBuilder = healthChecksBuilder;
             _healthCheck = healthCheck;
             _alertTransportSettings = alertTransportSettings;
+            _observers = new List<IObserver<HealthReport>>();
+            laststatus = HealthStatus.Healthy;
+        }
+
+        private class Unsubscriber : IDisposable
+        {
+            private List<IObserver<HealthReport>> _observers;
+            private IObserver<HealthReport> _observer;
+
+            public Unsubscriber(List<IObserver<HealthReport>> observers, IObserver<HealthReport> observer)
+            {
+                this._observers = observers;
+                this._observer = observer;
+            }
+
+            public void Dispose()
+            {
+                if (_observer != null && _observers.Contains(_observer))
+                    _observers.Remove(_observer);
+            }
         }
 
         public bool HealthFailed(HealthStatus status)
@@ -44,7 +65,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
             var timeok = (lastAlertTime.Ticks + timeToAlert.Ticks) <= currentTime.Ticks;
             return timeok;
         }
-        public bool HasToAlert(HealthStatus status)
+        public bool ProcessAlertRules(HealthStatus status)
         {
             var failed = HealthFailed(status);
             var lastfailed = HealthFailed(laststatus);
@@ -72,26 +93,30 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         }
 
-        public virtual Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
+        protected bool HasToPublishAlert(HealthReport report)
         {
             var entry = report
                 .Entries
                 .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
-            if (entry.Key != this._healthCheck.Name) return Task.CompletedTask;
+            if (entry.Key != this._healthCheck.Name) return false;
 
-            var alert = this.HasToAlert(entry.Value.Status);
+            var alert = this.ProcessAlertRules(entry.Value.Status);
 
             this.laststatus = entry.Value.Status;
 
             this.lastcheck = DateTime.Now;
 
-            Condition.WithExceptionOnFailure<AlertBehaviourException>()
-                .Requires(alert)
-                .IsTrue();
+            lock (_observers)
+            {
+                _observers.ForEach(x => x.OnNext(report));
+            }
 
-            return Task.CompletedTask;
+            return alert;
         }
+
+        public abstract Task PublishAsync(HealthReport report, CancellationToken cancellationToken);
+        
 
         protected internal abstract void Validate();
 
@@ -102,5 +127,16 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
             Validate();
             SetPublishing();
         }
+
+        public IDisposable Subscribe(IObserver<HealthReport> observer)
+        {
+            lock (_observers)
+            {
+                if (!_observers.Contains(observer))
+                    _observers.Add(observer);
+                return new Unsubscriber(_observers, observer);
+            }
+        }
+
     }
 }

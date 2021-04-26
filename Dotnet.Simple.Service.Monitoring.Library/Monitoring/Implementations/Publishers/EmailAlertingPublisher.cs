@@ -16,6 +16,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Pu
     public class EmailAlertingPublisher : PublisherBase
     {
         private EmailTransportSettings _emailTransportSettings;
+
         public EmailAlertingPublisher(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
             AlertTransportSettings alertTransportSettings) : 
@@ -26,13 +27,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Pu
 
         public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            base.PublishAsync(report, cancellationToken);
-
-            var entry = report
-                .Entries
-                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
-
-            if (entry.Key != this._healthCheck.Name) return Task.CompletedTask;
+            var alert = this.HasToPublishAlert(report);
 
             //Do work
 

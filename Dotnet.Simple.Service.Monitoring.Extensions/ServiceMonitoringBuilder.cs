@@ -9,6 +9,7 @@ using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Dotnet.Simple.Service.Monitoring.Library.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
 namespace Dotnet.Simple.Service.Monitoring.Extensions
@@ -23,6 +24,7 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
             _stackMonitoring = stackMonitoring;
             _options = options;
         }
+
         public IServiceMonitoringBuilder Add(ServiceHealthCheck monitor)
         {
             _stackMonitoring.AddMonitoring(monitor);
@@ -40,8 +42,6 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
 
                 if (monitor.Alert)
                 {
-                    
-
                     monitor.AlertBehaviour?.ForEach(ab =>
                     {
                         AlertTransportSettings transport = null;
@@ -65,6 +65,17 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
                     });
                 }
             }
+
+            return this;
+        }
+
+        public IServiceMonitoringBuilder AddObserver(IObserver<HealthReport> observer)
+        {
+            _stackMonitoring.GetPublishers().ForEach(x =>
+            {
+                var observable = (IObservable<HealthReport>) x;
+                observable.Subscribe(observer);
+            });
 
             return this;
         }

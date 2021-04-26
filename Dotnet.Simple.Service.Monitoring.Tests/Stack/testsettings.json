@@ -1,0 +1,56 @@
+{
+  "Monitoring": {
+    "Settings": {
+      "ShowUI":  "True" 
+    },
+    "HealthChecks": [
+      {
+        "Name": "Test",
+        "ServiceType": "HttpEndpoint",
+        "EndpointOrHost": "https://www.google.com",
+        "Port": 443,
+        "MonitoringInterval" : "00:00:01",
+        "HealthCheckConditions": {
+          "HttpBehaviour": {
+            "HttpExpectedResponseTimeMs": 1000,
+            "HttpExpectedCode": 200,
+            "HttpVerb": "Get"
+          },
+          "ServiceReach": true,
+          "ServiceConnectionEstablished": true
+        },
+        "PublishChecks": true,
+        "Alert": true,
+        "AlertBehaviour": [
+          {
+            "TransportMethod": "Email",
+            "TransportName": "StandardEmailTransport",
+            "AlertOnce": false,
+            "AlertOnServiceRecovered": true,
+            "StartAlertingOn": "",
+            "StopAlertingOn": "",
+            "AlertEvery": "00:00:05",
+            "AlertOn": ""
+          }
+        ] 
+      }
+    ],
+    "EmailTransportSettings": [
+      {
+        "Name": "StandardEmailTransport",
+        "From": "test@test.com",
+        "To": "turrican@hotmail.com",
+        "SmtpHost": "test.test.com",
+        "SmtpPort": 25,
+        "Authentication": false,
+        "Username": "",
+        "Password": ""
+      }
+    ],
+    "TelegramTransportSettings": [
+      {
+
+      }
+    ]
+  }
+}
