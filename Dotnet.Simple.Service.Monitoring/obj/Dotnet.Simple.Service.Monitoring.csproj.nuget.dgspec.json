@@ -29,9 +29,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json": {},
-          "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-experimental/nuget/v3/index.json": {}
+          "http://proget.habitatsoft.com/nuget/Habitatsoft/": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.1": {
@@ -102,9 +101,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json": {},
-          "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-experimental/nuget/v3/index.json": {}
+          "http://proget.habitatsoft.com/nuget/Habitatsoft/": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.1": {
@@ -162,6 +160,10 @@
               "target": "Package",
               "version": "[1.2.0, )"
             },
+            "InfluxDB.Collector": {
+              "target": "Package",
+              "version": "[1.1.1, )"
+            },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",
               "version": "[5.0.1, )"
@@ -194,6 +196,82 @@
         }
       }
     },
+    "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.UI.Extensions\\Dotnet.Simple.Service.Monitoring.UI.Extensions.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.UI.Extensions\\Dotnet.Simple.Service.Monitoring.UI.Extensions.csproj",
+        "projectName": "Dotnet.Simple.Service.Monitoring.UI.Extensions",
+        "projectPath": "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.UI.Extensions\\Dotnet.Simple.Service.Monitoring.UI.Extensions.csproj",
+        "packagesPath": "C:\\Users\\Enrique\\.nuget\\packages\\",
+        "outputPath": "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.UI.Extensions\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
+          "C:\\Program Files (x86)\\Microsoft\\Xamarin\\NuGet\\",
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Enrique\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net5.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "http://proget.habitatsoft.com/nuget/Habitatsoft/": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net5.0": {
+            "targetAlias": "net5.0",
+            "projectReferences": {
+              "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.Extensions\\Dotnet.Simple.Service.Monitoring.Extensions.csproj": {
+                "projectPath": "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.Extensions\\Dotnet.Simple.Service.Monitoring.Extensions.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net5.0": {
+          "targetAlias": "net5.0",
+          "dependencies": {
+            "AspNetCore.HealthChecks.UI": {
+              "target": "Package",
+              "version": "[5.0.1, )"
+            },
+            "AspNetCore.HealthChecks.UI.Client": {
+              "target": "Package",
+              "version": "[5.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.100-preview.1.21103.13\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
     "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -219,9 +297,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json": {},
-          "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-experimental/nuget/v3/index.json": {}
+          "http://proget.habitatsoft.com/nuget/Habitatsoft/": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net5.0": {
@@ -229,6 +306,9 @@
             "projectReferences": {
               "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.Extensions\\Dotnet.Simple.Service.Monitoring.Extensions.csproj": {
                 "projectPath": "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.Extensions\\Dotnet.Simple.Service.Monitoring.Extensions.csproj"
+              },
+              "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.UI.Extensions\\Dotnet.Simple.Service.Monitoring.UI.Extensions.csproj": {
+                "projectPath": "E:\\code\\GIT\\Dotnet.Simple.Service.Monitoring\\Dotnet.Simple.Service.Monitoring.UI.Extensions\\Dotnet.Simple.Service.Monitoring.UI.Extensions.csproj"
               }
             }
           }
@@ -242,6 +322,12 @@
       "frameworks": {
         "net5.0": {
           "targetAlias": "net5.0",
+          "dependencies": {
+            "NetEscapades.Configuration.Yaml": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -252,6 +338,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[5.0.2, 5.0.2]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"

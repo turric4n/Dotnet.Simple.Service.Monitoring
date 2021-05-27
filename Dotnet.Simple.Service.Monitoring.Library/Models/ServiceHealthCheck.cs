@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Dotnet.Simple.Service.Monitoring.Library.Options;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Models
 {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Models
 {
@@ -12,5 +13,9 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models
         public bool AlertOnce { get; set; }
         public bool AlertOnServiceRecovered { get; set; }
         public TimeSpan AlertEvery { get; set; }
+        public DateTime LastCheck { get; set; }
+        public DateTime LastPublished { get; set; }
+        public HealthStatus LastStatus { get; set; }
+
     }
 }

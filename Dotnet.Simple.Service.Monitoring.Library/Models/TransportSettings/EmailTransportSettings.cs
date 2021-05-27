@@ -8,6 +8,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings
     public class EmailTransportSettings : AlertTransportSettings
     {
         public string From { get; set; }
+        public string DisplayName { get; set; }
         public string To { get; set; }
         public string SmtpHost { get; set; }
         public int SmtpPort { get; set; }

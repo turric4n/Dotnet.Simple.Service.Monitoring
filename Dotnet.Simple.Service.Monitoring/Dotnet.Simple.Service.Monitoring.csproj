@@ -5,7 +5,26 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="appsettings.Development.yml" />
+    <None Remove="appsettings.yml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.Development.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.yml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Dotnet.Simple.Service.Monitoring.Extensions\Dotnet.Simple.Service.Monitoring.Extensions.csproj" />
+    <ProjectReference Include="..\Dotnet.Simple.Service.Monitoring.UI.Extensions\Dotnet.Simple.Service.Monitoring.UI.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

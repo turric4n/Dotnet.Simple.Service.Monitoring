@@ -19,9 +19,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
     {
         protected readonly IHealthChecksBuilder _healthChecksBuilder;
         protected readonly ServiceHealthCheck _healthCheck;
-        protected DateTime lastcheck;
-        protected DateTime lastpublish;
-        protected HealthStatus laststatus;
         protected AlertTransportSettings _alertTransportSettings;
         protected List<IObserver<HealthReport>> _observers;
 
@@ -34,7 +31,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
             _healthCheck = healthCheck;
             _alertTransportSettings = alertTransportSettings;
             _observers = new List<IObserver<HealthReport>>();
-            laststatus = HealthStatus.Healthy;
         }
 
         private class Unsubscriber : IDisposable
@@ -67,16 +63,21 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
         }
         public bool ProcessAlertRules(HealthStatus status)
         {
-            var failed = HealthFailed(status);
-            var lastfailed = HealthFailed(laststatus);
-
             var behaviour = _healthCheck
                 .AlertBehaviour
                 .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
 
             if (behaviour == null) return false;
 
-            var timeisoktoalert = TimeBetweenIsOkToAlert(lastcheck.ToUniversalTime().TimeOfDay, behaviour.AlertEvery,DateTime.UtcNow.TimeOfDay);
+            behaviour.LastStatus =
+                (behaviour.LastCheck == DateTime.MinValue) ? HealthStatus.Healthy : behaviour.LastStatus;
+
+            var failed = HealthFailed(status);
+            var lastfailed = HealthFailed(behaviour.LastStatus);
+
+            var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastCheck.ToUniversalTime().TimeOfDay, 
+                behaviour.AlertEvery,
+                DateTime.UtcNow.TimeOfDay);
 
             var alert = (timeisoktoalert) &&
                             (
@@ -99,13 +100,19 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 .Entries
                 .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
+            var behaviour = _healthCheck
+                .AlertBehaviour
+                .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
+
+            if (behaviour == null) return false;
+
             if (entry.Key != this._healthCheck.Name) return false;
 
             var alert = this.ProcessAlertRules(entry.Value.Status);
 
-            this.laststatus = entry.Value.Status;
+            behaviour.LastStatus = entry.Value.Status;
 
-            this.lastcheck = DateTime.Now;
+            behaviour.LastCheck = DateTime.Now;
 
             lock (_observers)
             {

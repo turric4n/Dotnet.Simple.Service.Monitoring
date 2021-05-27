@@ -17,7 +17,13 @@ namespace Dotnet.Simple.Service.Monitoring
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+            Host.CreateDefaultBuilder(args).ConfigureAppConfiguration((context, builder) =>
+                {
+                    var env = context.HostingEnvironment;
+                    builder
+                        .AddYamlFile("appsettings.yml", optional: false)
+                        .AddYamlFile($"appsettings.{env.EnvironmentName}.yml", optional: true);
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

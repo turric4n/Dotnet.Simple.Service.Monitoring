@@ -7,15 +7,17 @@ using Dotnet.Simple.Service.Monitoring.Library.Monitoring;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Dotnet.Simple.Service.Monitoring.Library.Options;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using RabbitMQ.Client.Events;
+using Microsoft.Extensions.Options;
 
 namespace Dotnet.Simple.Service.Monitoring.Extensions
 {
     public static class ServiceMonitoringExtensions
     {
-        public static IServiceMonitoringBuilder UseServiceMonitoring(this IServiceCollection serviceCollection, IConfiguration configuration)
+        public static IServiceMonitoringBuilder UseServiceMonitoring(this IServiceCollection serviceCollection, 
+            IConfiguration configuration)
         {
             var monitoringsection = configuration.GetSection("Monitoring");
 
@@ -30,8 +32,6 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
             serviceCollection.AddSingleton<IHealthChecksBuilder>(provider => healthChecksBuilder);
 
             var sp = serviceCollection.BuildServiceProvider();
-
-            var monitoring = sp.GetRequiredService<IStackMonitoring>();
 
             var builder = sp.GetRequiredService<IServiceMonitoringBuilder>();
 

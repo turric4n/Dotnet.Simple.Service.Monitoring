@@ -8,6 +8,8 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
     {
         IStackMonitoring AddMonitoring(ServiceHealthCheck monitor);
         IStackMonitoring AddPublishing(AlertTransportSettings alertTransportSettings, ServiceHealthCheck monitor);
+
+        List<ServiceMonitoringBase> GetMonitors();
         List<PublisherBase> GetPublishers();
     }
 }

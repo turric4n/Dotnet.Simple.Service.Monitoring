@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dotnet.Simple.Service.Monitoring.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 
 namespace Dotnet.Simple.Service.Monitoring
@@ -26,14 +27,18 @@ namespace Dotnet.Simple.Service.Monitoring
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .UseServiceMonitoring(Configuration)
-                .UseSettings();
+            services.UseServiceMonitoring(Configuration)
+                .UseSettings()
+                .AddUI(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath);
+
+            // Adds JSON settings
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -43,9 +48,10 @@ namespace Dotnet.Simple.Service.Monitoring
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
+                endpoints.MapHealthChecksUI(options =>
                 {
-                    await context.Response.WriteAsync("Hello World!");
+                    options.UIPath = "/health"; // this is ui path in your browser
+                    options.ApiPath = "/health-ui-api";
                 });
             });
         }

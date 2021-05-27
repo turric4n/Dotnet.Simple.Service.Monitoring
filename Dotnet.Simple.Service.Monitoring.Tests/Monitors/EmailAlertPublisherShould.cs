@@ -6,6 +6,7 @@ using Dotnet.Simple.Service.Monitoring.Library.Models;
 using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;

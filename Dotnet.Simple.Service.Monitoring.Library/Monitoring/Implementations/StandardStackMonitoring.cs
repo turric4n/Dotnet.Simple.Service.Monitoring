@@ -4,6 +4,8 @@ using Dotnet.Simple.Service.Monitoring.Library.Models;
 using Dotnet.Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.InfluxDB;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -13,10 +15,12 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
     {
         private readonly IHealthChecksBuilder _healthChecksBuilder;
         private readonly List<PublisherBase> _publishers;
+        private readonly List<ServiceMonitoringBase> _monitors;
 
         public StandardStackMonitoring(IHealthChecksBuilder healthChecksBuilder)
         {
             _healthChecksBuilder = healthChecksBuilder;
+            _monitors = new List<ServiceMonitoringBase>();
             _publishers = new List<PublisherBase>();
         }
         public IStackMonitoring AddMonitoring(ServiceHealthCheck monitor)
@@ -39,6 +43,9 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             }
             mymonitor?.SetUp();
+
+            _monitors.Add(mymonitor);
+
             return this;
         }
 
@@ -46,12 +53,27 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             PublisherBase publisher = null;
 
-            if (alertTransportSettings is EmailTransportSettings)
+            switch (alertTransportSettings)
             {
-                publisher = new EmailAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
-                lock (_publishers)
+                case EmailTransportSettings _:
                 {
-                    _publishers.Add(publisher);
+                    publisher = new EmailAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                    lock (_publishers)
+                    {
+                        _publishers.Add(publisher);
+                    }
+
+                    break;
+                }
+                case InfluxDBTransportSettings _:
+                {
+                    publisher = new InfluxDBAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                    lock (_publishers)
+                    {
+                        _publishers.Add(publisher);
+                    }
+
+                    break;
                 }
             }
 
@@ -59,6 +81,12 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             return this;
         }
+
+        public List<ServiceMonitoringBase> GetMonitors()
+        {
+            return _monitors;
+        }
+
 
         public List<PublisherBase> GetPublishers()
         {

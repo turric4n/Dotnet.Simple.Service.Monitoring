@@ -15,5 +15,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Options
         public List<EmailTransportSettings> EmailTransportSettings { get; set; }
         public List<SlackTransportSettings> SlackTransportSettings { get; set; }
         public List<TelegramTransportSettings> TelegramTransportSettings { get; set; }
+        public List<InfluxDBTransportSettings> InfluxDbTransportSettings { get; set; }
     }
 }

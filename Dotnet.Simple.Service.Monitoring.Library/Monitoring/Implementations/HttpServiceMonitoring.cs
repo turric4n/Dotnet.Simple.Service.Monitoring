@@ -35,38 +35,32 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            var urilist = new List<Uri>();
-            this._healthCheck.EndpointOrHost.Split(',')
-                .ToList()
-                .ForEach(x =>
+            this._healthChecksBuilder.AddUrlGroup((options) =>
+            {
+                var uri = new Uri(this._healthCheck.EndpointOrHost);
+                options.AddUri(uri);
+                options.ExpectHttpCode(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
+                switch (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
                 {
-                    var uri = new Uri(x);
-                    this._healthChecksBuilder.AddUrlGroup((options) =>
-                    {
-                        options.AddUri(uri);
-                        options.ExpectHttpCode(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
-                        switch (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
-                        {
-                            case HttpVerb.Get:
-                                options.UseGet();
-                                break;
-                            case HttpVerb.Post:
-                                options.UsePost();
-                                break;
-                            case HttpVerb.Put:
-                                break;
-                            case HttpVerb.Delete:
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
+                    case HttpVerb.Get:
+                        options.UseGet();
+                        break;
+                    case HttpVerb.Post:
+                        options.UsePost();
+                        break;
+                    case HttpVerb.Put:
+                        break;
+                    case HttpVerb.Delete:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-                        if (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs > 0)
-                        {
-                            options.UseTimeout(TimeSpan.FromMilliseconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs));
-                        }
-                    }, _healthCheck.Name);
-                });
+                if (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs > 0)
+                {
+                    //options.UseTimeout(TimeSpan.FromMilliseconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs));
+                }
+            }, _healthCheck.Name);
         }
 
     }

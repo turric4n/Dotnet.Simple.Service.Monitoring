@@ -29,9 +29,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json": {},
-          "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-experimental/nuget/v3/index.json": {}
+          "http://proget.habitatsoft.com/nuget/Habitatsoft/": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.1": {
@@ -102,9 +101,8 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "https://api.nuget.org/v3/index.json": {},
-          "https://dotnet.myget.org/F/dotnet-core/api/v3/index.json": {},
-          "https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-experimental/nuget/v3/index.json": {}
+          "http://proget.habitatsoft.com/nuget/Habitatsoft/": {},
+          "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "netstandard2.1": {
@@ -161,6 +159,10 @@
             "CuttingEdge.Conditions.NetStandard": {
               "target": "Package",
               "version": "[1.2.0, )"
+            },
+            "InfluxDB.Collector": {
+              "target": "Package",
+              "version": "[1.1.1, )"
             },
             "Microsoft.Extensions.DependencyInjection": {
               "target": "Package",

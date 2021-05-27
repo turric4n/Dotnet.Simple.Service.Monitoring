@@ -1,0 +1,69 @@
+﻿Logging:
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+Monitoring:
+  Settings:
+    ShowUI: 'True'
+  HealthChecks:
+  - Name: Test
+    ServiceType: HttpEndpoint
+    EndpointOrHost: https://www.erwrwe.com/
+    Port: 443
+    HealthCheckConditions:
+      HttpBehaviour:
+        HttpExpectedResponseTimeMs: 300
+        HttpExpectedCode: 200
+        HttpVerb: Get
+      ServiceReach: true
+      ServiceConnectionEstablished: true
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Influx
+      TransportName: InfluxTransport1
+      AlertOnce: false
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+    #- TransportMethod: Email
+    #  TransportName: StandardEmailTransport
+    #  AlertOnce: false
+    #  AlertOnServiceRecovered: true
+    #  StartAlertingOn: ''
+    #  StopAlertingOn: ''
+    #  AlertEvery: '00:00:30'
+    #- TransportMethod: Email
+    #  TransportName: EmailTransport2
+    #  AlertOnce: false
+    #  AlertOnServiceRecovered: true
+    #  StartAlertingOn: ''
+    #  StopAlertingOn: ''
+    #  AlertEvery: '00:00:30'
+    #  AlertOn: ''
+  EmailTransportSettings:
+  - Name: StandardEmailTransport
+    From: alerting@habitatsoft.com
+    To: efuentes@habitatsoft.com
+    SmtpHost: turbomail.habitatsoft.com
+    SmtpPort: 25
+    Authentication: false
+    Username: ''
+    Password: ''
+    Template: Plain
+  - Name: EmailTransport2
+    From: alerting2@habitatsoft.com
+    To: turrican@hotmail.com
+    SmtpHost: turbomail.habitatsoft.com
+    SmtpPort: 25
+    Authentication: false
+    Username: ''
+    Password: ''
+  TelegramTransportSettings:
+  InfluxDBTransportSettings:
+  - Name: InfluxTransport1
+    Host: http://protector.habitatsoft.com:8086
+    Database: health_checks

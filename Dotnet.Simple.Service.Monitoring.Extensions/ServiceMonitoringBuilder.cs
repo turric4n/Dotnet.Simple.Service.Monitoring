@@ -19,7 +19,7 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
         private readonly IStackMonitoring _stackMonitoring;
         private readonly IOptions<MonitorOptions> _options;
 
-        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options)
+        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options = null)
         {
             _stackMonitoring = stackMonitoring;
             _options = options;
@@ -55,6 +55,10 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
                                 transport = _options.Value.TelegramTransportSettings
                                     .FirstOrDefault(x => x.Name == ab.TransportName);
                                 break;
+                            case AlertTransportMethod.Influx:
+                                transport = _options.Value.InfluxDbTransportSettings
+                                    .FirstOrDefault(x => x.Name == ab.TransportName);
+                                break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
@@ -77,11 +81,6 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
                 observable.Subscribe(observer);
             });
 
-            return this;
-        }
-
-        public IServiceMonitoringBuilder AddUI()
-        {
             return this;
         }
     }

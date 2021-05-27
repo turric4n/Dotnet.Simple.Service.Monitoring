@@ -9,6 +9,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Models
         Dummy,
         Email,
         Telegram,
+        Influx,
         Slack
     }
 }
