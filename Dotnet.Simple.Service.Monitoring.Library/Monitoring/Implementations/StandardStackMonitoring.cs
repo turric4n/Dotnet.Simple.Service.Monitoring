@@ -6,6 +6,7 @@ using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
 using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.InfluxDB;
+using Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -68,6 +69,17 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
                 case InfluxDBTransportSettings _:
                 {
                     publisher = new InfluxDBAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                    lock (_publishers)
+                    {
+                        _publishers.Add(publisher);
+                    }
+
+                    break;
+                }
+
+                case TelegramTransportSettings _:
+                {
+                    publisher = new TelegramAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
                     lock (_publishers)
                     {
                         _publishers.Add(publisher);

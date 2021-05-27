@@ -9,6 +9,7 @@ Monitoring:
   HealthChecks:
   - Name: Test
     ServiceType: HttpEndpoint
+    ProjectName: Test Project
     EndpointOrHost: https://www.erwrwe.com/
     Port: 443
     HealthCheckConditions:
@@ -23,6 +24,14 @@ Monitoring:
     AlertBehaviour:
     - TransportMethod: Influx
       TransportName: InfluxTransport1
+      AlertOnce: false
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+    - TransportMethod: Telegram
+      TransportName: TelegramTransport1
       AlertOnce: false
       AlertOnServiceRecovered: true
       StartAlertingOn: ''
@@ -62,8 +71,12 @@ Monitoring:
     Authentication: false
     Username: ''
     Password: ''
-  TelegramTransportSettings:
   InfluxDBTransportSettings:
   - Name: InfluxTransport1
     Host: http://protector.habitatsoft.com:8086
     Database: health_checks
+  TelegramTransportSettings:
+  - Name: TelegramTransport1
+    BotName: ''
+    BotApiToken: 
+    ChatId: ''

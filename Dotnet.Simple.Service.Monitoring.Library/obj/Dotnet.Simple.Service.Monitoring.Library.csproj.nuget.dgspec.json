@@ -103,6 +103,10 @@
             "Microsoft.Extensions.Options.ConfigurationExtensions": {
               "target": "Package",
               "version": "[5.0.0, )"
+            },
+            "Telegram.Bot": {
+              "target": "Package",
+              "version": "[15.7.1, )"
             }
           },
           "imports": [
