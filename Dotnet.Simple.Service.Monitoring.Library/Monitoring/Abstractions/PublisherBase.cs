@@ -26,7 +26,6 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Abstractions
             ServiceHealthCheck healthCheck, 
             AlertTransportSettings alertTransportSettings)
         {
-
             _healthChecksBuilder = healthChecksBuilder;
             _healthCheck = healthCheck;
             _alertTransportSettings = alertTransportSettings;

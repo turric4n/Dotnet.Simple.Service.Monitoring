@@ -38,6 +38,10 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
 
             foreach (var monitor in _options.Value.HealthChecks)
             {
+                monitor.Name = string.IsNullOrEmpty(monitor.Name)
+                    ? _options.Value.Settings?.UseGlobalServiceName
+                    : monitor.Name;
+
                 _stackMonitoring.AddMonitoring(monitor);
 
                 if (monitor.Alert)
@@ -57,6 +61,10 @@ namespace Dotnet.Simple.Service.Monitoring.Extensions
                                 break;
                             case AlertTransportMethod.Influx:
                                 transport = _options.Value.InfluxDbTransportSettings
+                                    .FirstOrDefault(x => x.Name == ab.TransportName);
+                                break;
+                            case AlertTransportMethod.Slack:
+                                transport = _options.Value.SlackTransportSettings
                                     .FirstOrDefault(x => x.Name == ab.TransportName);
                                 break;
                             default:
