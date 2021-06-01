@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour
 {
-    public class InfluxDBValidationError : Exception
+    public class InfluxDbValidationError : Exception
     {
-        public InfluxDBValidationError(string message) : base(message)
+        public InfluxDbValidationError(string message) : base(message)
         {
         }
     }

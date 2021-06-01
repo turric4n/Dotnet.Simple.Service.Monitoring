@@ -47,6 +47,7 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Pu
                             $"Alert Details  : {entry.Value.Description} {Environment.NewLine}" +
                             $"Alert Details  : {entry.Value.Exception?.ToString()} {Environment.NewLine}",
                     As_user = false,
+                    Username = _slackTransportSettings.Username
                 };
 
                 await SlackMessageSender.SendMessageAsync(_slackTransportSettings.Token, msg);

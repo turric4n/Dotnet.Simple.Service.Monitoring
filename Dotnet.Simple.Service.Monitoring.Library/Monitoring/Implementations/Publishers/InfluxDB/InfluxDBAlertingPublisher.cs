@@ -17,16 +17,16 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.InfluxDB
 {
-    public class InfluxDBAlertingPublisher : PublisherBase
+    public class InfluxDbAlertingPublisher : PublisherBase
     {
-        private readonly InfluxDBTransportSettings _influxDBTransportSettings;
+        private readonly InfluxDbTransportSettings _influxDBTransportSettings;
 
-        public InfluxDBAlertingPublisher(IHealthChecksBuilder healthChecksBuilder, 
+        public InfluxDbAlertingPublisher(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
             AlertTransportSettings alertTransportSettings) : 
             base(healthChecksBuilder, healthCheck, alertTransportSettings)
         {
-            _influxDBTransportSettings = (InfluxDBTransportSettings)alertTransportSettings;
+            _influxDBTransportSettings = (InfluxDbTransportSettings)alertTransportSettings;
         }
 
         public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
@@ -56,11 +56,11 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations.Pu
 
         protected internal override void Validate()
         {
-            Condition.WithExceptionOnFailure<InfluxDBValidationError>()
+            Condition.WithExceptionOnFailure<InfluxDbValidationError>()
                 .Requires(_influxDBTransportSettings.Host)
                 .IsNotNullOrEmpty();
 
-            Condition.WithExceptionOnFailure<InfluxDBValidationError>()
+            Condition.WithExceptionOnFailure<InfluxDbValidationError>()
                 .Requires(_influxDBTransportSettings.Database)
                 .IsNotNullOrEmpty();
         }

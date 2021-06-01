@@ -67,9 +67,9 @@ namespace Dotnet.Simple.Service.Monitoring.Library.Monitoring.Implementations
 
                     break;
                 }
-                case InfluxDBTransportSettings _:
+                case InfluxDbTransportSettings _:
                 {
-                    publisher = new InfluxDBAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                    publisher = new InfluxDbAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
                     lock (_publishers)
                     {
                         _publishers.Add(publisher);
