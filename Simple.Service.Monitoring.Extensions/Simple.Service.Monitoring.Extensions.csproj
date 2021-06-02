@@ -4,6 +4,12 @@
 	  <TargetFramework>netstandard2.1</TargetFramework>
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	  <Description>Simple Service Monitoring Extensions for .NET</Description>
+	  <Copyright>Turrican Software</Copyright>
+	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <AssemblyVersion>1.0.1.0</AssemblyVersion>
+	  <FileVersion>1.0.1.0</FileVersion>
+	  <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

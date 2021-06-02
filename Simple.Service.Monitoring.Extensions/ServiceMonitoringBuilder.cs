@@ -19,7 +19,7 @@ namespace Simple.Service.Monitoring.Extensions
         private readonly IStackMonitoring _stackMonitoring;
         private readonly IOptions<MonitorOptions> _options;
 
-        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options = null)
+        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options)
         {
             _stackMonitoring = stackMonitoring;
             _options = options;
@@ -34,7 +34,9 @@ namespace Simple.Service.Monitoring.Extensions
 
         public IServiceMonitoringBuilder UseSettings()
         {
-            if (_options.Value == null) return this;
+            var validoptions = _options?.Value.HealthChecks != null;
+
+            if (!validoptions) return this;
 
             foreach (var monitor in _options.Value.HealthChecks)
             {
