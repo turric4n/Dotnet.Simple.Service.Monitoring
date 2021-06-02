@@ -170,13 +170,74 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Assert
             Assert.IsTrue(ok);
 
-            System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
+            Thread.Sleep(TimeSpan.FromSeconds(5));
 
             //Act
             alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
             Assert.IsFalse(ok);
+        }
+
+        [Test]
+        public void Given_Well_Formed_Alert_Behaviour_Will_Publish_All_Results_Even_Healthy()
+        {
+            // Arrange
+            var ok = false;
+            
+           var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheckalways",
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    HttpBehaviour = new HttpBehaviour()
+                    {
+                        HttpExpectedCode = 200,
+                        HttpExpectedResponseTimeMs = 100,
+                        HttpVerb = HttpVerb.Get
+                    },
+                },
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        AlertEvery = TimeSpan.FromSeconds(5),
+                        AlertOnServiceRecovered = true,
+                        TransportName = "Dummy",
+                        TransportMethod = AlertTransportMethod.Email,
+                        PublishAllResults = true
+                    }
+                },
+                EndpointOrHost = "https://www.google.com",
+                MonitoringInterval = TimeSpan.FromSeconds(1),
+                ServiceType = ServiceType.HttpEndpoint,
+                Alert = true
+            };
+
+           var alertPublisher2 =
+               new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+
+
+            var dic = new Dictionary<string, HealthReportEntry>();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
+
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
+            {
+                ok = !ok;
+            });
+
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+
+            alertPublisher2.Subscribe(healthobserver.Object);
+
+            //Act
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
         }
     }
 }

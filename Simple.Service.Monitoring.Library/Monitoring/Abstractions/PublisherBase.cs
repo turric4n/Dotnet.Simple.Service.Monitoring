@@ -88,9 +88,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                             (!failed && lastfailed && behaviour.AlertOnServiceRecovered)
                             );
 
+            alert = (behaviour.PublishAllResults && timeisoktoalert) || alert;
 
             return alert;
-
         }
 
         protected bool HasToPublishAlert(HealthReport report)
