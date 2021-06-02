@@ -113,9 +113,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
             behaviour.LastCheck = DateTime.Now;
 
-            lock (_observers)
+            if (alert)
             {
-                _observers.ForEach(x => x.OnNext(report));
+                lock (_observers)
+                {
+                    _observers.ForEach(x => x.OnNext(report));
+                }
             }
 
             return alert;

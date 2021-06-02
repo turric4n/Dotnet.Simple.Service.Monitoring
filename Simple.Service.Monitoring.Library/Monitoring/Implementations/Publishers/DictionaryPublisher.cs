@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Simple.Service.Monitoring.Library.Models;
@@ -9,33 +11,43 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers
 {
-    public class DummyPublisher : PublisherBase
+    public class DictionaryPublisher : PublisherBase
     {
-        public DummyPublisher(IHealthChecksBuilder healthChecksBuilder, 
+        private ConcurrentDictionary<DateTime, HealthReport> _reportDictionary;
+        public DictionaryPublisher(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
             AlertTransportSettings alertTransportSettings) : 
             base(healthChecksBuilder, healthCheck, alertTransportSettings)
         {
+            _reportDictionary = new ConcurrentDictionary<DateTime, HealthReport>();
         }
 
         public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            var entry = report.Entries.FirstOrDefault(x => x.Key == this._healthCheck.Name);
-            if (entry.Key == this._healthCheck.Name)
-            {
+            var alert = this.HasToPublishAlert(report);
 
+            if (alert)
+            {
+                lock (_reportDictionary)
+                {
+                    _reportDictionary.AddOrUpdate(DateTime.Now, report, (time, healthReport) => healthReport = report);
+                }
             }
+
             return Task.CompletedTask;
         }
 
         protected internal override void Validate()
         {
-            throw new System.NotImplementedException();
+            return;
         }
 
         protected internal override void SetPublishing()
         {
-            throw new System.NotImplementedException();
+            this._healthChecksBuilder.Services.AddSingleton<IHealthCheckPublisher>(sp =>
+            {
+                return this;
+            });
         }
     }
 }

@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Simple.Service.Monitoring.Library.Models;
-using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using NUnit.Framework;
+using Simple.Service.Monitoring.Library.Models.TransportSettings;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -19,8 +18,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
     {
         private IHealthChecksBuilder healthChecksBuilder;
         private ServiceHealthCheck httpendpointhealthcheck;
-        private EmailAlertingPublisher emailAlertingPublisher;
-        private EmailTransportSettings alertTransportSettings;
+        private DictionaryPublisher alertPublisher;
+        private DictionaryTransportSettings alertTransportSettings;
 
         [SetUp]
         public void Setup()
@@ -49,7 +48,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     {
                         AlertEvery = TimeSpan.FromSeconds(5),
                         AlertOnServiceRecovered = true,
-                        TransportName = "EmailTransport",
+                        TransportName = "Dummy",
                         TransportMethod = AlertTransportMethod.Email
                     }
                 },
@@ -59,13 +58,13 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 Alert = true
             };
 
-            alertTransportSettings = new EmailTransportSettings()
+            alertTransportSettings = new DictionaryTransportSettings()
             {
-                Authentication = false,
-                Name = "EmailTransport",
+                Name = "Dummy",
             };
-            emailAlertingPublisher =
-                new EmailAlertingPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+
+            alertPublisher =
+                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
         }
 
         [Test]
@@ -79,7 +78,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var delta = alertEvery;
             var current = currentTime;
             // Act
-            var hasToAlert = emailAlertingPublisher.TimeBetweenIsOkToAlert(last, delta, current);
+            var hasToAlert = alertPublisher.TimeBetweenIsOkToAlert(last, delta, current);
             //Assert
             Assert.IsTrue(hasToAlert);
         }
@@ -95,7 +94,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var delta = alertEvery;
             var current = currentTime;
             // Act
-            var hasToAlert = emailAlertingPublisher.TimeBetweenIsOkToAlert(last, delta, current);
+            var hasToAlert = alertPublisher.TimeBetweenIsOkToAlert(last, delta, current);
             //Assert
             Assert.IsFalse(hasToAlert);
         }
@@ -112,29 +111,42 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             Assert.DoesNotThrowAsync(() =>
             {
-                return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
+                return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
             });
         }
 
-        //[Test]
-        //public void Given_Well_Formed_Alert_Behaviour_Two_Burst_Monitors_Unhealthy_Will_Not_Alert()
-        //{
-        //    // Arrange
-        //    var dic = new Dictionary<string, HealthReportEntry>();
-        //    dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+        [Test]
+        public void Given_Well_Formed_Alert_Behaviour_Two_Burst_Monitors_Unhealthy_Will_Not_Alert()
+        {
+            var ok = false;
+            // Arrange
+            var dic = new Dictionary<string, HealthReportEntry>();
 
-        //    var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+            dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
-        //    //Act
-        //    Assert.DoesNotThrowAsync(() =>
-        //    {
-        //        return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
-        //    });
-        //    Assert.ThrowsAsync<AlertBehaviourException>(() =>
-        //    {
-        //        return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
-        //    });
-        //}
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+                healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
+            {
+                ok = !ok;
+            });
+
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+
+            alertPublisher.Subscribe(healthobserver.Object);
+
+            //Act
+            alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
+
+            //Act
+            alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
+        }
 
         [Test]
         public void Given_Well_Formed_Alert_Behaviour_Next_Follow_Unhealthy_Monitor_Will_Alert()
@@ -148,36 +160,14 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             Assert.DoesNotThrowAsync(() =>
             {
-                return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
+                return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
             });
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
             Assert.DoesNotThrowAsync(() =>
             {
-                return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
+                return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
             });
         }
-
-        //[Test]
-        //public void Given_Bad_Formed_Alert_Behaviour_Next_Follow_Unhealthy_Monitor_Will_Alert()
-        //{
-        //    // Arrange
-        //    var dic = new Dictionary<string, HealthReportEntry>();
-        //    dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
-
-        //    var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
-
-        //    //Act
-        //    Assert.DoesNotThrowAsync(() =>
-        //    {
-        //        return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
-        //    });
-
-        //    Thread.Sleep(TimeSpan.FromSeconds(4));
-        //    Assert.ThrowsAsync<AlertBehaviourException>(() =>
-        //    {
-        //        return emailAlertingPublisher.PublishAsync(healthReportMock, new CancellationToken());
-        //    });
-        //}
     }
 }
