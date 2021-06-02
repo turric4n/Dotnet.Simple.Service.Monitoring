@@ -71,7 +71,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         [TestCase("22:05:00", "00:05:00", "22:10:00")]
         [TestCase("05:00", "05:00", "10:00")]
         [TestCase("10", "1", "11")]
-        public void Given_Timespan_Respect_Cooldown_Time_Between_Alerts(TimeSpan lastAlertTime, TimeSpan alertEvery, TimeSpan currentTime)
+        public void Given_Timespan_Respect_Cooldown_Time_Between_Alerts(TimeSpan lastAlertTime, TimeSpan alertEvery,
+            TimeSpan currentTime)
         {
             // Arrange
             var last = lastAlertTime;
@@ -87,7 +88,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         [TestCase("22:05:00", "00:05:00", "22:04:00")]
         [TestCase("05:00", "05:00", "01:00")]
         [TestCase("10", "1", "08")]
-        public void Given_Timespan_Does_Not_Respect_Cooldown_Time_Between_Alerts(TimeSpan lastAlertTime, TimeSpan alertEvery, TimeSpan currentTime)
+        public void Given_Timespan_Does_Not_Respect_Cooldown_Time_Between_Alerts(TimeSpan lastAlertTime,
+            TimeSpan alertEvery, TimeSpan currentTime)
         {
             // Arrange
             var last = lastAlertTime;
@@ -125,11 +127,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
             var healthobserver = new Mock<IObserver<HealthReport>>();
-                healthobserver.Setup(
-                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
-            {
-                ok = !ok;
-            });
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() => { ok = !ok; });
 
             var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
 
@@ -151,23 +150,33 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         [Test]
         public void Given_Well_Formed_Alert_Behaviour_Next_Follow_Unhealthy_Monitor_Will_Alert()
         {
+            var ok = false;
             // Arrange
             var dic = new Dictionary<string, HealthReportEntry>();
+
             dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() => { ok = !ok; });
 
             var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
 
-            //Act
-            Assert.DoesNotThrowAsync(() =>
-            {
-                return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
-            });
+            alertPublisher.Subscribe(healthobserver.Object);
 
-            Thread.Sleep(TimeSpan.FromSeconds(5));
-            Assert.DoesNotThrowAsync(() =>
-            {
-                return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
-            });
+            //Act
+            alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
+
+            System.Threading.Thread.Sleep(TimeSpan.FromSeconds(5));
+
+            //Act
+            alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsFalse(ok);
         }
     }
 }
