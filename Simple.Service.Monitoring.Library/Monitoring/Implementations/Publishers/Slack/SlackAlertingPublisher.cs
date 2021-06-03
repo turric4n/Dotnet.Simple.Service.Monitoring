@@ -31,7 +31,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             var alert = this.HasToPublishAlert(report);
 
-            var entry = report.Entries.FirstOrDefault();
+            var entry = report
+                .Entries
+                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
             if (alert)
             {
@@ -39,13 +41,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 {
                     Channel = _slackTransportSettings.Channel,
                     Text =  $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                            $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
-                            $"Service Type    : {_healthCheck.ServiceType.ToString()} {Environment.NewLine}" +
+                            $"Triggered On    : { DateTime.UtcNow } {Environment.NewLine}" +
+                            $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
                             $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                            $"Alert Status   : {entry.Value.Status.ToString()} {Environment.NewLine}" +
-                            $"Alert Details  : {entry.Value.Status.ToString()} {Environment.NewLine}" +
+                            $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
+                            $"Alert Details  : {entry.Value.Status} {Environment.NewLine}" +
                             $"Alert Details  : {entry.Value.Description} {Environment.NewLine}" +
-                            $"Alert Details  : {entry.Value.Exception?.ToString()} {Environment.NewLine}",
+                            $"Alert Details  : {entry.Value.Exception} {Environment.NewLine}",
                     As_user = false,
                     Username = _slackTransportSettings.Username
                 };

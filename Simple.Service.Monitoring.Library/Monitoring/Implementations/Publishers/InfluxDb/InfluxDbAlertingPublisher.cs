@@ -42,13 +42,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     .WriteTo.InfluxDB(_influxDBTransportSettings.Host, _influxDBTransportSettings.Database)
                     .CreateCollector();
 
+                var entry = report
+                    .Entries
+                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+
                 collector.Write("health_check",
                     new Dictionary<string, object>
                     {
                         { "endpoint", _healthCheck.EndpointOrHost },
-                        { "status", report.Status },
-                        { "error", report.Entries.First().Value.Exception },
-                        { "reponsetime", report.TotalDuration.Milliseconds }
+                        { "status", (int)entry.Value.Status },
+                        { "error", entry.Value.Exception },
+                        { "responsetime", entry.Value.Duration.Milliseconds }
                     });
             }
 

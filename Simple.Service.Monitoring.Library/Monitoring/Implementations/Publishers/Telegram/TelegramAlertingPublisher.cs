@@ -36,15 +36,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             {
                 var telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
 
-                var entry = report.Entries.FirstOrDefault();
+                var entry = report
+                    .Entries
+                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
                 var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
                 var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
                            $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
-                           $"Service Type    : {_healthCheck.ServiceType.ToString()} {Environment.NewLine}" +
+                           $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
                            $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                           $"Alert Status   : {entry.Value.Status.ToString()} {Environment.NewLine}" +
+                           $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
                            $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
 
                            telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);

@@ -37,7 +37,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             if (!alert) return Task.CompletedTask;
 
-            var entry = report.Entries.FirstOrDefault();
+            var entry = report
+                .Entries
+                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
             var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
@@ -45,10 +47,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                        $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
                        $"Service Type    : {_healthCheck.ServiceType.ToString()} {Environment.NewLine}" +
                        $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                       $"Alert Status   : {entry.Value.Status.ToString()} {Environment.NewLine}" +
-                       $"Alert Details  : {entry.Value.Status.ToString()} {Environment.NewLine}" +
+                       $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
+                       $"Alert Details  : {entry.Value.Status} {Environment.NewLine}" +
                        $"Alert Details  : {entry.Value.Description} {Environment.NewLine}" +
-                       $"Alert Details  : {entry.Value.Exception?.ToString()} {Environment.NewLine}";
+                       $"Alert Details  : {entry.Value.Exception} {Environment.NewLine}";
 
             //Do work
             var message = _mailMessageFactory.Create(_emailTransportSettings.To, subject, body);
