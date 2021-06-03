@@ -45,11 +45,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                            $"Service Type    : {_healthCheck.ServiceType.ToString()} {Environment.NewLine}" +
                            $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
                            $"Alert Status   : {entry.Value.Status.ToString()} {Environment.NewLine}" +
-                           $"Alert Details  : {entry.Value.Status.ToString()} {Environment.NewLine}" +
-                           $"Alert Details  : {entry.Value.Description} {Environment.NewLine}" +
-                           $"Alert Details  : {entry.Value.Exception?.ToString()} {Environment.NewLine}";
+                           $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
 
-                telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
+                           telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
             }
 
             return Task.CompletedTask;

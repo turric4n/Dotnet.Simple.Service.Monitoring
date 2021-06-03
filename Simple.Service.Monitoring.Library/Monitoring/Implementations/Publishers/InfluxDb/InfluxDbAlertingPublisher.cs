@@ -47,7 +47,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     {
                         { "endpoint", _healthCheck.EndpointOrHost },
                         { "status", report.Status },
-                        { "error", report.Entries.First().Value.Exception }
+                        { "error", report.Entries.First().Value.Exception },
+                        { "reponsetime", report.TotalDuration.Milliseconds }
                     });
             }
 

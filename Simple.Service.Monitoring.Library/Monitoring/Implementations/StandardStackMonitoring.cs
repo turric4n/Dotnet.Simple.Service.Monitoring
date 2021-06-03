@@ -35,6 +35,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     mymonitor = new HttpServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.ElasticSearch:
+                    //mymonitor = new ElasticSearchServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Sql:
                     break;
