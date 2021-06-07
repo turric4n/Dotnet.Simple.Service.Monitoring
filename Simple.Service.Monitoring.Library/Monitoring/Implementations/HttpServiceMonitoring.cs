@@ -37,29 +37,33 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             this._healthChecksBuilder.AddUrlGroup((options) =>
             {
-                var uri = new Uri(this._healthCheck.EndpointOrHost);
-                options.AddUri(uri);
-                options.ExpectHttpCode(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
-                switch (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
+                foreach (var endpoint in this._healthCheck.EndpointOrHost.Split(','))
                 {
-                    case HttpVerb.Get:
-                        options.UseGet();
-                        break;
-                    case HttpVerb.Post:
-                        options.UsePost();
-                        break;
-                    case HttpVerb.Put:
-                        break;
-                    case HttpVerb.Delete:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    var uri = new Uri(endpoint);
+                    options.AddUri(uri);
+                    options.ExpectHttpCode(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
+                    switch (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
+                    {
+                        case HttpVerb.Get:
+                            options.UseGet();
+                            break;
+                        case HttpVerb.Post:
+                            options.UsePost();
+                            break;
+                        case HttpVerb.Put:
+                            break;
+                        case HttpVerb.Delete:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    if (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs > 0)
+                    {
+                        //options.UseTimeout(TimeSpan.FromMilliseconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs));
+                    }
                 }
 
-                if (this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs > 0)
-                {
-                    //options.UseTimeout(TimeSpan.FromMilliseconds(this._healthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedResponseTimeMs));
-                }
             }, _healthCheck.Name);
         }
 
