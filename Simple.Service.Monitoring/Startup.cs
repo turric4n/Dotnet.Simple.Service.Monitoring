@@ -6,10 +6,12 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Simple.Service.Monitoring.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Simple.Service.Monitoring
 {
@@ -27,8 +29,15 @@ namespace Simple.Service.Monitoring
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.UseServiceMonitoring(Configuration)
-                .UseSettings();
+            var monitoring = services.UseServiceMonitoring(Configuration)
+                .UseSettings()
+                .Build();
+
+
+            monitoring.GetCustomMonitor("Test").AddCustomCheck(() =>
+            {
+                return Task.FromResult(HealthCheckResult.Unhealthy());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

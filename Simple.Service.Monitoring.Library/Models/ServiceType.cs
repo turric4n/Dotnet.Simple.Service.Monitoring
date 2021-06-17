@@ -8,9 +8,11 @@ namespace Simple.Service.Monitoring.Library.Models
 {
     public enum ServiceType
     {
+        Custom,
         HttpEndpoint,
         ElasticSearch,
         Sql,
-        Rmq
+        Rmq,
+        Hangfire
     }
 }

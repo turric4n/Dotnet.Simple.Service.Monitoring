@@ -10,17 +10,19 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
     public abstract class ServiceMonitoringBase : IServiceMonitoring
     {
-        protected readonly IHealthChecksBuilder _healthChecksBuilder;
-        protected readonly ServiceHealthCheck _healthCheck;
-        protected readonly Guid _monitorId;
-        protected readonly string _name;
+        protected readonly IHealthChecksBuilder HealthChecksBuilder;
+        protected readonly ServiceHealthCheck HealthCheck;
+        protected readonly Guid MonitorId;
+
+        public readonly string Name;
         
+
         protected ServiceMonitoringBase(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck)
         {
-            _healthChecksBuilder = healthChecksBuilder;
-            _healthCheck = healthCheck;
-            _monitorId = new Guid();
-            _name = healthCheck.Name;
+            HealthChecksBuilder = healthChecksBuilder;
+            HealthCheck = healthCheck;
+            MonitorId = new Guid();
+            Name = healthCheck.Name;
         }
 
         protected internal abstract void Validate();

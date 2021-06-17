@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using CuttingEdge.Conditions;
 using Simple.Service.Monitoring.Library.Models;
@@ -9,30 +10,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
-    public class ElasticSearchServiceMonitoring : ServiceMonitoringBase
+    public class MsSqlServiceMonitoring : ServiceMonitoringBase
     {
 
-        public ElasticSearchServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
+        public MsSqlServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
         {
         }
 
         protected internal override void Validate()
         {
+            var csbuilder = new DbConnectionStringBuilder();
             Condition.Requires(this.HealthCheck.HealthCheckConditions)
                 .IsNotNull();
+            Condition.Requires(this.HealthCheck.ConnectionString)
+                .IsNotNull();
             Condition
-                .WithExceptionOnFailure<MalformedUriException>()
-                .Requires(Uri.IsWellFormedUriString(this.HealthCheck.EndpointOrHost, UriKind.Absolute))
-                .IsTrue();
-    }
+                .Ensures(csbuilder.ConnectionString = this.HealthCheck.ConnectionString);
+        }
 
         protected internal override void SetMonitoring()
         {
-            this.HealthChecksBuilder.AddElasticsearch((options) =>
-            {
-                var uri = new Uri(this.HealthCheck.EndpointOrHost);
-                options.UseServer(uri.ToString());
-            }, HealthCheck.Name);
+            HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString);
         }
 
     }

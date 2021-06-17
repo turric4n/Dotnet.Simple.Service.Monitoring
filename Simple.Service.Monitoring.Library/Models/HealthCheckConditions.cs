@@ -5,6 +5,8 @@
         // HTTP
         public HttpBehaviour HttpBehaviour { get; set; }
 
+        public MsSqlBehaviour SqlBehaviour { get; set; }
+
         // TCP, DNS, ICMP
         public bool ServiceReach { get; set; }
         public bool ServiceConnectionEstablished { get; set; }

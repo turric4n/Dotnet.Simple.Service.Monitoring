@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -27,7 +28,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         }
         public IStackMonitoring AddMonitoring(ServiceHealthCheck monitor)
         {
-            HttpServiceMonitoring mymonitor = null;
+            ServiceMonitoringBase mymonitor = null;
 
             switch (monitor.ServiceType)
             {
@@ -35,16 +36,25 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     mymonitor = new HttpServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.ElasticSearch:
-                    //mymonitor = new ElasticSearchServiceMonitoring(_healthChecksBuilder, monitor);
+                    mymonitor = new ElasticSearchServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Sql:
+                    mymonitor = new MsSqlServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Rmq:
+
+                    break;
+                case ServiceType.Hangfire:
+                    mymonitor = new MsSqlServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Custom:
+                    mymonitor = new CustomMonitoring(_healthChecksBuilder, monitor);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
 
             }
+
             mymonitor?.SetUp();
 
             _monitors.Add(mymonitor);
@@ -112,10 +122,18 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             return _monitors;
         }
 
+        public CustomMonitoring GetCustomMonitor(string name)
+        {
+            return _monitors.FirstOrDefault(x => x.GetType() == typeof(CustomMonitoring) && x.Name == name) as CustomMonitoring;
+        }
+
 
         public List<PublisherBase> GetPublishers()
         {
-            return _publishers;
+            lock (_publishers)
+            {
+                return _publishers;
+            }
         }
     }
 }

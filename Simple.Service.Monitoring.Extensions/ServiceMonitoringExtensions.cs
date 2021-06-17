@@ -19,6 +19,9 @@ namespace Simple.Service.Monitoring.Extensions
         public static IServiceMonitoringBuilder UseServiceMonitoring(this IServiceCollection serviceCollection, 
             IConfiguration configuration)
         {
+
+            //Refactor!!!!!!
+
             var monitoringsection = configuration.GetSection("Monitoring");
 
             serviceCollection.Configure<MonitorOptions>(monitoringsection);
@@ -29,7 +32,7 @@ namespace Simple.Service.Monitoring.Extensions
 
             var healthChecksBuilder = serviceCollection.AddHealthChecks();
 
-            serviceCollection.AddSingleton<IHealthChecksBuilder>(provider => healthChecksBuilder);
+            serviceCollection.AddSingleton(provider => healthChecksBuilder);
 
             var sp = serviceCollection.BuildServiceProvider();
 

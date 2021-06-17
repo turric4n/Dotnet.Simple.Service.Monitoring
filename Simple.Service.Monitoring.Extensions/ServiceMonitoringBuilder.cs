@@ -34,9 +34,9 @@ namespace Simple.Service.Monitoring.Extensions
 
         public IServiceMonitoringBuilder UseSettings()
         {
-            var validoptions = _options?.Value.HealthChecks != null;
+            var validOptions = _options?.Value.HealthChecks != null;
 
-            if (!validoptions) return this;
+            if (!validOptions) return this;
 
             foreach (var monitor in _options.Value.HealthChecks)
             {
@@ -83,7 +83,7 @@ namespace Simple.Service.Monitoring.Extensions
             return this;
         }
 
-        public IServiceMonitoringBuilder AddObserver(IObserver<HealthReport> observer)
+        public IServiceMonitoringBuilder AddPublisherObserver(IObserver<HealthReport> observer)
         {
             _stackMonitoring.GetPublishers().ForEach(x =>
             {
@@ -92,6 +92,11 @@ namespace Simple.Service.Monitoring.Extensions
             });
 
             return this;
+        }
+
+        public IStackMonitoring Build()
+        {
+            return _stackMonitoring;
         }
     }
 }
