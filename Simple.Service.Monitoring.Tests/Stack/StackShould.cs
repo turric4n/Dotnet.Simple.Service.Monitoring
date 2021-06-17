@@ -45,7 +45,7 @@ namespace Simple.Service.Monitoring.Tests.Stack
                 {
                     services.UseServiceMonitoring(configuration)
                         .UseSettings()
-                        .AddObserver(observermock.Object);
+                        .AddPublisherObserver(observermock.Object);
                 });
 
             var server = new TestServer(webhostBuilder);
