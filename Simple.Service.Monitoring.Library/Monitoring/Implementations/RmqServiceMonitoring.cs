@@ -7,13 +7,14 @@ using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
-    public class MsSqlServiceMonitoring : ServiceMonitoringBase
+    public class RmqServiceMonitoring : ServiceMonitoringBase
     {
 
-        public MsSqlServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
+        public RmqServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
         {
         }
 
@@ -30,8 +31,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, 
-                this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query);
+            HealthChecksBuilder.AddRabbitMQ(this.HealthCheck.ConnectionString, null, this.HealthCheck.Name, null, null);
         }
+
     }
 }

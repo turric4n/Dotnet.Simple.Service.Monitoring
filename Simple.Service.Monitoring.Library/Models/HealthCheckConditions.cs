@@ -7,6 +7,10 @@
 
         public MsSqlBehaviour SqlBehaviour { get; set; }
 
+        public HangfireBehaviour HangfireBehaviour { get; set; }
+
+
+
         // TCP, DNS, ICMP
         public bool ServiceReach { get; set; }
         public bool ServiceConnectionEstablished { get; set; }

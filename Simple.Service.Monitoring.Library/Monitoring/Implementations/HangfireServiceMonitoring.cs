@@ -10,10 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
-    public class MsSqlServiceMonitoring : ServiceMonitoringBase
+    public class HangfireServiceMonitoring : ServiceMonitoringBase
     {
 
-        public MsSqlServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
+        public HangfireServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
         {
         }
 
@@ -30,8 +30,19 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, 
-                this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query);
+            HealthChecksBuilder.AddHangfire(options =>
+            {
+                var minimumAvailableServers =
+                    this.HealthCheck.HealthCheckConditions.HangfireBehaviour?.MinimumAvailableServers;
+
+                var maximumJobsFailed =
+                    this.HealthCheck.HealthCheckConditions.HangfireBehaviour?.MinimumAvailableServers;
+
+                options.MinimumAvailableServers = minimumAvailableServers;
+
+                options.MaximumJobsFailed = maximumJobsFailed;
+            }, this.HealthCheck.Name);
         }
+
     }
 }

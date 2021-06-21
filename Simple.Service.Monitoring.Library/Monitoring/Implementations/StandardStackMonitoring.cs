@@ -42,13 +42,16 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     mymonitor = new MsSqlServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Rmq:
-
+                    mymonitor = new RmqServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Hangfire:
-                    mymonitor = new MsSqlServiceMonitoring(_healthChecksBuilder, monitor);
+                    mymonitor = new HangfireServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Custom:
                     mymonitor = new CustomMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Ping:
+                    mymonitor = new PingServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

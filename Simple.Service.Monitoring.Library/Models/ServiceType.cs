@@ -13,6 +13,7 @@ namespace Simple.Service.Monitoring.Library.Models
         ElasticSearch,
         Sql,
         Rmq,
-        Hangfire
+        Hangfire,
+        Ping
     }
 }
