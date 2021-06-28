@@ -7,9 +7,9 @@
 	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Version>1.0.1.4</Version>
-	  <AssemblyVersion>1.0.1.4</AssemblyVersion>
-	  <FileVersion>1.0.1.4</FileVersion>
+	  <Version>1.0.1.5</Version>
+	  <AssemblyVersion>1.0.1.5</AssemblyVersion>
+	  <FileVersion>1.0.1.5</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -11,6 +11,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Sl
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CustomNotificationService;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -84,6 +85,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 case InfluxDbTransportSettings _:
                 {
                     publisher = new InfluxDbAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                    lock (_publishers)
+                    {
+                        _publishers.Add(publisher);
+                    }
+
+                    break;
+                }
+
+                case CustomNotificationTransportSettings _:
+                {
+                    publisher = new CustomNotificationAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
                     lock (_publishers)
                     {
                         _publishers.Add(publisher);

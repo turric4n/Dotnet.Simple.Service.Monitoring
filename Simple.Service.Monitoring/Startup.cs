@@ -34,10 +34,11 @@ namespace Simple.Service.Monitoring
                 .Build();
 
 
-            monitoring.GetCustomMonitor("Test").AddCustomCheck(() =>
-            {
-                return Task.FromResult(HealthCheckResult.Unhealthy());
-            });
+            //monitoring.GetCustomMonitor("Test").AddCustomCheck(() =>
+            //{
+
+            //    return Task.FromResult(HealthCheckResult.Healthy());
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

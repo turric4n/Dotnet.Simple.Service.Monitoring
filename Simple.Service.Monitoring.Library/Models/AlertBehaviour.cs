@@ -17,5 +17,6 @@ namespace Simple.Service.Monitoring.Library.Models
         public DateTime LastPublished { get; set; }
         public HealthStatus LastStatus { get; set; }
         public bool PublishAllResults { get; set; }
+        public bool IncludeEnvironment { get; set; }
     }
 }

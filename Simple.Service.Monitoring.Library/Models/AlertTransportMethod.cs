@@ -10,6 +10,7 @@ namespace Simple.Service.Monitoring.Library.Models
         Email,
         Telegram,
         Influx,
-        Slack
+        Slack,
+        CustomApi
     }
 }

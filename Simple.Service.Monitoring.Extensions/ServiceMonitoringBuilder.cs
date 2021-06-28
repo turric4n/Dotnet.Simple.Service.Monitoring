@@ -57,6 +57,10 @@ namespace Simple.Service.Monitoring.Extensions
                                 transport = _options.Value.EmailTransportSettings
                                     .FirstOrDefault(x => x.Name == ab.TransportName);
                                 break;
+                            case AlertTransportMethod.CustomApi:
+                                transport = _options.Value.CustomNotificationTransportSettings
+                                    .FirstOrDefault(x => x.Name == ab.TransportName);
+                                break;
                             case AlertTransportMethod.Telegram:
                                 transport = _options.Value.TelegramTransportSettings
                                     .FirstOrDefault(x => x.Name == ab.TransportName);
