@@ -62,9 +62,9 @@ appSettings.json
     "EmailTransportSettings": [
       {
         "Name": "StandardEmailTransport",
-        "From": "turrican@habitatsoft.com",
-        "To": "turrican@hotmail.com",
-        "SmtpHost": "turbomail.habitatsoft.com",
+        "From": "test@test.com",
+        "To": "test@test.com",
+        "SmtpHost": "test.test.com",
         "SmtpPort": 25,
         "Authentication": false,
         "Username": "",
@@ -105,9 +105,9 @@ Monitoring:
       AlertOn: ''
   EmailTransportSettings:
   - Name: StandardEmailTransport
-    From: turrican@habitatsoft.com
-    To: turrican@hotmail.com
-    SmtpHost: smtp.test.com
+    From: test@test.com
+    To: test@test.com
+    SmtpHost: test.test.com
     SmtpPort: 25
     Authentication: false
     Username: ''
