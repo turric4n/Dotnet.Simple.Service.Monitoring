@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.Service.Monitoring.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.Service.Monitoring.UI.Extensions", "..\Simple.Service.Monitoring.UI.Extensions\Simple.Service.Monitoring.UI.Extensions.csproj", "{C7DEB940-701B-483D-9F7E-30AA1E65230A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Service.Monitoring.Sample.API", "..\Simple.Service.Monitoring.Sample.API\Simple.Service.Monitoring.Sample.API.csproj", "{0931937B-D7AF-4C09-837A-BD3F01B8BA0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C7DEB940-701B-483D-9F7E-30AA1E65230A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7DEB940-701B-483D-9F7E-30AA1E65230A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7DEB940-701B-483D-9F7E-30AA1E65230A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0931937B-D7AF-4C09-837A-BD3F01B8BA0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0931937B-D7AF-4C09-837A-BD3F01B8BA0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0931937B-D7AF-4C09-837A-BD3F01B8BA0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0931937B-D7AF-4C09-837A-BD3F01B8BA0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,10 +1,6 @@
-﻿using System;
-using CuttingEdge.Conditions;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Simple.Service.Monitoring.Library.Models;
-using Simple.Service.Monitoring.Library.Models.TransportSettings;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
@@ -13,9 +9,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
         protected readonly IHealthChecksBuilder HealthChecksBuilder;
         protected readonly ServiceHealthCheck HealthCheck;
         protected readonly Guid MonitorId;
-
         public readonly string Name;
-        
 
         protected ServiceMonitoringBase(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck)
         {

@@ -1,0 +1,74 @@
+﻿Logging:
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+Monitoring:
+  Settings:
+    ShowUI: 'True'
+    UseGlobalServiceName: 'Test'
+  HealthChecks:
+  - Name: Test
+    ServiceType: HttpEndpoint
+    EndpointOrHost: https://www.testendpoint.com/
+    Port: 443
+    HealthCheckConditions:
+      HttpBehaviour:
+        HttpExpectedResponseTimeMs: 300
+        HttpExpectedCode: 200
+        HttpVerb: Get
+      ServiceReach: true
+      ServiceConnectionEstablished: true
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Influx
+      TransportName: InfluxTransport1
+      AlertOnce: false
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+    - TransportMethod: Slack
+      TransportName: SlackTransport1
+      AlertOnce: false
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+
+  CustomNotificationTransportSettings:
+  EmailTransportSettings:
+  - Name: StandardEmailTransport
+    From: test@test.com
+    To: test@test.com
+    SmtpHost: test.test.com
+    SmtpPort: 25
+    Authentication: false
+    Username: ''
+    Password: ''
+    Template: Plain
+  - Name: EmailTransport2
+    From: test@test.com
+    To: test@test.com
+    SmtpHost: host
+    SmtpPort: 25
+    Authentication: false
+    Username: ''
+    Password: ''
+  InfluxDBTransportSettings:
+  - Name: InfluxTransport1
+    Host: 
+    Database: health_checks
+  TelegramTransportSettings:
+  - Name: TelegramTransport1
+    BotName: ''
+    BotApiToken: 
+    ChatId: ''
+  SlackTransportSettings:
+  - Name: SlackTransport1
+    Token: 
+    Channel: 
+    Username: "Health Checks"

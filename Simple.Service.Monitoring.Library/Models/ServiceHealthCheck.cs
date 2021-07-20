@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Simple.Service.Monitoring.Library.Options;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Simple.Service.Monitoring.Library.Models
 {
@@ -21,5 +16,8 @@ namespace Simple.Service.Monitoring.Library.Models
         public HealthCheckConditions HealthCheckConditions { get; set; }
         public bool Alert { get; set; }
         public List<AlertBehaviour> AlertBehaviour { get; set; }
+        public bool ExposeEndpoint { get; set; }
+        public string Endpoint { get; set; }
+        public string FullClassName { get; set; }
     }
 }

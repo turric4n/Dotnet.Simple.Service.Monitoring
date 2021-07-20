@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System; 
 using System.Linq;
-using System.Text;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
-using Simple.Service.Monitoring.Library.Monitoring;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Options;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 
@@ -89,7 +84,8 @@ namespace Simple.Service.Monitoring.Extensions
 
         public IServiceMonitoringBuilder AddPublisherObserver(IObserver<HealthReport> observer)
         {
-            _stackMonitoring.GetPublishers().ForEach(x =>
+            _stackMonitoring.GetPublishers()
+                .ForEach(x =>
             {
                 var observable = (IObservable<HealthReport>) x;
                 observable.Subscribe(observer);

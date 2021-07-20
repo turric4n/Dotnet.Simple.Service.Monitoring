@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Linq;
-using CuttingEdge.Conditions;
+﻿using CuttingEdge.Conditions;
+using Microsoft.Extensions.DependencyInjection;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
+using System;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RabbitMQ.Client;
 
@@ -21,18 +17,19 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void Validate()
         {
-            //var csbuilder = new DbConnectionStringBuilder();
-            //csbuilder.ConnectionString = HealthCheck.ConnectionString;
-
-            Condition.Requires(this.HealthCheck.ConnectionString)
+            Condition.Requires(HealthCheck.EndpointOrHost)
                 .IsNotNull();
-            //Condition
-            //    .Ensures(csbuilder.ConnectionString = this.HealthCheck.ConnectionString);
         }
 
         protected internal override void SetMonitoring()
         {
-            HealthChecksBuilder.AddRabbitMQ(this.HealthCheck.ConnectionString, null, this.HealthCheck.Name, HealthStatus.Unhealthy, null, TimeSpan.FromSeconds(5));
+            var connectionFactory = new RabbitMQ.Client.ConnectionFactory();
+            connectionFactory.Uri = new Uri(HealthCheck.EndpointOrHost);
+
+            HealthChecksBuilder.AddRabbitMQ(provider =>
+            {
+                return connectionFactory;
+            }, Name, HealthStatus.Unhealthy);
         }
     }
 }

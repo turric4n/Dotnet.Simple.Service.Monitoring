@@ -9,9 +9,9 @@ namespace Simple.Service.Monitoring.Library.Models
     public enum ServiceType
     {
         Custom,
-        HttpEndpoint,
+        Http,
         ElasticSearch,
-        Sql,
+        MsSql,
         Rmq,
         Hangfire,
         Ping

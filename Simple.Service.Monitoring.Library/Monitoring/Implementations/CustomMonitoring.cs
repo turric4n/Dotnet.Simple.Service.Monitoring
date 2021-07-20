@@ -1,12 +1,12 @@
-﻿using System;
-using System.Runtime.InteropServices.ComTypes;
-using System.Threading.Tasks;
-using CuttingEdge.Conditions;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using RabbitMQ.Client.Events;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -28,12 +28,59 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             CustomCheck = check;
         }
 
+        internal static IEnumerable<Assembly> GetAssembliesFast()
+        {
+            var list = new List<string>();
+            var stack = new Stack<Assembly>();
+
+            stack.Push(Assembly.GetEntryAssembly());
+
+            do
+            {
+                var asm = stack.Pop();
+
+                yield return asm;
+
+                foreach (var reference in asm.GetReferencedAssemblies().Where(name => !name.Name.Contains("System")))
+                    if (!list.Contains(reference.FullName))
+                    {
+                        stack.Push(Assembly.Load(reference));
+                        list.Add(reference.FullName);
+                    }
+
+            }
+            while (stack.Count > 0);
+
+        }
+
         protected internal override void SetMonitoring()
         {
-            this.HealthChecksBuilder.AddAsyncCheck(Name, () =>
+
+            if (string.IsNullOrEmpty(this.HealthCheck.FullClassName))
             {
-                return CustomCheck != null ? CustomCheck() : Task.FromResult(HealthCheckResult.Healthy());
-            });
+                HealthChecksBuilder.AddAsyncCheck(Name, () =>
+                {
+                    return CustomCheck != null ? CustomCheck() : Task.FromResult(HealthCheckResult.Healthy());
+                });
+            }
+
+            else
+            {
+                Type classType = null;
+                Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                foreach (Assembly assem in assemblies)
+                {
+                    classType = assem.GetType(HealthCheck.FullClassName);
+                    if (classType != null) break;
+                }
+
+                if (classType == null)
+                    throw new Exception(
+                        $"Invalid class name {HealthCheck.FullClassName} defined in custom test named {Name}");
+                var classInstance = Activator.CreateInstance(classType) as IHealthCheck;
+                HealthChecksBuilder.AddCheck(Name, classInstance);
+            }
+
         }
     }
 }

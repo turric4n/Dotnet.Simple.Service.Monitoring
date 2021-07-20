@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CustomNotificationService;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.InfluxDB;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Slack;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CustomNotificationService;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -33,13 +32,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             switch (monitor.ServiceType)
             {
-                case ServiceType.HttpEndpoint:
+
+                case ServiceType.Http:
                     mymonitor = new HttpServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.ElasticSearch:
                     mymonitor = new ElasticSearchServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
-                case ServiceType.Sql:
+                case ServiceType.MsSql:
                     mymonitor = new MsSqlServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 case ServiceType.Rmq:
@@ -63,6 +63,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             _monitors.Add(mymonitor);
 
+            return this;
+        }
+        public IStackMonitoring AddCustomHealthCheck(IHealthCheck healthCheck, string name, IEnumerable<string> tags)
+        {
+            _healthChecksBuilder.AddCheck(name, healthCheck, null, tags);
             return this;
         }
 

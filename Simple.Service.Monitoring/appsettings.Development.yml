@@ -9,7 +9,7 @@ Monitoring:
     UseGlobalServiceName: 'Test'
   HealthChecks:
   - Name: Test
-    ServiceType: HttpEndpoint
+    ServiceType: Http
     EndpointOrHost: https://www.testendpoint.com/
     Port: 443
     HealthCheckConditions:
@@ -22,49 +22,76 @@ Monitoring:
     PublishChecks: true
     Alert: true
     AlertBehaviour:
-    - TransportMethod: Influx
-      TransportName: InfluxTransport1
-      AlertOnce: false
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
       AlertOnServiceRecovered: true
       StartAlertingOn: ''
       StopAlertingOn: ''
       AlertEvery: '00:00:05'
       AlertOn: ''
-    - TransportMethod: Slack
-      TransportName: SlackTransport1
-      AlertOnce: false
+  - Name: Rmqtest
+    ServiceType: Rmq
+    EndpointOrHost: "amqp://user:test@localhost:5672/"
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
       AlertOnServiceRecovered: true
       StartAlertingOn: ''
       StopAlertingOn: ''
       AlertEvery: '00:00:05'
       AlertOn: ''
+  - Name: ElasticTest
+    ServiceType: ElasticSearch
+    EndpointOrHost: http://test:9200/
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+  - Name: TurriCustom
+    ServiceType: Custom
+    FullClassName: Simple.Service.Monitoring.HealthCheck
+    PublishChecks: true    
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+  CustomNotificationTransportSettings:
   EmailTransportSettings:
   - Name: StandardEmailTransport
-    From: test@test.com
-    To: test@test.com
-    SmtpHost: test.test.com
+    From: turrican@habitatsoft.com
+    To: turrican@hotmail.com
+    SmtpHost: turbomail.habitatsoft.com
     SmtpPort: 25
     Authentication: false
     Username: ''
     Password: ''
     Template: Plain
-  - Name: EmailTransport2
-    From: test@test.com
-    To: test@test.com
-    SmtpHost: host
-    SmtpPort: 25
-    Authentication: false
-    Username: ''
-    Password: ''
   InfluxDBTransportSettings:
   - Name: InfluxTransport1
     Host: 
     Database: health_checks
   TelegramTransportSettings:
-  - Name: TelegramTransport1
-    BotName: ''
-    BotApiToken: 
-    ChatId: ''
+  - Name: testchat
+    BotName: '@testbot'
+    BotApiToken: token
+    ChatId: '-chatid'
   SlackTransportSettings:
   - Name: SlackTransport1
     Token: 

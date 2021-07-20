@@ -7,9 +7,9 @@
 	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Version>1.0.1.5</Version>
-	  <AssemblyVersion>1.0.1.5</AssemblyVersion>
-	  <FileVersion>1.0.1.5</FileVersion>
+	  <Version>1.0.1.6</Version>
+	  <AssemblyVersion>1.0.1.6</AssemblyVersion>
+	  <FileVersion>1.0.1.6</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,10 +24,10 @@
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="5.0.1" />
     <PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
     <PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="5.0.7" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="5.0.8" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
-    <PackageReference Include="Telegram.Bot" Version="16.0.0" />
+    <PackageReference Include="Telegram.Bot" Version="16.0.1" />
   </ItemGroup>
 
   <ItemGroup>

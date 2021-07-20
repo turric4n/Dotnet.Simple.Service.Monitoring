@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using CuttingEdge.Conditions;
+﻿using CuttingEdge.Conditions;
+using Microsoft.Extensions.DependencyInjection;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Net.Http;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
