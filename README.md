@@ -9,7 +9,7 @@ It uses .NET HealthChecks engine and awesome Xabaril's AspNetCore.HealthChecks -
 This code is just doing the same thing but in a very easy way... BUT also publishes health check results into multiple communication providers (Email, Telegram, Slack...)
 
 *HOW IT WORKS?*
-Just put some lines in your settings file and MAGIC! that will automate health checks and publish results.
+Just put some lines in your settings file and MAGIC! Health checks and transport providers will be automated.
 
 ## Initialization code : 
 
@@ -145,4 +145,5 @@ Monitoring:
 - EmailTransportSettings (Array) (Object)
   - Name (Transport unique name)
     
+(TBC)
  
