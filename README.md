@@ -107,7 +107,7 @@ Monitoring:
   - Name: StandardEmailTransport
     From: turrican@habitatsoft.com
     To: turrican@hotmail.com
-    SmtpHost: turbomail.habitatsoft.com
+    SmtpHost: smtp.test.com
     SmtpPort: 25
     Authentication: false
     Username: ''
