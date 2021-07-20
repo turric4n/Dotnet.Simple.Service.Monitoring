@@ -1,6 +1,6 @@
 # Dotnet.Simple.Service.Monitoring
 
-Avoid hard healthcheck implementations... Just add some lines in your settings and enjoy about monitoring.
+Avoid complex healthcheck implementations... Just add some lines in your settings and enjoy about monitoring.
 
 This is a library, framework, wrapper to simplify .NET health checks framework. It uses .NET HealthChecks engine and Xabaril's AspNetCore.HealthChecks https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks
 
@@ -111,3 +111,34 @@ Monitoring:
     Password: ''
     Template: Plain    
  ```
+ 
+ ## Monitoring properties :
+ 
+ - Name (Health check name)
+ - Service Type (Type of service you want to monitor) (Enum)
+   - Http (Typical http or https URI)
+   - ElasticSearch (ElasticSearch endpoint is supported)
+   - MsSql (Microsoft SQL Server)
+   - Rmq (Rabbit MQ)
+   - Hangfire
+   - Ping (ICMP)
+ - EndpointOrHost (Mandatory when monitoring HTTP or ElasticSearch, just an URI)
+ - PublishChecks (Enable check publishing, disable when you don't want to hear anything from this check)
+ - Alert (Enable when you want to publish checks into implicated transport methods)
+ - AlertBehaviour (Define here transports you will use to publish health check results) (Object)
+   - TransportMethod (Transport method you want to use)
+    - Email
+    - Slack
+    - Telegram
+    - InfluxDb
+   - TransportName (Name of the defined transport in the config file, go to transport section)
+   - AlertOnce (Just send one notification on health check failure)
+   - AlertOnServiceRecovered (Send notification when health check is recovered)
+   - StartAlertingOn (Start to send alerts on suggested DateTime)
+   - StopAlertingOn (Stop sending alerts on suggested DateTime)            
+   - AlertEvery (Time between alerts)
+ 
+## Transport properties :
+- EmailTransportSettings (Object)
+    
+ 
