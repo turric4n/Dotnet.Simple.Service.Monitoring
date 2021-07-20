@@ -1,6 +1,6 @@
 # Dotnet.Simple.Service.Monitoring
 
-Avoid complex health check implementations... Just add some lines in your settings and enjoy the way your services are going down with awesome monitoring.
+Avoid complex health check implementations... Just add some lines in your settings and find out when your services are falling down with awesome monitoring.
 
 This chunk of code, basically is known (colloquially) as a wannabe library/framework/wrapper to simplify .NET health checks framework.
 
