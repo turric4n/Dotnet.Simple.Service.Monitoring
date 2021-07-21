@@ -5,6 +5,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using System;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using RabbitMQ.Client;
+using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -19,6 +20,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             Condition.Requires(HealthCheck.EndpointOrHost)
                 .IsNotNull();
+
+            Condition
+                .WithExceptionOnFailure<MalformedUriException>()
+                .Requires(Uri.IsWellFormedUriString(HealthCheck.EndpointOrHost, UriKind.Absolute))
+                .IsTrue();
         }
 
         protected internal override void SetMonitoring()
