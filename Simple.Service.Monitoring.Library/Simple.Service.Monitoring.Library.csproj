@@ -3,13 +3,17 @@
   <PropertyGroup>
 	  <TargetFramework>netstandard2.1</TargetFramework>
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	  <Description>Monitoring library for internal or external services made in C#</Description>
+	  <Description>Simple health check library for internal or external services made in C#</Description>
 	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Version>1.0.1.6</Version>
-	  <AssemblyVersion>1.0.1.6</AssemblyVersion>
-	  <FileVersion>1.0.1.6</FileVersion>
+	  <Version>1.0.1.8</Version>
+	  <AssemblyVersion>1.0.1.8</AssemblyVersion>
+	  <FileVersion>1.0.1.8</FileVersion>
+	  <Authors>Turrican with help of my fellow friends</Authors>
+	  <Company>Turrican Software</Company>
+	  <PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
+	  <RepositoryType>GIT</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,16 +22,17 @@
     <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="5.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="5.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.Network" Version="5.0.4" />
-    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="5.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="5.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="5.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="5.0.3" />
-    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="5.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="6.0.1" />
     <PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
     <PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="5.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
-    <PackageReference Include="Telegram.Bot" Version="16.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+    <PackageReference Include="Telegram.Bot" Version="16.0.2" />
+    <PackageReference Include="TimeZoneConverter" Version="3.5.0" />
   </ItemGroup>
 
   <ItemGroup>

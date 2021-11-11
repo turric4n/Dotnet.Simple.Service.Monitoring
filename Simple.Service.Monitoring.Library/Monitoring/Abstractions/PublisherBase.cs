@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TimeZoneConverter;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
@@ -55,6 +56,25 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             var timeok = (lastAlertTime.Ticks + timeToAlert.Ticks) <= currentTime.Ticks;
             return timeok;
         }
+
+        public DateTime GetReportLastCheck(HealthStatus status)
+        {
+            var behaviour = _healthCheck
+                .AlertBehaviour
+                .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
+
+            if (behaviour == null) return DateTime.MinValue;
+            else if (string.IsNullOrEmpty(behaviour.Timezone)) return behaviour.LastCheck;
+
+            var timezone = TZConvert.GetTimeZoneInfo(behaviour.Timezone);
+
+            if (timezone == null) return behaviour.LastCheck;
+
+            var convertedTime = TimeZoneInfo.ConvertTime(behaviour.LastCheck, timezone);
+
+            return convertedTime;
+        }
+
         public bool ProcessAlertRules(HealthStatus status)
         {
             var behaviour = _healthCheck
@@ -73,6 +93,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 behaviour.AlertEvery,
                 DateTime.UtcNow.TimeOfDay);
 
+            behaviour.LatestErrorPublished = (timeisoktoalert && failed) || behaviour.LatestErrorPublished;
+
             var alert = (timeisoktoalert) &&
                             (
                                 // One time
@@ -80,8 +102,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                                 // Always
                             (failed && !lastfailed) || 
                                 // On Recovered
-                            (!failed && lastfailed && behaviour.AlertOnServiceRecovered)
+                            (!failed && lastfailed && behaviour.AlertOnServiceRecovered)                               
                             );
+
+            if (behaviour.LatestErrorPublished && status == HealthStatus.Healthy)
+            {
+                alert = true;
+                behaviour.LatestErrorPublished = false;
+            }
 
             alert = (behaviour.PublishAllResults && timeisoktoalert) || alert;
 
@@ -107,6 +135,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             behaviour.LastStatus = entry.Value.Status;
 
             behaviour.LastCheck = DateTime.Now;
+
+            behaviour.LastPublished = DateTime.Now;
 
             if (alert)
             {

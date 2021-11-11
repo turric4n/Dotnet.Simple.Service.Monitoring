@@ -41,14 +41,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 .Entries
                 .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
+            var lastchecktime = GetReportLastCheck(report.Status);
+
             var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
             var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                       $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
-                       $"Service Type    : {_healthCheck.ServiceType.ToString()} {Environment.NewLine}" +
+                       $"Triggered On    : { lastchecktime } {Environment.NewLine}" +
+                       $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
                        $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
                        $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
-                       $"Alert Details  : {entry.Value.Status} {Environment.NewLine}" +
                        $"Alert Details  : {entry.Value.Description} {Environment.NewLine}" +
                        $"Alert Details  : {entry.Value.Exception} {Environment.NewLine}";
 

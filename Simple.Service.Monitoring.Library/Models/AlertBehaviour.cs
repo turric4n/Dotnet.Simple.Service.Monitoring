@@ -15,8 +15,10 @@ namespace Simple.Service.Monitoring.Library.Models
         public TimeSpan AlertEvery { get; set; }
         public DateTime LastCheck { get; set; }
         public DateTime LastPublished { get; set; }
+        public bool LatestErrorPublished { get; set; }
         public HealthStatus LastStatus { get; set; }
         public bool PublishAllResults { get; set; }
         public bool IncludeEnvironment { get; set; }
+        public string Timezone { get; set; }
     }
 }

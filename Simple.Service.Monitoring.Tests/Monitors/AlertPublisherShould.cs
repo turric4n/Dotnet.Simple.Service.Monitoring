@@ -10,6 +10,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
+using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -115,6 +116,166 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             {
                 return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
             });
+        }
+
+        [Test]
+        public void Given_Unhealthy_Check_Should_Not_Alert_During_Cooldown_But_It_Should_Alert_When_Recovered()
+        {
+            // Arrange
+            var ok = false;
+
+            var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheckalways",
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    HttpBehaviour = new HttpBehaviour()
+                    {
+                        HttpExpectedCode = 200,
+                        HttpExpectedResponseTimeMs = 100,
+                        HttpVerb = HttpVerb.Get
+                    },
+                },
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        AlertEvery = TimeSpan.FromSeconds(30),
+                        AlertOnServiceRecovered = true,
+                        TransportName = "Dummy",
+                        TransportMethod = AlertTransportMethod.Email,
+                        PublishAllResults = false
+                    }
+                },
+                EndpointOrHost = "https://www.google.com",
+                MonitoringInterval = TimeSpan.FromSeconds(1),
+                ServiceType = ServiceType.Http,
+                Alert = true
+            };
+
+            var alertPublisher2 =
+                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+
+
+            var dic = new Dictionary<string, HealthReportEntry>();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
+                {
+                    ok = !ok;
+                });
+
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+
+            alertPublisher2.Subscribe(healthobserver.Object);
+
+            //Act
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            dic.Clear();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsFalse(ok);
+        }
+
+        [Test]
+        public void Given_Healthy_Check_And_Then_Unhealthy_Should_Not_Alert_During_Cooldown()
+        {
+            // Arrange
+            var ok = true;
+
+            var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheckalways",
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    HttpBehaviour = new HttpBehaviour()
+                    {
+                        HttpExpectedCode = 200,
+                        HttpExpectedResponseTimeMs = 100,
+                        HttpVerb = HttpVerb.Get
+                    },
+                },
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        AlertEvery = TimeSpan.FromSeconds(5),
+                        AlertOnServiceRecovered = true,
+                        TransportName = "Dummy",
+                        TransportMethod = AlertTransportMethod.Email,
+                        PublishAllResults = false
+                    }
+                },
+                EndpointOrHost = "https://www.google.com",
+                MonitoringInterval = TimeSpan.FromSeconds(1),
+                ServiceType = ServiceType.Http,
+                Alert = true
+            };
+
+            var alertPublisher2 =
+                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+
+
+            var dic = new Dictionary<string, HealthReportEntry>();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
+
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
+                {
+                    ok = !ok;
+                });
+
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+
+            alertPublisher2.Subscribe(healthobserver.Object);
+
+            //Act
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
+
+            Thread.Sleep(4000);
+
+            dic.Clear();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
         }
 
         [Test]
