@@ -44,7 +44,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
@@ -96,7 +95,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },

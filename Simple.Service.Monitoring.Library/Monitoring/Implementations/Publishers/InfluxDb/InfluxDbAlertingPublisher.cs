@@ -31,30 +31,33 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
         public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-
-            var alert = this.HasToPublishAlert(report);
-
-            if (alert)
+            Task.Run(() =>
             {
-                using var collector = new CollectorConfiguration()
-                    .Tag.With("name", _healthCheck.Name)
-                    .Batch.AtInterval(TimeSpan.FromSeconds(2))
-                    .WriteTo.InfluxDB(_influxDBTransportSettings.Host, _influxDBTransportSettings.Database)
-                    .CreateCollector();
+                var alert = this.HasToPublishAlert(report);
 
-                var entry = report
-                    .Entries
-                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+                if (alert)
+                {
+                    using var collector = new CollectorConfiguration()
+                        .Tag.With("name", _healthCheck.Name)
+                        .Batch.AtInterval(TimeSpan.FromSeconds(2))
+                        .WriteTo.InfluxDB(_influxDBTransportSettings.Host, _influxDBTransportSettings.Database)
+                        .CreateCollector();
 
-                collector.Write("health_check",
-                    new Dictionary<string, object>
-                    {
-                        { "endpoint", _healthCheck.EndpointOrHost },
-                        { "status", (int)entry.Value.Status },
-                        { "error", entry.Value.Exception },
-                        { "responsetime", entry.Value.Duration.Milliseconds }
-                    });
-            }
+                    var entry = report
+                        .Entries
+                        .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+
+                    collector.Write("health_check",
+                        new Dictionary<string, object>
+                        {
+                            { "endpoint", _healthCheck.EndpointOrHost },
+                            { "status", (int)entry.Value.Status },
+                            { "error", entry.Value.Exception },
+                            { "responsetime", entry.Value.Duration.Milliseconds }
+                        });
+                }
+            });
+
 
             return Task.CompletedTask;
         }

@@ -13,10 +13,12 @@ namespace Simple.Service.Monitoring.Library.Models
         public bool AlertOnce { get; set; }
         public bool AlertOnServiceRecovered { get; set; }
         public TimeSpan AlertEvery { get; set; }
+        public int AlertByFailCount { get; set; }
         public DateTime LastCheck { get; set; }
         public DateTime LastPublished { get; set; }
         public bool LatestErrorPublished { get; set; }
         public HealthStatus LastStatus { get; set; }
+        public int FailedCount { get; set; }
         public bool PublishAllResults { get; set; }
         public bool IncludeEnvironment { get; set; }
         public string Timezone { get; set; }

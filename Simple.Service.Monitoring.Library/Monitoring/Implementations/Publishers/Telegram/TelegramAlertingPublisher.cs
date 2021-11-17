@@ -29,28 +29,32 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
         public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-
-            var alert = this.HasToPublishAlert(report);
-
-            if (alert)
+            var _ = Task.Run(async () =>
             {
-                var telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
+                var alert = this.HasToPublishAlert(report);
 
-                var entry = report
-                    .Entries
-                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+                if (alert)
+                {
+                    var telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
 
-                var subject = $"Alert Triggered : {_healthCheck.Name} ";
+                    var entry = report
+                        .Entries
+                        .FirstOrDefault(x => 
+                            x.Key == this._healthCheck.Name);
 
-                var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                           $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
-                           $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
-                           $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                           $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
-                           $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
+                    var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
-                           telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
-            }
+                    var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
+                               $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
+                               $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
+                               $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
+                               $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
+                               $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
+
+                    telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
+                }
+            });
+
 
             return Task.CompletedTask;
         }

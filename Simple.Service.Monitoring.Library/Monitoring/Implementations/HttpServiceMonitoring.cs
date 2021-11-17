@@ -36,12 +36,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             this.HealthChecksBuilder.AddUrlGroup((options) =>
             {
-                foreach (var endpoint in this.HealthCheck.EndpointOrHost.Split(','))
+                foreach (var endpoint in HealthCheck.EndpointOrHost.Split(','))
                 {
                     var uri = new Uri(endpoint);
+                    var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs);
+                    options.UseTimeout(TimeSpan.FromMilliseconds(20000));
                     options.AddUri(uri);
-                    options.ExpectHttpCode(this.HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
-                    switch (this.HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
+                    options.ExpectHttpCode(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
+                    switch (HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
                     {
                         case HttpVerb.Get:
                             options.UseGet();

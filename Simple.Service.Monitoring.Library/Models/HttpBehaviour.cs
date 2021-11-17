@@ -14,7 +14,7 @@ namespace Simple.Service.Monitoring.Library.Models
     public class HttpBehaviour
     {
         public int HttpExpectedCode { get; set; }
-        public int HttpExpectedResponseTimeMs { get; set; }
+        public int HttpTimeoutMs { get; set; } = 5000;
         public HttpVerb HttpVerb { get; set; }
     }
 }

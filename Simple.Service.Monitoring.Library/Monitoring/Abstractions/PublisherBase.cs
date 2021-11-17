@@ -64,7 +64,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
 
             if (behaviour == null) return DateTime.MinValue;
-            else if (string.IsNullOrEmpty(behaviour.Timezone)) return behaviour.LastCheck;
+            
+            if (string.IsNullOrEmpty(behaviour.Timezone)) return behaviour.LastCheck;
 
             var timezone = TZConvert.GetTimeZoneInfo(behaviour.Timezone);
 
@@ -83,70 +84,83 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
             if (behaviour == null) return false;
 
+            // Last status of the check always start with healthy value
             behaviour.LastStatus =
-                (behaviour.LastCheck == DateTime.MinValue) ? HealthStatus.Healthy : behaviour.LastStatus;
+                (behaviour.LastCheck == DateTime.MinValue) 
+                    ? HealthStatus.Healthy : behaviour.LastStatus;
 
             var failed = HealthFailed(status);
             var lastfailed = HealthFailed(behaviour.LastStatus);
 
-            var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastCheck.ToUniversalTime().TimeOfDay, 
+            behaviour.FailedCount = failed ? 
+                behaviour.FailedCount += 1 : 0;
+
+            var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastPublished.ToUniversalTime().TimeOfDay, 
                 behaviour.AlertEvery,
                 DateTime.UtcNow.TimeOfDay);
 
-            behaviour.LatestErrorPublished = (timeisoktoalert && failed) || behaviour.LatestErrorPublished;
+            var alert = (timeisoktoalert) && (behaviour.FailedCount >= behaviour.AlertByFailCount) &&
+                        (
+                            // When we want to alert always
+                            (failed && lastfailed && !behaviour.AlertOnce) ||
+                            // When failed retries
+                            (failed && lastfailed && !behaviour.LatestErrorPublished) ||
+                            // Always when is time to alert and latest
+                            (failed && !lastfailed)
+                        );
 
-            var alert = (timeisoktoalert) &&
-                            (
-                                // One time
-                            (failed && lastfailed && !behaviour.AlertOnce) || 
-                                // Always
-                            (failed && !lastfailed) || 
-                                // On Recovered
-                            (!failed && lastfailed && behaviour.AlertOnServiceRecovered)                               
-                            );
-
-            if (behaviour.LatestErrorPublished && status == HealthStatus.Healthy)
+            // On Recovered if latest error has been published
+            if (!failed && lastfailed && behaviour.AlertOnServiceRecovered)
             {
                 alert = true;
                 behaviour.LatestErrorPublished = false;
             }
 
-            alert = (behaviour.PublishAllResults && timeisoktoalert) || alert;
+            // Alert always if we want to publish all results even checks are healthy (things like influx results in a dashboard)
+            alert = (behaviour.PublishAllResults) || alert;
 
             return alert;
         }
 
         protected bool HasToPublishAlert(HealthReport report)
         {
-            var entry = report
-                .Entries
-                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
-
-            var behaviour = _healthCheck
-                .AlertBehaviour
-                .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
-
-            if (behaviour == null) return false;
-
-            if (entry.Key != this._healthCheck.Name) return false;
-
-            var alert = this.ProcessAlertRules(entry.Value.Status);
-
-            behaviour.LastStatus = entry.Value.Status;
-
-            behaviour.LastCheck = DateTime.Now;
-
-            behaviour.LastPublished = DateTime.Now;
-
-            if (alert)
+            lock (this)
             {
-                lock (_observers)
-                {
-                    _observers.ForEach(x => x.OnNext(report));
-                }
-            }
+                var entry = report
+                    .Entries
+                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
-            return alert;
+                var behaviour = _healthCheck
+                    .AlertBehaviour
+                    .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
+
+                if (behaviour == null) return false;
+
+                if (entry.Key != this._healthCheck.Name) return false;
+
+                var alert = this.ProcessAlertRules(entry.Value.Status);
+
+                if (alert)
+                {
+                    behaviour.LatestErrorPublished = true;
+                }
+
+                behaviour.LastStatus = entry.Value.Status;
+
+                behaviour.LastCheck = DateTime.Now;
+
+                behaviour.LastPublished = alert ? DateTime.Now : behaviour.LastPublished;
+
+                if (alert)
+                {
+                    lock (_observers)
+                    {
+                        _observers.ForEach(x => x.OnNext(report));
+                    }
+                }
+
+                return alert;
+            }
         }
 
         public abstract Task PublishAsync(HealthReport report, CancellationToken cancellationToken);

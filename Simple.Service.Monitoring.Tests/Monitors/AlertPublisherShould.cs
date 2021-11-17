@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Simple.Service.Monitoring.Library.Models;
@@ -39,7 +40,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
@@ -132,7 +132,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
@@ -221,7 +220,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpExpectedResponseTimeMs = 100,
                         HttpVerb = HttpVerb.Get
                     },
                 },
@@ -309,6 +307,162 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         }
 
         [Test]
+        public void Unhealthy_Check_Count_Should_Reset_To_0_When_Healthy()
+        {
+            // Arrange
+            var ok = true;
+
+            var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheckalways",
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    HttpBehaviour = new HttpBehaviour()
+                    {
+                        HttpExpectedCode = 200,
+                        HttpVerb = HttpVerb.Get
+                    },
+                },
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        AlertByFailCount = 5,
+                        AlertOnServiceRecovered = true,
+                        TransportName = "Dummy",
+                        TransportMethod = AlertTransportMethod.Email,
+                        PublishAllResults = false
+                    }
+                },
+                EndpointOrHost = "https://www.google.com",
+                MonitoringInterval = TimeSpan.FromSeconds(1),
+                ServiceType = ServiceType.Http,
+                Alert = true
+            };
+
+            var alertPublisher2 =
+                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+
+
+            var dic = new Dictionary<string, HealthReportEntry>();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
+                {
+                    ok = !ok;
+                });
+
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+
+            alertPublisher2.Subscribe(healthobserver.Object);
+
+            //Act
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 1);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 2);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 3);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 4);
+
+            dic.Clear();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 0);
+        }
+
+        [Test]
+        public void Given_Alert_Behaviour_Next_To_Fith_Unhealthy_Check_Should_Alert()
+        {
+            // Arrange
+            var ok = true;
+
+            var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheckalways",
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    HttpBehaviour = new HttpBehaviour()
+                    {
+                        HttpExpectedCode = 200,
+                        HttpVerb = HttpVerb.Get
+                    },
+                },
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        AlertByFailCount = 5,
+                        AlertOnServiceRecovered = true,
+                        TransportName = "Dummy",
+                        TransportMethod = AlertTransportMethod.Email,
+                        PublishAllResults = false
+                    }
+                },
+                EndpointOrHost = "https://www.google.com",
+                MonitoringInterval = TimeSpan.FromSeconds(1),
+                ServiceType = ServiceType.Http,
+                Alert = true
+            };
+
+            var alertPublisher2 =
+                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+
+
+            var dic = new Dictionary<string, HealthReportEntry>();
+
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+
+            var healthobserver = new Mock<IObserver<HealthReport>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
+                {
+                    ok = !ok;
+                });
+
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+
+            alertPublisher2.Subscribe(healthobserver.Object);
+
+            //Act
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            //Assert
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsTrue(ok);
+
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+
+            Assert.IsFalse(ok);
+        }
+
+        [Test]
         public void Given_Well_Formed_Alert_Behaviour_Next_Follow_Unhealthy_Monitor_Will_Alert()
         {
             var ok = false;
@@ -354,7 +508,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     HttpBehaviour = new HttpBehaviour()
                     {
                         HttpExpectedCode = 200,
-                        HttpExpectedResponseTimeMs = 100,
+                        HttpTimeoutMs = 1000,
                         HttpVerb = HttpVerb.Get
                     },
                 },
