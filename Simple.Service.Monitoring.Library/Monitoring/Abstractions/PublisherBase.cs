@@ -99,6 +99,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 behaviour.AlertEvery,
                 DateTime.UtcNow.TimeOfDay);
 
+            // Unhealthy and has to alert
             var alert = (timeisoktoalert) && (behaviour.FailedCount >= behaviour.AlertByFailCount) &&
                         (
                             // When we want to alert always
@@ -109,8 +110,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                             (failed && !lastfailed)
                         );
 
-            // On Recovered if latest error has been published
-            if (!failed && lastfailed && behaviour.AlertOnServiceRecovered)
+            if (alert)
+            {
+                behaviour.LatestErrorPublished = true;
+            }
+
+            // On Recovered if and latest error has been published
+            if (!failed && lastfailed && behaviour.AlertOnServiceRecovered && behaviour.LatestErrorPublished)
             {
                 alert = true;
                 behaviour.LatestErrorPublished = false;
@@ -139,11 +145,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 if (entry.Key != this._healthCheck.Name) return false;
 
                 var alert = this.ProcessAlertRules(entry.Value.Status);
-
-                if (alert)
-                {
-                    behaviour.LatestErrorPublished = true;
-                }
 
                 behaviour.LastStatus = entry.Value.Status;
 
@@ -185,6 +186,5 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 return new Unsubscriber(_observers, observer);
             }
         }
-
     }
 }
