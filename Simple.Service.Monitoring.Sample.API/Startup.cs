@@ -9,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Simple.Service.Monitoring.Extensions;
+using Simple.Service.Monitoring.Sample.API.External;
 
 namespace Simple.Service.Monitoring.Sample.API
 {
@@ -26,6 +28,12 @@ namespace Simple.Service.Monitoring.Sample.API
         {
 
             services.AddControllers();
+
+            services.AddTransient<IExternalService, ExternalService>();
+
+            services.UseServiceMonitoring(Configuration)
+                .UseSettings()
+                .Build();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

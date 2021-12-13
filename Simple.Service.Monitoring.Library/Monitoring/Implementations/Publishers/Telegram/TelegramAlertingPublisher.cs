@@ -11,6 +11,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using InfluxDB.Collector;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram
@@ -19,47 +20,41 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
     {
         private readonly TelegramTransportSettings _telegramTransportSettings;
 
-        public TelegramAlertingPublisher(IHealthChecksBuilder healthChecksBuilder, 
-            ServiceHealthCheck healthCheck, 
-            AlertTransportSettings alertTransportSettings) : 
+        public TelegramAlertingPublisher(IHealthChecksBuilder healthChecksBuilder,
+            ServiceHealthCheck healthCheck,
+            AlertTransportSettings alertTransportSettings) :
             base(healthChecksBuilder, healthCheck, alertTransportSettings)
         {
             _telegramTransportSettings = (TelegramTransportSettings)alertTransportSettings;
         }
 
-        public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
+        public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            var _ = Task.Run(async () =>
-            {
-                var alert = this.HasToPublishAlert(report);
+            var alert = this.HasToPublishAlert(report);
 
-                if (alert)
-                {
-                    var telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
+            if (!alert) return;
 
-                    var entry = report
-                        .Entries
-                        .FirstOrDefault(x => 
-                            x.Key == this._healthCheck.Name);
+            var telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
 
-                    var subject = $"Alert Triggered : {_healthCheck.Name} ";
+            var entry = report
+                .Entries
+                .FirstOrDefault(x =>
+                    x.Key == this._healthCheck.Name);
 
-                    var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                               $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
-                               $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
-                               $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                               $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
-                               $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
+            var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
-                    telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
-                }
-            });
+            var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
+                       $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
+                       $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
+                       $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
+                       $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
+                       $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
 
+            await telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
 
-            return Task.CompletedTask;
         }
 
-        protected internal override void Validate()
+    protected internal override void Validate()
         {
             Condition.WithExceptionOnFailure<TelegramAlertingValidationError>()
                 .Requires(_telegramTransportSettings.BotApiToken)

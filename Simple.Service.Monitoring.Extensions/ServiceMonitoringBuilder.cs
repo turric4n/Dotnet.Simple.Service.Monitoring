@@ -5,6 +5,7 @@ using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Options;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Simple.Service.Monitoring.Extensions
@@ -13,16 +14,62 @@ namespace Simple.Service.Monitoring.Extensions
     {
         private readonly IStackMonitoring _stackMonitoring;
         private readonly IOptions<MonitorOptions> _options;
+        private readonly ILogger<ServiceMonitoringBuilder> _logger;
 
-        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options)
+        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options, ILogger<ServiceMonitoringBuilder> logger)
         {
             _stackMonitoring = stackMonitoring;
             _options = options;
+            _logger = logger;
         }
 
         public IServiceMonitoringBuilder Add(ServiceHealthCheck monitor)
         {
+            _logger.LogInformation($"Adding new health check monitor {monitor.Name} - {monitor.ServiceType}");
             _stackMonitoring.AddMonitoring(monitor);
+
+            return this;
+        }
+
+        public IServiceMonitoringBuilder AddPublishing(ServiceHealthCheck monitor)
+        {
+            if (monitor.Alert)
+            {
+                monitor.AlertBehaviour?.ForEach(ab =>
+                {
+                    AlertTransportSettings transport;
+                    switch (ab.TransportMethod)
+                    {
+                        case AlertTransportMethod.Email:
+                            transport = _options.Value.EmailTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.CustomApi:
+                            transport = _options.Value.CustomNotificationTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Telegram:
+                            transport = _options.Value.TelegramTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Influx:
+                            transport = _options.Value.InfluxDbTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Slack:
+                            transport = _options.Value.SlackTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    if (transport == null) return;
+
+                    _logger.LogInformation($"Adding new health check publisher {transport.Name} {transport.GetType().Name}");
+                    _stackMonitoring.AddPublishing(transport, monitor);
+                });
+            }
 
             return this;
         }
@@ -39,44 +86,9 @@ namespace Simple.Service.Monitoring.Extensions
                     ? _options.Value.Settings?.UseGlobalServiceName
                     : monitor.Name;
 
-                _stackMonitoring.AddMonitoring(monitor);
+                this.Add(monitor);
 
-                if (monitor.Alert)
-                {
-                    monitor.AlertBehaviour?.ForEach(ab =>
-                    {
-                        AlertTransportSettings transport = null;
-                        switch (ab.TransportMethod)
-                        {
-                            case AlertTransportMethod.Email:
-                                transport = _options.Value.EmailTransportSettings
-                                    .FirstOrDefault(x => x.Name == ab.TransportName);
-                                break;
-                            case AlertTransportMethod.CustomApi:
-                                transport = _options.Value.CustomNotificationTransportSettings
-                                    .FirstOrDefault(x => x.Name == ab.TransportName);
-                                break;
-                            case AlertTransportMethod.Telegram:
-                                transport = _options.Value.TelegramTransportSettings
-                                    .FirstOrDefault(x => x.Name == ab.TransportName);
-                                break;
-                            case AlertTransportMethod.Influx:
-                                transport = _options.Value.InfluxDbTransportSettings
-                                    .FirstOrDefault(x => x.Name == ab.TransportName);
-                                break;
-                            case AlertTransportMethod.Slack:
-                                transport = _options.Value.SlackTransportSettings
-                                    .FirstOrDefault(x => x.Name == ab.TransportName);
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
-                        if (transport != null)
-                        {
-                            _stackMonitoring.AddPublishing(transport, monitor);
-                        }
-                    });
-                }
+                this.AddPublishing(monitor);
             }
 
             return this;
@@ -85,9 +97,9 @@ namespace Simple.Service.Monitoring.Extensions
         public IServiceMonitoringBuilder AddPublisherObserver(IObserver<HealthReport> observer)
         {
             _stackMonitoring.GetPublishers()
-                .ForEach(x =>
+                .ForEach(publisher =>
             {
-                var observable = (IObservable<HealthReport>) x;
+                var observable = (IObservable<HealthReport>)publisher;
                 observable.Subscribe(observer);
             });
 

@@ -13,6 +13,7 @@ namespace Simple.Service.Monitoring.Extensions
         IServiceMonitoringBuilder Add(ServiceHealthCheck monitor);
         IServiceMonitoringBuilder UseSettings();
         IServiceMonitoringBuilder AddPublisherObserver(IObserver<HealthReport> observer);
+        IServiceMonitoringBuilder AddPublishing(ServiceHealthCheck monitor);
         IStackMonitoring Build();
     }
 }

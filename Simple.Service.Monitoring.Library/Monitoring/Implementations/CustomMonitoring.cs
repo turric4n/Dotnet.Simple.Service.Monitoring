@@ -12,9 +12,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
     public class CustomMonitoring : ServiceMonitoringBase
     {
+        private readonly IHealthChecksBuilder _healthChecksBuilder;
+        private readonly IServiceProvider _serviceProvider;
 
         public CustomMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
         {
+            _healthChecksBuilder = healthChecksBuilder;
+            _serviceProvider = _healthChecksBuilder.Services.BuildServiceProvider();
         }
 
         protected internal override void Validate()
@@ -77,7 +81,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 if (classType == null)
                     throw new Exception(
                         $"Invalid class name {HealthCheck.FullClassName} defined in custom test named {Name}");
-                var classInstance = Activator.CreateInstance(classType) as IHealthCheck;
+
+                var classInstance = ActivatorUtilities.CreateInstance(_serviceProvider, classType) as IHealthCheck;
                 HealthChecksBuilder.AddCheck(Name, classInstance);
             }
 
