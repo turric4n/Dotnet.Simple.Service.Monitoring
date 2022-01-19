@@ -50,10 +50,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     collector.Write("health_check",
                         new Dictionary<string, object>
                         {
-                            { "endpoint", _healthCheck.EndpointOrHost },
                             { "status", (int)entry.Value.Status },
                             { "error", entry.Value.Exception },
                             { "responsetime", entry.Value.Duration.Milliseconds }
+                        }, new Dictionary<string, string>()
+                        {
+                            { "endpoint", _healthCheck.EndpointOrHost }
                         });
                 }
             });
