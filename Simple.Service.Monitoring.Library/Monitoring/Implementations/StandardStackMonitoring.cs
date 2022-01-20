@@ -54,6 +54,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 case ServiceType.Ping:
                     mymonitor = new PingServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
+                case ServiceType.Redis:
+                    mymonitor = new RedisServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
 

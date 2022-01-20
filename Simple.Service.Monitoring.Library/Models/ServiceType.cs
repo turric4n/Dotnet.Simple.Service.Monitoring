@@ -14,6 +14,7 @@ namespace Simple.Service.Monitoring.Library.Models
         MsSql,
         Rmq,
         Hangfire,
-        Ping
+        Ping,
+        Redis
     }
 }

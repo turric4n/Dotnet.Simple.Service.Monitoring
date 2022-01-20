@@ -11,7 +11,7 @@ namespace Simple.Service.Monitoring.Library.Models
         Put,
         Delete
     }
-    public class HttpBehaviour
+    public class HttpBehaviour : ConnectionBehaviour
     {
         public int HttpExpectedCode { get; set; }
         public int HttpTimeoutMs { get; set; } = 5000;

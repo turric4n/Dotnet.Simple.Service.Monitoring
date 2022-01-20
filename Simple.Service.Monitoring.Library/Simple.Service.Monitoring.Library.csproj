@@ -7,9 +7,9 @@
 	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Version>1.0.1.8</Version>
-	  <AssemblyVersion>1.0.1.8</AssemblyVersion>
-	  <FileVersion>1.0.1.8</FileVersion>
+	  <Version>1.0.2.4</Version>
+	  <AssemblyVersion>1.0.2.4</AssemblyVersion>
+	  <FileVersion>1.0.2.4</FileVersion>
 	  <Authors>Turrican with help of my fellow friends</Authors>
 	  <Company>Turrican Software</Company>
 	  <PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
@@ -23,6 +23,7 @@
     <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="5.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.Network" Version="5.0.4" />
     <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="5.0.2" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="6.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="5.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="5.0.3" />
     <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="6.0.1" />
