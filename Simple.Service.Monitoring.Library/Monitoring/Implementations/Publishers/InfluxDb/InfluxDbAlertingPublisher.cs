@@ -55,7 +55,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                             { "responsetime", entry.Value.Duration.Milliseconds }
                         }, new Dictionary<string, string>()
                         {
-                            { "endpoint", _healthCheck.EndpointOrHost }
+                            { "endpoint", _healthCheck.EndpointOrHost ?? _healthCheck.ConnectionString }
                         });
                 }
             });
