@@ -47,19 +47,26 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                         .Entries
                         .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
-                    collector.Write("health_check",
-                        new Dictionary<string, object>
-                        {
-                            { "status", (int)entry.Value.Status },
-                            { "error", entry.Value.Exception },
-                            { "responsetime", entry.Value.Duration.Milliseconds }
-                        }, new Dictionary<string, string>()
-                        {
-                            { "endpoint", _healthCheck.EndpointOrHost ?? _healthCheck.ConnectionString }
-                        });
+                    var tags = new Dictionary<string, string>()
+                    {
+                        { "endpoint", _healthCheck.EndpointOrHost ?? _healthCheck.ConnectionString }
+                    };
+
+                    var fields = new Dictionary<string, object>()
+                    {
+                        { "status", (int)entry.Value.Status },
+                        { "error", entry.Value.Exception },
+                        { "responsetime", entry.Value.Duration.Milliseconds }
+                    };
+
+                    foreach (var valueTag in entry.Value.Data)
+                    {
+                        fields.Add(valueTag.Key, valueTag.Value);
+                    }
+
+                    collector.Write("health_check", fields, tags);
                 }
             });
-
 
             return Task.CompletedTask;
         }

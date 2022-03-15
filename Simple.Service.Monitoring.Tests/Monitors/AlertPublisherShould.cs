@@ -103,6 +103,18 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         }
 
         [Test]
+        [TestCase("00:00:00", "23:59:59", "00:08:00")]
+        public void Given_Timespan_Does_Respect_Scheduled_Time(TimeSpan from, TimeSpan to, TimeSpan currentTime)
+        {
+            // Arrange
+            var current = currentTime;
+            // Act
+            var hasToAlert = alertPublisher.TimeBetweenScheduler(from, to, current);
+            //Assert
+            Assert.IsTrue(hasToAlert);
+        }
+
+        [Test]
         public void Given_Well_Formed_Alert_Behaviour_First_Unhealthy_Will_Alert()
         {
             // Arrange

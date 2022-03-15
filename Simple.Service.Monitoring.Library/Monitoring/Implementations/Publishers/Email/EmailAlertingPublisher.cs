@@ -12,6 +12,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Em
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Transport.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Templates;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email
 {
@@ -46,12 +47,18 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
             var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                       $"Triggered On    : { lastchecktime } {Environment.NewLine}" +
+                       $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
                        $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
-                       $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                       $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
-                       $"Alert Details  : {entry.Value.Description} {Environment.NewLine}" +
-                       $"Alert Details  : {entry.Value.Exception} {Environment.NewLine}";
+                       $"Alert Endpoint  : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
+                       $"Alert Status    : {entry.Value.Status} {Environment.NewLine}" +
+                       $"Alert Details   : {entry.Value.Description} {Environment.NewLine}";
+
+            foreach (var extraData in entry.Value.Data)
+            {
+                body += $"Alert Tags    : {extraData.Key} - {extraData.Value} {Environment.NewLine}";
+            }
+
+            body = StandardEmailTemplate.TemplateBody.Replace("#replace", body);
 
             //Do work
             var message = _mailMessageFactory.Create(_emailTransportSettings.To, subject, body);

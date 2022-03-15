@@ -8,37 +8,38 @@ Monitoring:
     ShowUI: 'True'
     UseGlobalServiceName: 'Test'
   HealthChecks:
-  - Name: Test
-    ServiceType: HttpEndpoint
-    EndpointOrHost: https://www.testendpoint.com/
-    Port: 443
-    HealthCheckConditions:
-      HttpBehaviour:
-        HttpExpectedResponseTimeMs: 300
-        HttpExpectedCode: 200
-        HttpVerb: Get
-      ServiceReach: true
-      ServiceConnectionEstablished: true
-    PublishChecks: true
-    Alert: true
+  - Name: TurriCustom
+    ServiceType: Custom
+    FullClassName: Simple.Service.Monitoring.Sample.API.Health.CustomHealth
+    PublishChecks: true    
+    Alert: false
     AlertBehaviour:
-    - TransportMethod: Influx
-      TransportName: InfluxTransport1
-      AlertOnce: false
+    - TransportMethod: Telegram
+      TransportName: DevOpsTelegramChat
+      AlertOnce: true
       AlertOnServiceRecovered: true
       StartAlertingOn: ''
       StopAlertingOn: ''
       AlertEvery: '00:00:05'
       AlertOn: ''
-    - TransportMethod: Slack
-      TransportName: SlackTransport1
-      AlertOnce: false
+  - Name: Redis
+    ServiceType: Redis
+    ConnectionString: 192.168.0.200:6379
+    PublishChecks: true    
+    Alert: true
+    HealthCheckConditions:
+      RedisBehaviour:
+        TimeoutMs: 5000
+    AlertBehaviour:
+    - TransportMethod: Telegram
+      TransportName: DevOpsTelegramChat
+      AlertOnce: true
       AlertOnServiceRecovered: true
       StartAlertingOn: ''
       StopAlertingOn: ''
       AlertEvery: '00:00:05'
       AlertOn: ''
-
+  ####################################
   CustomNotificationTransportSettings:
   EmailTransportSettings:
   - Name: StandardEmailTransport
@@ -67,8 +68,3 @@ Monitoring:
     BotName: ''
     BotApiToken: 
     ChatId: ''
-  SlackTransportSettings:
-  - Name: SlackTransport1
-    Token: 
-    Channel: 
-    Username: "Health Checks"

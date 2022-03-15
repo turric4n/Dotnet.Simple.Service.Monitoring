@@ -57,6 +57,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             return timeok;
         }
 
+        public bool TimeBetweenScheduler(TimeSpan timeFrom, TimeSpan timeTo, TimeSpan currentTime)
+        {
+            var timeok = (currentTime.Ticks >= timeFrom.Ticks) && (currentTime.Ticks < timeTo.Ticks);
+            return timeok;
+        }
+
         public DateTime GetReportLastCheck(HealthStatus status)
         {
             var behaviour = _healthCheck
@@ -95,9 +101,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             behaviour.FailedCount = failed ? 
                 behaviour.FailedCount += 1 : 0;
 
+            //Alert every
             var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastPublished.ToUniversalTime().TimeOfDay, 
                 behaviour.AlertEvery,
                 DateTime.UtcNow.TimeOfDay);
+            
+            //Scheduled 
+            timeisoktoalert = timeisoktoalert && TimeBetweenScheduler(behaviour.StartAlertingOn, behaviour.StopAlertingOn,
+                behaviour.LastPublished.ToUniversalTime().TimeOfDay);
 
             // Unhealthy and has to alert
             var alert = (timeisoktoalert) && (behaviour.FailedCount >= behaviour.AlertByFailCount) &&
