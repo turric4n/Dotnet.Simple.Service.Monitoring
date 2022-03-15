@@ -107,11 +107,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 DateTime.UtcNow.TimeOfDay);
             
             //Scheduled 
-            timeisoktoalert = timeisoktoalert && TimeBetweenScheduler(behaviour.StartAlertingOn, behaviour.StopAlertingOn,
-                behaviour.LastPublished.ToUniversalTime().TimeOfDay);
+            var timeisokScheduled =  TimeBetweenScheduler(behaviour.StartAlertingOn, behaviour.StopAlertingOn,
+                DateTime.UtcNow.TimeOfDay);
+
+            var isOkToAlert = timeisoktoalert && timeisokScheduled;
 
             // Unhealthy and has to alert
-            var alert = (timeisoktoalert) && (behaviour.FailedCount >= behaviour.AlertByFailCount) &&
+            var alert = (isOkToAlert) && (behaviour.FailedCount >= behaviour.AlertByFailCount) &&
                         (
                             // When we want to alert always
                             (failed && lastfailed && !behaviour.AlertOnce) ||

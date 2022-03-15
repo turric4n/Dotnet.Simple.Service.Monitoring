@@ -51,7 +51,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                         Username = _slackTransportSettings.Username
                     };
 
-                    await SlackMessageSender.SendMessageAsync(_slackTransportSettings.Token, msg);
+                foreach (var extraData in entry.Value.Data)
+                {
+                    msg.Text += $"Alert Tags    : {extraData.Key} - {extraData.Value} {Environment.NewLine}";
+                }
+
+                await SlackMessageSender.SendMessageAsync(_slackTransportSettings.Token, msg);
             }
         }
 

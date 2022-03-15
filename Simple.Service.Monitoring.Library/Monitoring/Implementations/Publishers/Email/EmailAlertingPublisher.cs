@@ -46,16 +46,16 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
-            var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                       $"Triggered On    : {DateTime.UtcNow} {Environment.NewLine}" +
-                       $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
-                       $"Alert Endpoint  : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                       $"Alert Status    : {entry.Value.Status} {Environment.NewLine}" +
-                       $"Alert Details   : {entry.Value.Description} {Environment.NewLine}";
+            var body = $"Alert Triggered : {_healthCheck.Name} <br>" +
+                       $"Triggered On    : {DateTime.UtcNow} <br>" +
+                       $"Service Type    : {_healthCheck.ServiceType} <br>" +
+                       $"Alert Endpoint  : {_healthCheck.EndpointOrHost} <br>" +
+                       $"Alert Status    : {entry.Value.Status} <br>" +
+                       $"Alert Details   : {entry.Value.Description} <br>";
 
             foreach (var extraData in entry.Value.Data)
             {
-                body += $"Alert Tags    : {extraData.Key} - {extraData.Value} {Environment.NewLine}";
+                body += $"Alert Tags    : {extraData.Key} - {extraData.Value} <br>";
             }
 
             body = StandardEmailTemplate.TemplateBody.Replace("#replace", body);

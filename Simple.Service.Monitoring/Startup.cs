@@ -32,10 +32,6 @@ namespace Simple.Service.Monitoring
             var monitoring = services.UseServiceMonitoring(Configuration)
                 .UseSettings()
                 .Build();
-            //    .AddCustomCheck(() =>
-            //{
-            //    return Task.FromResult(HealthCheckResult.Healthy());
-            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
