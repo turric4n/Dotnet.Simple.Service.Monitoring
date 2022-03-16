@@ -47,7 +47,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             var subject = $"Alert Triggered : {_healthCheck.Name} ";
 
             var body = $"Alert Triggered : {_healthCheck.Name} <br>" +
-                       $"Triggered On    : {DateTime.UtcNow} <br>" +
+                       $"Triggered On    : {DateTime.Now} <br>" +
                        $"Service Type    : {_healthCheck.ServiceType} <br>" +
                        $"Alert Endpoint  : {_healthCheck.EndpointOrHost} <br>" +
                        $"Alert Status    : {entry.Value.Status} <br>" +
