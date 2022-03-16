@@ -102,13 +102,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 behaviour.FailedCount += 1 : 0;
 
             //Alert every
-            var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastPublished.ToUniversalTime().TimeOfDay, 
+            var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastPublished.TimeOfDay, 
                 behaviour.AlertEvery,
-                DateTime.UtcNow.TimeOfDay);
+                DateTime.Now.TimeOfDay);
             
             //Scheduled 
             var timeisokScheduled =  TimeBetweenScheduler(behaviour.StartAlertingOn, behaviour.StopAlertingOn,
-                DateTime.UtcNow.TimeOfDay);
+                DateTime.Now.TimeOfDay);
 
             var isOkToAlert = timeisoktoalert && timeisokScheduled;
 
