@@ -31,7 +31,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         protected internal override void SetMonitoring()
         {
             HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, 
-                this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query);
+                this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query, HealthCheck.Name);
         }
     }
 }

@@ -5,11 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="appsettings - Copy.Development.yml" />
     <None Remove="appsettings.Development.yml" />
     <None Remove="appsettings.yml" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="appsettings - Copy.Development.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="appsettings.Development.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

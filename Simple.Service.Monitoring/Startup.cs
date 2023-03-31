@@ -12,11 +12,14 @@ using Simple.Service.Monitoring.Extensions;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Newtonsoft.Json;
+using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 
 namespace Simple.Service.Monitoring
 {
     public class Startup
     {
+        private IStackMonitoring _stackMonitoring;
 
         public Startup(IConfiguration configuration)
         {
@@ -29,7 +32,7 @@ namespace Simple.Service.Monitoring
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var monitoring = services.UseServiceMonitoring(Configuration)
+            _stackMonitoring = services.UseServiceMonitoring(Configuration)
                 .UseSettings()
                 .Build();
         }
@@ -37,10 +40,6 @@ namespace Simple.Service.Monitoring
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath);
-
-            // Adds JSON settings
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -50,10 +49,12 @@ namespace Simple.Service.Monitoring
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapHealthChecksUI(options =>
+                endpoints.MapGet("/", async context =>
                 {
-                    options.UIPath = "/health"; // this is ui path in your browser
-                    options.ApiPath = "/health-ui-api";
+                    var monitors = _stackMonitoring.GetMonitors();
+                    var publishers = _stackMonitoring.GetPublishers();
+
+                    await context.Response.WriteAsync($"Monitors : {JsonConvert.SerializeObject(monitors)} \r\n Publishers : {JsonConvert.SerializeObject(publishers)}");
                 });
             });
         }

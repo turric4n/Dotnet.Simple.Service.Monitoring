@@ -25,7 +25,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            this.HealthChecksBuilder.AddElasticsearch(HealthCheck.EndpointOrHost, Name, HealthStatus.Unhealthy, null, TimeSpan.FromSeconds(5));
+            this.HealthChecksBuilder.AddElasticsearch(HealthCheck.EndpointOrHost, HealthCheck.Name, HealthStatus.Unhealthy, null, TimeSpan.FromSeconds(5));
         }
 
     }

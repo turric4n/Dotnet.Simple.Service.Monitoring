@@ -35,7 +35,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             HealthChecksBuilder.AddRabbitMQ(provider =>
             {
                 return connectionFactory;
-            }, Name, HealthStatus.Unhealthy);
+            }, HealthCheck.Name, HealthStatus.Unhealthy);
         }
     }
 }

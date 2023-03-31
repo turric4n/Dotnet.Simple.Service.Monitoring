@@ -48,7 +48,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                        $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
                        $"Alert Endpoint  : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
                        $"Alert Status    : {entry.Value.Status} {Environment.NewLine}" +
-                       $"Alert Details   : {entry.Value.Description} {Environment.NewLine}";
+                       $"Alert Details   : {(string.IsNullOrEmpty(entry.Value.Description) ? entry.Value.Exception?.Message : entry.Value.Description) } {Environment.NewLine}";
 
             foreach (var extraData in entry.Value.Data)
             {
@@ -56,7 +56,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
 
             await telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
-
         }
 
     protected internal override void Validate()

@@ -27,7 +27,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            HealthChecksBuilder.AddMySql(this.HealthCheck.ConnectionString);
+            HealthChecksBuilder.AddMySql(this.HealthCheck.ConnectionString, HealthCheck.Name);
         }
     }
 }
