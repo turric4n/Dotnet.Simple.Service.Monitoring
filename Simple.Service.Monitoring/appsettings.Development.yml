@@ -26,10 +26,10 @@ Monitoring:
       TransportName: StandardEmailTransport
       AlertOnce: true
       AlertOnServiceRecovered: true
-      StartAlertingOn: ''
-      StopAlertingOn: ''
-      AlertEvery: '00:00:05'
-      AlertOn: ''
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:
   - Name: Rmqtest
     ServiceType: Rmq
     EndpointOrHost: "amqp://user:test@localhost:5672/"
@@ -40,10 +40,10 @@ Monitoring:
       TransportName: StandardEmailTransport
       AlertOnce: true
       AlertOnServiceRecovered: true
-      StartAlertingOn: ''
-      StopAlertingOn: ''
-      AlertEvery: '00:00:05'
-      AlertOn: ''
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:
   - Name: ElasticTest
     ServiceType: ElasticSearch
     EndpointOrHost: http://test:9200/
@@ -54,10 +54,10 @@ Monitoring:
       TransportName: StandardEmailTransport
       AlertOnce: true
       AlertOnServiceRecovered: true
-      StartAlertingOn: ''
-      StopAlertingOn: ''
-      AlertEvery: '00:00:05'
-      AlertOn: ''
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:
   - Name: TurriCustom
     ServiceType: Custom
     FullClassName: Simple.Service.Monitoring.HealthCheck
@@ -68,10 +68,10 @@ Monitoring:
       TransportName: StandardEmailTransport
       AlertOnce: true
       AlertOnServiceRecovered: true
-      StartAlertingOn: ''
-      StopAlertingOn: ''
-      AlertEvery: '00:00:05'
-      AlertOn: ''
+      StartAlertingOn: 
+      StopAlertingOn: 
+      AlertEvery: 00:00:05
+      AlertOn:
   CustomNotificationTransportSettings:
   EmailTransportSettings:
   - Name: StandardEmailTransport

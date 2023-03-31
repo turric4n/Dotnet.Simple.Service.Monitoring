@@ -1,0 +1,32 @@
+Settings:
+  ShowUI: false
+  UseGlobalServiceName: Test
+HealthChecks:
+- Name: TurriTest
+  ServiceType: Custom
+  EndpointOrHost: Turri
+  ConnectionString: 1234
+  MonitoringInterval: 00:00:00
+  HealthCheckConditions: 
+  Alert: false
+  AlertBehaviour: 
+  FullClassName: 
+EmailTransportSettings:
+- From: 2
+  DisplayName: turri2
+  To: test@test.com
+  SmtpHost: testEndpoint
+  SmtpPort: 25
+  Authentication: false
+  Username: Turri
+  Password: 1231231
+  Name: test
+SlackTransportSettings: 
+TelegramTransportSettings: 
+InfluxDbTransportSettings: 
+CustomNotificationTransportSettings:
+- BaseEndpoint: http://someendpoint
+  ApiKey: BlaBla
+  ProjectName: Turri2
+  Environment: Environment
+  Name: Turri

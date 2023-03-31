@@ -5,7 +5,7 @@
         // HTTP
         public HttpBehaviour HttpBehaviour { get; set; }
 
-        public MsSqlBehaviour SqlBehaviour { get; set; }
+        public SqlBehaviour SqlBehaviour { get; set; }
 
         public HangfireBehaviour HangfireBehaviour { get; set; }
 

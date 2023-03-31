@@ -277,7 +277,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Assert
             Assert.IsTrue(ok);
 
-            Thread.Sleep(4000);
+            Thread.Sleep(2000);
 
             dic.Clear();
 

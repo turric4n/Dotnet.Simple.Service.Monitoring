@@ -1,0 +1,23 @@
+HealthChecks:
+  - Name: Test
+    ServiceType: Http
+    EndpointOrHost: https://www.testendpoint.com/
+    Port: 443
+    HealthCheckConditions:
+      HttpBehaviour:
+        HttpExpectedResponseTimeMs: 300
+        HttpExpectedCode: 200
+        HttpVerb: Get
+      ServiceReach: true
+      ServiceConnectionEstablished: true
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+      - TransportMethod: Email
+        TransportName: StandardEmailTransport
+        AlertOnce: true
+        AlertOnServiceRecovered: true
+        StartAlertingOn: ""
+        StopAlertingOn: ""
+        AlertEvery: "00:00:05"
+        AlertOn: ""

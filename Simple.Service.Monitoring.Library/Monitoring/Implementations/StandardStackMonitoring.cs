@@ -57,6 +57,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 case ServiceType.Redis:
                     mymonitor = new RedisServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
+                case ServiceType.MySql:
+                    mymonitor = new MySqlServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
 

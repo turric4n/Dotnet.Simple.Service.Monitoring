@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="2.1.0" />
+    <PackageReference Include="NetEscapades.Configuration.Yaml" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
