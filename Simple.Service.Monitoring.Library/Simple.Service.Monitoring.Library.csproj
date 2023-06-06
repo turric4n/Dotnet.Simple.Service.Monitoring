@@ -30,9 +30,9 @@
     <PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
     <PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.5" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-    <PackageReference Include="Telegram.Bot" Version="18.0.0" />
+    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
     <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
   </ItemGroup>
 
