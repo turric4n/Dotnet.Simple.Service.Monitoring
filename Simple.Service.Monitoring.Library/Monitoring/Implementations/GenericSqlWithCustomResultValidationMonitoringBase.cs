@@ -39,14 +39,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     if (HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.Int ||
                         HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.DateTime)
                     {
-                        result = (int)healthCheckResultData > (int)expectedResult;
+                        result = (long)healthCheckResultData > (long)expectedResult;
                     }
                     break;
                 case ResultExpression.LessThan:
                     if (HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.Int ||
                         HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.DateTime)
                     {
-                        result = (int)healthCheckResultData < (int)expectedResult;
+                        result = (long)healthCheckResultData < (long)expectedResult;
                     }
                     break;
                 default:
@@ -63,7 +63,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             return dataType switch
             {
                 SqlResultDataType.String => typeof(string),
-                SqlResultDataType.Int => typeof(int),
+                SqlResultDataType.Int => typeof(long),
                 SqlResultDataType.Bool => typeof(bool),
                 SqlResultDataType.DateTime => typeof(DateTime),
                 _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
