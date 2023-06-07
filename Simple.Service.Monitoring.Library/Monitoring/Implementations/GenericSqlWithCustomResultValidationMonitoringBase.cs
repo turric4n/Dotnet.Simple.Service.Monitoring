@@ -20,7 +20,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             if (healthCheckResultData == null) return HealthCheckResult.Unhealthy("No data returned from query");
 
-            var expectedResult = HealthCheck.HealthCheckConditions.SqlBehaviour.ExpectedResult;
+            var targetType = GetTargetType(HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType);
+
+            var expectedResult =
+                Convert.ChangeType(HealthCheck.HealthCheckConditions.SqlBehaviour.ExpectedResult, targetType);
+            
             var result = false;
 
             switch (HealthCheck.HealthCheckConditions.SqlBehaviour.ResultExpression)
@@ -52,6 +56,18 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             return result
                 ? HealthCheckResult.Healthy()
                 : HealthCheckResult.Unhealthy("Result does not match expected result");
+        }
+
+        internal Type GetTargetType(SqlResultDataType dataType)
+        {
+            return dataType switch
+            {
+                SqlResultDataType.String => typeof(string),
+                SqlResultDataType.Int => typeof(int),
+                SqlResultDataType.Bool => typeof(bool),
+                SqlResultDataType.DateTime => typeof(DateTime),
+                _ => throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null)
+            };
         }
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-using CuttingEdge.Conditions;
-using Microsoft.Extensions.DependencyInjection;
-using Simple.Service.Monitoring.Library.Models;
-using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using System.Data.Common;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
+﻿using CuttingEdge.Conditions;
 using HealthChecks.SqlServer;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Simple.Service.Monitoring.Library.Models;
+using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
+using System.Data.Common;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
