@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Simple.Service.Monitoring.Library.Models
+﻿namespace Simple.Service.Monitoring.Library.Models
 {
     public class SqlBehaviour
     {
         public string Query { get; set; }
-        public string Result { get; set; }
+        public ResultExpression ResultExpression { get; set; }
+        public SqlResultDataType SqlResultDataType { get; set; }
+        public object ExpectedResult { get; set; }
     }
 }

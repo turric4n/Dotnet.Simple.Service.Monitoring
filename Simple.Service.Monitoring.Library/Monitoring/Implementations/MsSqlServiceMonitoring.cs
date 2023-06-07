@@ -1,13 +1,16 @@
-﻿using CuttingEdge.Conditions;
+﻿using System;
+using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using System.Data.Common;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
+using HealthChecks.SqlServer;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
-    public class MsSqlServiceMonitoring : ServiceMonitoringBase
+    public class MsSqlServiceMonitoring : GenericSqlWithCustomResultValidationMonitoringBase
     {
 
         public MsSqlServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
@@ -30,8 +33,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, 
-                this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query, HealthCheck.Name);
+            var sqlOptions = new SqlServerHealthCheckOptions()
+            {
+                CommandText = this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query,
+                ConnectionString = this.HealthCheck.ConnectionString,
+                HealthCheckResultBuilder = base.GetHealth
+            };
+
+            var sqlBehaviourQuery = this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query;
+            if (sqlBehaviourQuery != null)
+                HealthChecksBuilder.AddSqlServer(sqlOptions, HealthCheck.Name,
+                    HealthStatus.Unhealthy, null, null);
         }
     }
 }

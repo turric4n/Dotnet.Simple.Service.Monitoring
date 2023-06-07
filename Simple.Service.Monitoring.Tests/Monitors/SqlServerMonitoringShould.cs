@@ -1,15 +1,15 @@
-using System;
-using Simple.Service.Monitoring.Library.Models;
-using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using Simple.Service.Monitoring.Library.Models;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations;
+using System;
+using System.Collections.Generic;
 using Simple.Service.Monitoring.Library;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
     [TestFixture(Category = "Unit")]
-    public class MysqlServiceMonitoringShould
+    public class SqlServerMonitoringShould
     {
         private IHealthChecksBuilder healthChecksBuilder;
         [SetUp]
@@ -23,40 +23,19 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         }
 
         [Test]
-        public void Given_Valid_Mysql_Host_Monitoring_Settings()
+        public void Given_Valid_SQl_Host_Monitoring_Settings()
         {
             //Arrange
-            var mysqlCheck = new ServiceHealthCheck()
+            var sqlHealthCheck = new ServiceHealthCheck()
             {
                 Name = "testhealthcheck",
-                AlertBehaviour = null,
-                ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
-                ServiceType = ServiceType.MySql,
-                HealthCheckConditions = new HealthCheckConditions()
+                AlertBehaviour = new List<AlertBehaviour>()
                 {
-                }
-            };
-            //Act
-            var mysqlMonitoring = new MySqlServiceMonitoring(healthChecksBuilder, mysqlCheck);
-            //Assert
-            Assert.DoesNotThrow(() =>
-            {
-                mysqlMonitoring.SetUp();
-            });
-        }
 
-        [Test]
-        public void Given_Valid_Mysql_Host_And_Query_Monitoring_Settings()
-        {
-            //Arrange
-            var httpendpointhealthcheck = new ServiceHealthCheck()
-            {
-                Name = "testhealthcheck",
-                AlertBehaviour = null,
+                },
                 ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
                 MonitoringInterval = TimeSpan.FromSeconds(1),
-                ServiceType = ServiceType.MySql,
+                ServiceType = ServiceType.MsSql,
                 HealthCheckConditions = new HealthCheckConditions()
                 {
                     SqlBehaviour = new SqlBehaviour()
@@ -69,13 +48,11 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 }
             };
             //Act
-            var mysqlMonitoring = new MySqlServiceMonitoring(healthChecksBuilder, httpendpointhealthcheck);
-            mysqlMonitoring.SetUp();
-
+            var sqlMonitoring = new MsSqlServiceMonitoring(healthChecksBuilder, sqlHealthCheck);
             //Assert
             Assert.DoesNotThrow(() =>
             {
-                mysqlMonitoring.SetUp();
+                sqlMonitoring.SetUp();
             });
         }
     }

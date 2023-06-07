@@ -14,19 +14,20 @@
 	  <Company>Turrican Software</Company>
 	  <PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
 	  <RepositoryType>GIT</RepositoryType>
+	  <UserSecretsId>4f22cd28-9aa4-44c0-82d2-ce640fa480c4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.Hangfire" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="6.0.3" />
-    <PackageReference Include="AspNetCore.HealthChecks.MySql" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.Network" Version="6.0.4" />
-    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="6.0.4" />
-    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="6.0.2" />
-    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="6.0.3" />
+    <PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="7.0.0-rc2.6" />
+    <PackageReference Include="AspNetCore.HealthChecks.Hangfire" Version="7.0.0-rc2.5" />
+    <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="7.0.0-rc2.8" />
+    <PackageReference Include="AspNetCore.HealthChecks.MySql.TurricansFork" Version="7.0.1-tns" />
+    <PackageReference Include="AspNetCore.HealthChecks.Network" Version="7.0.0-rc2.6" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="7.0.0-rc2.7" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="7.0.0-rc2.6" />
+    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="7.0.0-rc2.6" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="7.0.0-rc2.11" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="7.0.0-rc2.6" />
     <PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
     <PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />

@@ -23,6 +23,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             healthChecksBuilder = healthcheckbuildermock.Object;
         }
 
+        [Test]
         public void Given_Valid_Custom_Monitoring_Will_Return_Healthy_Status()
         {
             //Arrange

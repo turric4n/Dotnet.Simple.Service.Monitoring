@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Simple.Service.Monitoring.Library.Models;
 using System;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Nest;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
