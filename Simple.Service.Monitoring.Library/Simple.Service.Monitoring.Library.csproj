@@ -3,11 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
 	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	  <Description>Simple health check library for internal or external services made in C#</Description>
+	  <Description>Simple health check library for internal or external services made in C#
+
+- Added SQL/MySQL query healthCheck and result</Description>
 	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-	  <Version>1.0.3.4</Version>
+	  <Version>1.0.3.5</Version>
 	  <AssemblyVersion>1.0.3.4</AssemblyVersion>
 	  <FileVersion>1.0.3.4</FileVersion>
 	  <Authors>Turrican with help of my fellow friends</Authors>
