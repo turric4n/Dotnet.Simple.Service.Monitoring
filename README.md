@@ -1,15 +1,14 @@
 # Dotnet.Simple.Service.Monitoring
 
-Avoid complex health check implementations... Just add some lines in your settings and find out when your services are falling down with awesome monitoring.
+Simplify Health Check Implementations with Easy Monitoring
 
-This chunk of code, basically is known (colloquially) as a wannabe library/framework/wrapper to simplify .NET health checks framework.
+Forget about complex health check implementations. With just a few lines added to your settings, you can effortlessly monitor the status of your services using an amazing monitoring solution.
 
-It uses .NET HealthChecks engine and awesome Xabaril's AspNetCore.HealthChecks - https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks
+This code snippet, often referred to colloquially as a wannabe library/framework/wrapper, aims to simplify the .NET health checks framework. It leverages the power of the .NET HealthChecks engine and the fantastic AspNetCore.HealthChecks library by Xabaril (available at https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks).
 
-This code is just doing the same thing but in a very easy way... BUT also publishes health check results into multiple communication providers (Email, Telegram, Slack...)
+By utilizing this code, you can achieve the same functionality with ease. Additionally, it provides the capability to publish health check results to various communication providers, including Email, Telegram, and Slack.
 
-*HOW IT WORKS?*
-Just put some lines in your settings file and MAGIC! Health checks and transport providers will be automated.
+How does it work? Simply add a few lines to your settings file, and voila! Health checks and transport providers will be automatically configured.
 
 ## Initialization code : 
 
@@ -116,30 +115,31 @@ Monitoring:
  ```
  
  ## Monitoring properties :
- - HealthChecks (Array)
-   - Name (Health check unique name)
-   - Service Type (Type of service you want to monitor) (Enum)
-     - Http (Typical http or https URI)
-     - ElasticSearch (ElasticSearch endpoint is supported)
-     - MsSql (Microsoft SQL Server)
-     - Rmq (Rabbit MQ)
-     - Hangfire
-     - Ping (ICMP)
-   - EndpointOrHost (Mandatory when monitoring HTTP or ElasticSearch, just an URI)
-   - PublishChecks (Enable check publishing, disable when you don't want to hear anything from this check)
-   - Alert (Enable when you want to publish checks into implicated transport methods)
-   - AlertBehaviour (Define here transports you will use to publish health check results) (Object)
-     - TransportMethod (Array) (Transport methods you want to use)
-      - Email
-      - Slack
-      - Telegram
-      - InfluxDb
-     - TransportName (Name of the defined transport in the config file, go to transport section)
-     - AlertOnce (Just send one notification on health check failure)
-     - AlertOnServiceRecovered (Send notification when health check is recovered)
-     - StartAlertingOn (Start to send alerts on suggested DateTime)
-     - StopAlertingOn (Stop sending alerts on suggested DateTime)            
-     - AlertEvery (Time between alerts)
+ 
+- **HealthChecks (Array)**
+  - **Name:** Health check unique name
+  - **Service Type:** Type of service you want to monitor (Enum)
+    - **Http:** Typical http or https URI
+    - **ElasticSearch:** ElasticSearch endpoint is supported
+    - **MsSql:** Microsoft SQL Server
+    - **Rmq:** Rabbit MQ
+    - **Hangfire**
+    - **Ping:** ICMP
+  - **EndpointOrHost:** Mandatory when monitoring HTTP or ElasticSearch, just an URI
+  - **PublishChecks:** Enable check publishing, disable when you don't want to hear anything from this check
+  - **Alert:** Enable when you want to publish checks into implicated transport methods
+  - **AlertBehaviour (Object):**
+    - **TransportMethod (Array):** Transport methods you want to use
+      - **Email**
+      - **Slack**
+      - **Telegram**
+      - **InfluxDb**
+    - **TransportName:** Name of the defined transport in the config file, go to transport section
+    - **AlertOnce:** Just send one notification on health check failure
+    - **AlertOnServiceRecovered:** Send notification when health check is recovered
+    - **StartAlertingOn:** Start to send alerts on suggested DateTime
+    - **StopAlertingOn:** Stop sending alerts on suggested DateTime
+    - **AlertEvery:** Time between alerts
  
 ## Transport properties :
 - EmailTransportSettings (Array) (Object)
