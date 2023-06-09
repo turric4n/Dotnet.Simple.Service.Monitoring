@@ -56,7 +56,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     {
                         { "status", (int)entry.Value.Status },
                         { "error", entry.Value.Exception },
-                        { "responsetime", entry.Value.Duration.Milliseconds }
+                        { "responsetime", entry.Value.Duration.Milliseconds },
+                        { "description", entry.Value.Description },
                     };
 
                     foreach (var valueTag in entry.Value.Data)

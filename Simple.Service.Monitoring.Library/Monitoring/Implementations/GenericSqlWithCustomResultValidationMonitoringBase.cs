@@ -1,10 +1,9 @@
-﻿using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
+using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
+using System;
+using System.Collections.Generic;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -53,9 +52,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     throw new ArgumentOutOfRangeException();
             }
 
+            var resultData = new Dictionary<string, object>
+            {
+                {"ExpectedResult", expectedResult},
+                {"ActualResult", healthCheckResultData},
+                {"ResultExpression", HealthCheck.HealthCheckConditions.SqlBehaviour.ResultExpression},
+                {"Result", result}
+            };
+
             return result
-                ? HealthCheckResult.Healthy()
-                : HealthCheckResult.Unhealthy("Result does not match expected result");
+                ? HealthCheckResult.Healthy($"Result match expected result. Expected: {expectedResult}, Actual: {healthCheckResultData}", resultData)
+                : HealthCheckResult.Unhealthy($"Result does not match expected result. Expected: {expectedResult}, Actual: {healthCheckResultData}", new Exception(), resultData);
         }
 
         internal Type GetTargetType(SqlResultDataType dataType)
