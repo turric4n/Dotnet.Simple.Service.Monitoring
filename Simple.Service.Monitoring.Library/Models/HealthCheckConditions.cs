@@ -3,6 +3,14 @@
     public class HealthCheckConditions
     {
         // HTTP
+        public HealthCheckConditions()
+        {
+            HttpBehaviour = new HttpBehaviour();
+            SqlBehaviour = new SqlBehaviour();
+            HangfireBehaviour = new HangfireBehaviour();
+            RedisBehaviour = new RedisBehaviour();
+        }
+
         public HttpBehaviour HttpBehaviour { get; set; }
 
         public SqlBehaviour SqlBehaviour { get; set; }

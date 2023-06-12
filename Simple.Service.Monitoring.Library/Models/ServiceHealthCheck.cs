@@ -5,6 +5,12 @@ namespace Simple.Service.Monitoring.Library.Models
 {
     public class ServiceHealthCheck
     {
+        public ServiceHealthCheck()
+        {
+            HealthCheckConditions = new HealthCheckConditions();
+            AlertBehaviour = new List<AlertBehaviour>();
+        }
+
         public string Name { get; set; }
         public ServiceType ServiceType { get; set; }
         public string EndpointOrHost { get; set; }

@@ -1,14 +1,9 @@
-﻿using System;
-using CuttingEdge.Conditions;
+﻿using CuttingEdge.Conditions;
+using HealthChecks.MySql;
 using Microsoft.Extensions.DependencyInjection;
 using Simple.Service.Monitoring.Library.Models;
-using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using System.Data.Common;
-using HealthChecks.MySql;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
-using HealthChecks.SqlServer;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using RabbitMQ.Client;
+using System.Data.Common;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -34,9 +29,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             var sqlOptions = new MySqlHealthCheckOptions();
 
-            if (this.HealthCheck.HealthCheckConditions.SqlBehaviour != null)
+            if (!string.IsNullOrEmpty(this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query))
             {
-                sqlOptions.CommandText = HealthCheck.HealthCheckConditions.SqlBehaviour?.Query ?? this.DEFAULTSQLQUERY;
                 sqlOptions.ConnectionString = this.HealthCheck.ConnectionString;
                 sqlOptions.HealthCheckResultBuilder = GetHealth;
 

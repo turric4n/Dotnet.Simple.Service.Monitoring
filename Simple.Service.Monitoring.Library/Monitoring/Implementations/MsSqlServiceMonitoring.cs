@@ -1,4 +1,5 @@
 ﻿using CuttingEdge.Conditions;
+using HealthChecks.MySql;
 using HealthChecks.SqlServer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -31,17 +32,19 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            var sqlOptions = new SqlServerHealthCheckOptions()
-            {
-                CommandText = this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query,
-                ConnectionString = this.HealthCheck.ConnectionString,
-                HealthCheckResultBuilder = base.GetHealth
-            };
+            var sqlOptions = new SqlServerHealthCheckOptions();
 
-            var sqlBehaviourQuery = this.HealthCheck.HealthCheckConditions.SqlBehaviour?.Query;
-            if (sqlBehaviourQuery != null)
-                HealthChecksBuilder.AddSqlServer(sqlOptions, HealthCheck.Name,
-                    HealthStatus.Unhealthy, null, null);
+            if (!string.IsNullOrEmpty(this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query))
+            {
+                sqlOptions.ConnectionString = this.HealthCheck.ConnectionString;
+                sqlOptions.HealthCheckResultBuilder = GetHealth;
+
+                HealthChecksBuilder.AddSqlServer(sqlOptions, HealthCheck.Name);
+            }
+            else
+            {
+                HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, HealthCheck.Name);
+            }
         }
     }
 }
