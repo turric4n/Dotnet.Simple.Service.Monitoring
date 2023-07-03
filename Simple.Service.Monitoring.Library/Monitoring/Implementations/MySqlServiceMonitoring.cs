@@ -38,7 +38,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             }
             else
             {
-                HealthChecksBuilder.AddMySql(this.HealthCheck.ConnectionString);
+                HealthChecksBuilder.AddMySql(this.HealthCheck.ConnectionString, DEFAULTSQLQUERY, null, HealthCheck.Name);
             }
         }
     }

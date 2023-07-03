@@ -64,7 +64,11 @@ namespace Simple.Service.Monitoring.Extensions
                             throw new ArgumentOutOfRangeException();
                     }
 
-                    if (transport == null) return;
+                    if (transport == null)
+                    {
+                        _logger.LogError($"Error adding alert publisher transport settings {ab.TransportName}");
+                        return;
+                    }
 
                     _logger.LogInformation($"Adding new health check publisher {transport.Name} {transport.GetType().Name}");
                     _stackMonitoring.AddPublishing(transport, monitor);

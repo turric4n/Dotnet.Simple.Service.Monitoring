@@ -43,7 +43,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             }
             else
             {
-                HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, HealthCheck.Name);
+                HealthChecksBuilder.AddSqlServer(this.HealthCheck.ConnectionString, DEFAULTSQLQUERY, null, HealthCheck.Name);
             }
         }
     }
