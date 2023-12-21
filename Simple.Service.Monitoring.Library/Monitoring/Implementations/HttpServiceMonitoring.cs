@@ -5,6 +5,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System;
 using System.Net.Http;
+using HealthChecks.Uris;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -41,7 +42,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     var uri = new Uri(endpoint);
                     var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs);
                     options.UseTimeout(TimeSpan.FromMilliseconds(20000));
-                    options.AddUri(uri);
+                    options.AddUri(uri, uriOptions =>
+                    {
+                        uriOptions.AddCustomHeader("User-Agent", "HealthChecks");
+                    });
                     options.ExpectHttpCode(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
                     switch (HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
                     {
