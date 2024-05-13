@@ -44,9 +44,25 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             var lastchecktime = GetReportLastCheck(report.Status);
 
-            var subject = $"Alert Triggered : {_healthCheck.Name} ";
+            var currentStatus = "[Undefined]";
 
-            var body = $"Alert Triggered : {_healthCheck.Name} <br>" +
+            switch (report.Status)
+            {
+                case HealthStatus.Unhealthy:
+                    currentStatus = "[Unhealthy]";
+                    break;
+                case HealthStatus.Degraded:
+                    currentStatus = "[Degraded]";
+                    break;
+                case HealthStatus.Healthy:
+                    currentStatus = "[Healthy]";
+                    break;
+            }
+
+
+            var subject = $"{currentStatus} - Alert Triggered : {_healthCheck.Name} ";
+
+            var body = $"{currentStatus} - Alert Triggered : {_healthCheck.Name} <br>" +
                        $"Triggered On    : {DateTime.Now} <br>" +
                        $"Service Type    : {_healthCheck.ServiceType} <br>" +
                        $"Alert Endpoint  : {_healthCheck.EndpointOrHost} <br>" +

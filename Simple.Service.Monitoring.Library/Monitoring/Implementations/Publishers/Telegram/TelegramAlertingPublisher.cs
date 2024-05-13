@@ -14,6 +14,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 
+
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram
 {
     public class TelegramAlertingPublisher : PublisherBase
@@ -41,9 +42,22 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 .FirstOrDefault(x =>
                     x.Key == this._healthCheck.Name);
 
-            var subject = $"Alert Triggered : {_healthCheck.Name} ";
+            var currentStatus = "[Undefined]";
 
-            var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
+            switch (report.Status)
+            {
+                case HealthStatus.Unhealthy:
+                    currentStatus = "[Unhealthy]";
+                    break;
+                case HealthStatus.Degraded:
+                    currentStatus = "[Degraded]";
+                    break;
+                case HealthStatus.Healthy:
+                    currentStatus = "[Healthy]";
+                    break;
+            }
+
+            var body = $"{currentStatus} - Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
                        $"Triggered On    : {DateTime.Now} {Environment.NewLine}" +
                        $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
                        $"Alert Endpoint  : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
