@@ -44,7 +44,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             var currentStatus = "[Undefined]";
 
-            switch (report.Status)
+            switch (entry.Value.Status)
             {
                 case HealthStatus.Unhealthy:
                     currentStatus = "[Unhealthy]";
