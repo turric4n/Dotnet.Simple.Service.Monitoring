@@ -9,9 +9,9 @@
 	  <Copyright>Turrican Software</Copyright>
 	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.4.0</Version>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
+    <Version>1.0.4.2</Version>
+    <AssemblyVersion>1.0.4.2</AssemblyVersion>
+    <FileVersion>1.0.4.2</FileVersion>
 	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 	  <Company>Turrican Software</Company>
 	  <Authors>Turrican with help of my fellow friends</Authors>

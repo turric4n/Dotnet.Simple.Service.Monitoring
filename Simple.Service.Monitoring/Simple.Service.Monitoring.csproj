@@ -11,9 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="appsettings - Copy.Development.yml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="appsettings.Development.yml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
