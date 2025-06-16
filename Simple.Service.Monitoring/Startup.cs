@@ -24,8 +24,8 @@ namespace Simple.Service.Monitoring
         {
             services
                 .AddServiceMonitoring(Configuration)
-                .WithServiceMonitoringUi()
-                .UseSettings();
+                .WithApplicationSettings()
+                .WithServiceMonitoringUi();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

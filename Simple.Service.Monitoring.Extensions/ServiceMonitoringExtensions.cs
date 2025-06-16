@@ -8,7 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceMonitoringExtensions
     {
-        public static IServiceMonitoringBuilder AddServiceMonitoring(this IServiceCollection serviceCollection, 
+        public static IServiceMonitoringConfigurationService AddServiceMonitoring(this IServiceCollection serviceCollection, 
             IConfiguration configuration)
         {
             var monitoringSection = configuration.GetSection("Monitoring");
@@ -24,7 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var stackMonitoring = new StandardStackMonitoring(healthChecksBuilder);
 
-            var serviceMonitoringBuilder = new ServiceMonitoringBuilder(stackMonitoring, currentOptions);
+            var serviceMonitoringBuilder = new ServiceMonitoringConfigurationService(stackMonitoring, currentOptions);
 
             serviceCollection.AddSingleton<IStackMonitoring>(stackMonitoring);
 

@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -11,13 +8,13 @@ using System.Linq;
 
 namespace Simple.Service.Monitoring.Extensions
 {
-    public class ServiceMonitoringBuilder : IServiceMonitoringBuilder
+    public class ServiceMonitoringConfigurationService : IServiceMonitoringConfigurationService
     {
         private readonly IStackMonitoring _stackMonitoring;
-        private readonly MonitorOptions _options;
-        //private readonly ILogger<ServiceMonitoringBuilder> _logger;
+        private MonitorOptions _options;
+        //private readonly ILogger<ServiceMonitoringConfigurationService> _logger;
 
-        public ServiceMonitoringBuilder(
+        public ServiceMonitoringConfigurationService(
             IStackMonitoring stackMonitoring,
             MonitorOptions options)
         {
@@ -25,7 +22,7 @@ namespace Simple.Service.Monitoring.Extensions
             _options = options;
         }
 
-        public IServiceMonitoringBuilder Add(ServiceHealthCheck monitor)
+        public IServiceMonitoringConfigurationService WithAdditionalCheck(ServiceHealthCheck monitor)
         {
             //_logger.LogInformation($"Adding new health check monitor {monitor.Name} - {monitor.ServiceType}");
             _stackMonitoring.AddMonitoring(monitor);
@@ -33,7 +30,7 @@ namespace Simple.Service.Monitoring.Extensions
             return this;
         }
 
-        public IServiceMonitoringBuilder AddPublishing(ServiceHealthCheck monitor)
+        public IServiceMonitoringConfigurationService WithAdditionalPublishing(ServiceHealthCheck monitor)
         {
             if (monitor.Alert)
             {
@@ -80,7 +77,7 @@ namespace Simple.Service.Monitoring.Extensions
             return this;
         }
 
-        public IServiceMonitoringBuilder UseSettings()
+        public IServiceMonitoringConfigurationService WithApplicationSettings()
         {
             var validOptions = _options?.HealthChecks != null;
 
@@ -92,15 +89,24 @@ namespace Simple.Service.Monitoring.Extensions
                     ? _options.Settings?.UseGlobalServiceName
                     : monitor.Name;
 
-                this.Add(monitor);
+                _stackMonitoring.AddMonitoring(monitor);
 
-                this.AddPublishing(monitor);
+                this.WithAdditionalPublishing(monitor);
             }
 
             return this;
         }
 
-        public IServiceMonitoringBuilder AddPublisherObserver(IObserver<HealthReport> observer)
+
+        public IServiceMonitoringConfigurationService WithRuntimeSettings(MonitorOptions options)
+        {
+            this._options = options ?? throw new ArgumentNullException(nameof(options));
+            var validOptions = _options?.HealthChecks != null;
+            WithApplicationSettings();
+            return this;
+        }
+
+        public IServiceMonitoringConfigurationService WithAdditionalPublisherObserver(IObserver<HealthReport> observer)
         {
             _stackMonitoring.GetPublishers()
                 .ForEach(publisher =>

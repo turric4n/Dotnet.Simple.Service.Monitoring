@@ -27,16 +27,16 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
 
-        public static IServiceMonitoringBuilder WithServiceMonitoringUi(this IServiceMonitoringBuilder monitoringBuilder)
+        public static IServiceMonitoringConfigurationService WithServiceMonitoringUi(this IServiceMonitoringConfigurationService monitoringConfigurationService)
         {
-            if (monitoringBuilder == null)
+            if (monitoringConfigurationService == null)
             {
-                throw new ArgumentNullException(nameof(monitoringBuilder), "ServiceMonitoringBuilder cannot be null");
+                throw new ArgumentNullException(nameof(monitoringConfigurationService), "ServiceMonitoringConfigurationService cannot be null");
             }
 
-            monitoringBuilder.AddPublisherObserver(new GenericObserver());
+            monitoringConfigurationService.WithAdditionalPublisherObserver(new GenericObserver());
 
-            return monitoringBuilder;
+            return monitoringConfigurationService;
         }
 
         public static IEndpointRouteBuilder MapServiceMonitoringUi(this IEndpointRouteBuilder endpoints)
