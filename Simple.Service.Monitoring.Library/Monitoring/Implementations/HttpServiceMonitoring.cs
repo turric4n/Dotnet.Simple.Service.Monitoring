@@ -34,6 +34,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
+
             this.HealthChecksBuilder.AddUrlGroup((options) =>
             {
                 foreach (var endpoint in HealthCheck.EndpointOrHost.Split(','))

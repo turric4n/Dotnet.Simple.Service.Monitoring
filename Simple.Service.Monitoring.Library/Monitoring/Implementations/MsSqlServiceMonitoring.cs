@@ -1,8 +1,6 @@
 ﻿using CuttingEdge.Conditions;
-using HealthChecks.MySql;
 using HealthChecks.SqlServer;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System.Data.Common;
