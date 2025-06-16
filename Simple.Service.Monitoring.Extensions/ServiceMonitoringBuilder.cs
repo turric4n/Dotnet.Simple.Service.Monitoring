@@ -8,32 +8,26 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Options;
 using System;
 using System.Linq;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 
 namespace Simple.Service.Monitoring.Extensions
 {
     public class ServiceMonitoringBuilder : IServiceMonitoringBuilder
     {
         private readonly IStackMonitoring _stackMonitoring;
-        private readonly IHealthChecksBuilder _healthChecksBuilder;
-        private readonly IOptions<MonitorOptions> _options;
-        private readonly ILogger<ServiceMonitoringBuilder> _logger;
+        private readonly MonitorOptions _options;
+        //private readonly ILogger<ServiceMonitoringBuilder> _logger;
 
         public ServiceMonitoringBuilder(
             IStackMonitoring stackMonitoring,
-            IHealthChecksBuilder healthChecksBuilder,
-            IOptions<MonitorOptions> options, 
-            ILogger<ServiceMonitoringBuilder> logger)
+            MonitorOptions options)
         {
             _stackMonitoring = stackMonitoring;
-            _healthChecksBuilder = healthChecksBuilder;
             _options = options;
-            _logger = logger;
         }
 
         public IServiceMonitoringBuilder Add(ServiceHealthCheck monitor)
         {
-            _logger.LogInformation($"Adding new health check monitor {monitor.Name} - {monitor.ServiceType}");
+            //_logger.LogInformation($"Adding new health check monitor {monitor.Name} - {monitor.ServiceType}");
             _stackMonitoring.AddMonitoring(monitor);
 
             return this;
@@ -49,23 +43,23 @@ namespace Simple.Service.Monitoring.Extensions
                     switch (ab.TransportMethod)
                     {
                         case AlertTransportMethod.Email:
-                            transport = _options.Value.EmailTransportSettings
+                            transport = _options.EmailTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
                         case AlertTransportMethod.CustomApi:
-                            transport = _options.Value.CustomNotificationTransportSettings
+                            transport = _options.CustomNotificationTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
                         case AlertTransportMethod.Telegram:
-                            transport = _options.Value.TelegramTransportSettings
+                            transport = _options.TelegramTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
                         case AlertTransportMethod.Influx:
-                            transport = _options.Value.InfluxDbTransportSettings
+                            transport = _options.InfluxDbTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
                         case AlertTransportMethod.Slack:
-                            transport = _options.Value.SlackTransportSettings
+                            transport = _options.SlackTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
                         default:
@@ -74,11 +68,11 @@ namespace Simple.Service.Monitoring.Extensions
 
                     if (transport == null)
                     {
-                        _logger.LogError($"Error adding alert publisher transport settings {ab.TransportName}");
+                        //_logger.LogError($"Error adding alert publisher transport settings {ab.TransportName}");
                         return;
                     }
 
-                    _logger.LogInformation($"Adding new health check publisher {transport.Name} {transport.GetType().Name}");
+                    //_logger.LogInformation($"Adding new health check publisher {transport.Name} {transport.GetType().Name}");
                     _stackMonitoring.AddPublishing(transport, monitor);
                 });
             }
@@ -88,14 +82,14 @@ namespace Simple.Service.Monitoring.Extensions
 
         public IServiceMonitoringBuilder UseSettings()
         {
-            var validOptions = _options?.Value.HealthChecks != null;
+            var validOptions = _options?.HealthChecks != null;
 
             if (!validOptions) return this;
 
-            foreach (var monitor in _options.Value.HealthChecks)
+            foreach (var monitor in _options.HealthChecks)
             {
                 monitor.Name = string.IsNullOrEmpty(monitor.Name)
-                    ? _options.Value.Settings?.UseGlobalServiceName
+                    ? _options.Settings?.UseGlobalServiceName
                     : monitor.Name;
 
                 this.Add(monitor);

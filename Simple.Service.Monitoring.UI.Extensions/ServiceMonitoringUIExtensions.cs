@@ -27,7 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
         }
 
-        public static IServiceMonitoringBuilder AddServiceMonitoringUi(this IServiceMonitoringBuilder monitoringBuilder)
+        public static IServiceMonitoringBuilder WithServiceMonitoringUi(this IServiceMonitoringBuilder monitoringBuilder)
         {
             if (monitoringBuilder == null)
             {

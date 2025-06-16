@@ -23,7 +23,9 @@ namespace Simple.Service.Monitoring
         public void ConfigureServices(IServiceCollection services)
         {
             services
-                .AddServiceMonitoring(Configuration);
+                .AddServiceMonitoring(Configuration)
+                .WithServiceMonitoringUi()
+                .UseSettings();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -36,12 +38,10 @@ namespace Simple.Service.Monitoring
 
             app.UseRouting();
 
-            app.UseServiceMonitoring()
-                .UseSettings()
-                .AddServiceMonitoringUi();
-
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapServiceMonitoringUi();
+
                 endpoints.MapGet("/", async context =>
                 {
                     var stackMonitoring = context.RequestServices.GetRequiredService<IStackMonitoring>();

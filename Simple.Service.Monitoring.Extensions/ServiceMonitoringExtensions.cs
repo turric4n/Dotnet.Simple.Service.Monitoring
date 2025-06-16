@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations;
@@ -9,27 +8,27 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceMonitoringExtensions
     {
-        public static IServiceCollection AddServiceMonitoring(this IServiceCollection serviceCollection, 
+        public static IServiceMonitoringBuilder AddServiceMonitoring(this IServiceCollection serviceCollection, 
             IConfiguration configuration)
         {
-            var monitoringsection = configuration.GetSection("Monitoring");
+            var monitoringSection = configuration.GetSection("Monitoring");
 
-            serviceCollection.Configure<MonitorOptions>(monitoringsection);
+            serviceCollection
+                .AddOptions<MonitorOptions>()
+                .Bind(monitoringSection)
+                .ValidateOnStart();
 
-            serviceCollection.AddSingleton<IServiceMonitoringBuilder, ServiceMonitoringBuilder>();
-
-            serviceCollection.AddSingleton<IStackMonitoring, StandardStackMonitoring>();
+            var currentOptions = monitoringSection.Get<MonitorOptions>();
 
             var healthChecksBuilder = serviceCollection.AddHealthChecks();
 
-            serviceCollection.AddSingleton(provider => healthChecksBuilder);
+            var stackMonitoring = new StandardStackMonitoring(healthChecksBuilder);
 
-            return serviceCollection;
-        }
+            var serviceMonitoringBuilder = new ServiceMonitoringBuilder(stackMonitoring, currentOptions);
 
-        public static IServiceMonitoringBuilder UseServiceMonitoring(this IApplicationBuilder applicationBuilder)
-        {
-            return applicationBuilder.ApplicationServices.GetService<IServiceMonitoringBuilder>();
+            serviceCollection.AddSingleton<IStackMonitoring>(stackMonitoring);
+
+            return serviceMonitoringBuilder;
         }
     }
 }

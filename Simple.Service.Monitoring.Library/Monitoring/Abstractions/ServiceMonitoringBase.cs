@@ -13,6 +13,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         protected ServiceMonitoringBase(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck)
         {
+            
             HealthChecksBuilder = healthChecksBuilder;
             HealthCheck = healthCheck;
             MonitorId = new Guid();
