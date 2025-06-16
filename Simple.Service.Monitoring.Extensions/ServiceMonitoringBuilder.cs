@@ -1,24 +1,32 @@
-﻿using System; 
-using System.Linq;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Options;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using System;
+using System.Linq;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 
 namespace Simple.Service.Monitoring.Extensions
 {
     public class ServiceMonitoringBuilder : IServiceMonitoringBuilder
     {
         private readonly IStackMonitoring _stackMonitoring;
+        private readonly IHealthChecksBuilder _healthChecksBuilder;
         private readonly IOptions<MonitorOptions> _options;
         private readonly ILogger<ServiceMonitoringBuilder> _logger;
 
-        public ServiceMonitoringBuilder(IStackMonitoring stackMonitoring, IOptions<MonitorOptions> options, ILogger<ServiceMonitoringBuilder> logger)
+        public ServiceMonitoringBuilder(
+            IStackMonitoring stackMonitoring,
+            IHealthChecksBuilder healthChecksBuilder,
+            IOptions<MonitorOptions> options, 
+            ILogger<ServiceMonitoringBuilder> logger)
         {
             _stackMonitoring = stackMonitoring;
+            _healthChecksBuilder = healthChecksBuilder;
             _options = options;
             _logger = logger;
         }
@@ -108,11 +116,6 @@ namespace Simple.Service.Monitoring.Extensions
             });
 
             return this;
-        }
-
-        public IStackMonitoring Build()
-        {
-            return _stackMonitoring;
         }
     }
 }

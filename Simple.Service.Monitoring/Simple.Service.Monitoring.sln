@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Simple.Service.Monitoring.S
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Service.Monitoring.Config.Generator", "..\Simple.Service.Monitoring.Config.Generator\Simple.Service.Monitoring.Config.Generator.csproj", "{7E2A07A7-33E8-4258-BD53-2F3F598DF6EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Service.Monitoring.UI", "..\Simple.Service.Monitoring.UI\Simple.Service.Monitoring.UI.csproj", "{F16C0DD9-B7BF-4E89-8AB9-8F60E11B8C2E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{7E2A07A7-33E8-4258-BD53-2F3F598DF6EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E2A07A7-33E8-4258-BD53-2F3F598DF6EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E2A07A7-33E8-4258-BD53-2F3F598DF6EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F16C0DD9-B7BF-4E89-8AB9-8F60E11B8C2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F16C0DD9-B7BF-4E89-8AB9-8F60E11B8C2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F16C0DD9-B7BF-4E89-8AB9-8F60E11B8C2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F16C0DD9-B7BF-4E89-8AB9-8F60E11B8C2E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

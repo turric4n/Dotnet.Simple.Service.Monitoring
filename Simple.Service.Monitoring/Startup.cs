@@ -5,15 +5,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 
 namespace Simple.Service.Monitoring
 {
     public class Startup
     {
-        private IStackMonitoring _stackMonitoring;
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -25,9 +22,8 @@ namespace Simple.Service.Monitoring
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            _stackMonitoring = services.UseServiceMonitoring(Configuration)
-                .UseSettings()
-                .Build();
+            services
+                .AddServiceMonitoring(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,12 +36,18 @@ namespace Simple.Service.Monitoring
 
             app.UseRouting();
 
+            app.UseServiceMonitoring()
+                .UseSettings()
+                .AddServiceMonitoringUi();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    var monitors = _stackMonitoring.GetMonitors();
-                    var publishers = _stackMonitoring.GetPublishers();
+                    var stackMonitoring = context.RequestServices.GetRequiredService<IStackMonitoring>();
+
+                    var monitors = stackMonitoring.GetMonitors();
+                    var publishers = stackMonitoring.GetPublishers();
 
                     await context.Response.WriteAsync($"Monitors : {JsonConvert.SerializeObject(monitors)} \r\n Publishers : {JsonConvert.SerializeObject(publishers)}");
                 });

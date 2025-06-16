@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System;
 
 namespace Simple.Service.Monitoring.Extensions
 {
@@ -14,6 +11,5 @@ namespace Simple.Service.Monitoring.Extensions
         IServiceMonitoringBuilder UseSettings();
         IServiceMonitoringBuilder AddPublisherObserver(IObserver<HealthReport> observer);
         IServiceMonitoringBuilder AddPublishing(ServiceHealthCheck monitor);
-        IStackMonitoring Build();
     }
 }

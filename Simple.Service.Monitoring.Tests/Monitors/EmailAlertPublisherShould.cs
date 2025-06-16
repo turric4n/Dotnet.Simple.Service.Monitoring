@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using FluentAssertions; // Added for FluentAssertions
+using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
-using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Moq;
-using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -77,11 +72,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 new EmailAlertingPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
             // Assert
-            Assert.DoesNotThrow(() =>
-            {
-                // Act
-                emailAlertingPublisher.SetUp();
-            });
+            Action act = () => emailAlertingPublisher.SetUp();
+            act.Should().NotThrow();
         }
 
         [Test]
@@ -128,11 +120,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 new EmailAlertingPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
             // Assert
-            Assert.Throws<FormatException>(() =>
-            {
-                // Act
-                emailAlertingPublisher.SetUp();
-            });
+            Action act = () => emailAlertingPublisher.SetUp();
+            act.Should().Throw<FormatException>();
         }
     }
 }

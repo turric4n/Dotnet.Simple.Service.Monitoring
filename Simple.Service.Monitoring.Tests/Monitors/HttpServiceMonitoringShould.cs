@@ -4,6 +4,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using FluentAssertions; // Added for FluentAssertions
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -44,10 +45,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             var httpendpointmonitoring = new HttpServiceMonitoring(healthChecksBuilder, httpendpointhealthcheck);
             //Assert
-            Assert.DoesNotThrow(() =>
-            {
-                httpendpointmonitoring.SetUp();
-            });
+            Action act = () => httpendpointmonitoring.SetUp();
+            act.Should().NotThrow();
         }
 
         [Test]
@@ -73,10 +72,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             var httpendpointmonitoring = new HttpServiceMonitoring(healthChecksBuilder, httpendpointhealthcheck);
             //Assert
-            Assert.Throws<MalformedUriException>(() =>
-            {
-                httpendpointmonitoring.SetUp();
-            });
+            Action act = () => httpendpointmonitoring.SetUp();
+            act.Should().Throw<MalformedUriException>();
         }
 
         [Test]
@@ -102,10 +99,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             var httpendpointmonitoring = new HttpServiceMonitoring(healthChecksBuilder, httpendpointhealthcheck);
             //Assert
-            Assert.DoesNotThrow(() =>
-            {
-                httpendpointmonitoring.SetUp();
-            });
+            Action act = () => httpendpointmonitoring.SetUp();
+            act.Should().NotThrow();
         }
         [Test]
         public void Given_InValid_Multiple_Http_Endpoint_Monitoring_Settings()
@@ -130,10 +125,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             var httpendpointmonitoring = new HttpServiceMonitoring(healthChecksBuilder, httpendpointhealthcheck);
             //Assert
-            Assert.Throws<MalformedUriException>(() =>
-            {
-                httpendpointmonitoring.SetUp();
-            });
+            Action act = () => httpendpointmonitoring.SetUp();
+            act.Should().Throw<MalformedUriException>();
         }
     }
 }

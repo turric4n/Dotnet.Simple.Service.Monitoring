@@ -20,23 +20,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="7.0.0-rc2.6" />
-    <PackageReference Include="AspNetCore.HealthChecks.Hangfire" Version="7.0.0-rc2.5" />
-    <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="7.0.0-rc2.8" />
+    <PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Hangfire" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.MySql.TurricansFork" Version="7.0.1-tns" />
-    <PackageReference Include="AspNetCore.HealthChecks.Network" Version="7.0.0-rc2.6" />
-    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="7.0.0-rc2.7" />
-    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="7.0.0-rc2.6" />
-    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="7.0.0-rc2.6" />
-    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="7.0.0-rc2.11" />
-    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="7.0.0-rc2.6" />
+    <PackageReference Include="AspNetCore.HealthChecks.Network" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.Uris" Version="9.0.0" />
     <PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
     <PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-    <PackageReference Include="Telegram.Bot" Version="19.0.0" />
-    <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.6" />
+    <PackageReference Include="Telegram.Bot" Version="22.5.1" />
+    <PackageReference Include="TimeZoneConverter" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -69,7 +69,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 body += $"Alert Tags    : {extraData.Key} - {extraData.Value} {Environment.NewLine}";
             }
 
-            await telegramBot.SendTextMessageAsync(_telegramTransportSettings.ChatId, body);
+            await telegramBot.SendMessage(_telegramTransportSettings.ChatId, body, cancellationToken: cancellationToken);
         }
 
     protected internal override void Validate()

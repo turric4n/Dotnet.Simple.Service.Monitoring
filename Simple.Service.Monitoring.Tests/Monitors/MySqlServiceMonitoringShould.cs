@@ -5,6 +5,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library;
+using FluentAssertions; // Added for FluentAssertions
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -40,10 +41,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             var mysqlMonitoring = new MySqlServiceMonitoring(healthChecksBuilder, mysqlCheck);
             //Assert
-            Assert.DoesNotThrow(() =>
-            {
-                mysqlMonitoring.SetUp();
-            });
+            Action act = () => mysqlMonitoring.SetUp();
+            act.Should().NotThrow();
         }
 
         [Test]
@@ -73,10 +72,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             mysqlMonitoring.SetUp();
 
             //Assert
-            Assert.DoesNotThrow(() =>
-            {
-                mysqlMonitoring.SetUp();
-            });
+            Action act = () => mysqlMonitoring.SetUp();
+            act.Should().NotThrow();
         }
     }
 }

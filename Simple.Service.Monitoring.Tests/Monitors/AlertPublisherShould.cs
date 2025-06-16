@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Simple.Service.Monitoring.Library.Models;
-using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
+﻿using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using NUnit.Framework;
+using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
-using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -82,9 +81,9 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             // Act
             var hasToAlert = alertPublisher.TimeBetweenIsOkToAlert(last, delta, current);
             //Assert
-            Assert.IsTrue(hasToAlert);
+            hasToAlert.Should().BeTrue();
         }
-
+                                                
         [Test]
         [TestCase("22:05:00", "00:05:00", "22:04:00")]
         [TestCase("05:00", "05:00", "01:00")]
@@ -99,7 +98,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             // Act
             var hasToAlert = alertPublisher.TimeBetweenIsOkToAlert(last, delta, current);
             //Assert
-            Assert.IsFalse(hasToAlert);
+            hasToAlert.Should().BeFalse();
         }
 
         [Test]
@@ -111,7 +110,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             // Act
             var hasToAlert = alertPublisher.TimeBetweenScheduler(from, to, current);
             //Assert
-            Assert.IsTrue(hasToAlert);
+            hasToAlert.Should().BeTrue();
         }
 
         [Test]
@@ -123,11 +122,9 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
 
-            //Act
-            Assert.DoesNotThrowAsync(() =>
-            {
-                return alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
-            });
+            //Act & Assert
+            Func<Task> act = async () => await alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
+            act.Should().NotThrowAsync();
         }
 
         [Test]
@@ -167,7 +164,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var alertPublisher2 =
                 new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-
             var dic = new Dictionary<string, HealthReportEntry>();
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
@@ -187,27 +183,27 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             dic.Clear();
 
@@ -215,7 +211,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsFalse(ok);
+            ok.Should().BeFalse();
         }
 
         [Test]
@@ -255,7 +251,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var alertPublisher2 =
                 new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-
             var dic = new Dictionary<string, HealthReportEntry>();
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
@@ -275,7 +270,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             Thread.Sleep(2000);
 
@@ -285,7 +280,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
         }
 
         [Test]
@@ -309,13 +304,13 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             //Act
             alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
         }
 
         [Test]
@@ -355,7 +350,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var alertPublisher2 =
                 new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-
             var dic = new Dictionary<string, HealthReportEntry>();
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
@@ -375,19 +369,19 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 1);
+            httpendpointhealthcheck.AlertBehaviour.First().FailedCount.Should().Be(1);
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 2);
+            httpendpointhealthcheck.AlertBehaviour.First().FailedCount.Should().Be(2);
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 3);
+            httpendpointhealthcheck.AlertBehaviour.First().FailedCount.Should().Be(3);
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 4);
+            httpendpointhealthcheck.AlertBehaviour.First().FailedCount.Should().Be(4);
 
             dic.Clear();
 
@@ -395,7 +389,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.AreEqual(httpendpointhealthcheck.AlertBehaviour.First().FailedCount, 0);
+            httpendpointhealthcheck.AlertBehaviour.First().FailedCount.Should().Be(0);
         }
 
         [Test]
@@ -435,7 +429,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var alertPublisher2 =
                 new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-
             var dic = new Dictionary<string, HealthReportEntry>();
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
@@ -455,23 +448,23 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            Assert.IsFalse(ok);
+            ok.Should().BeFalse();
         }
 
         [Test]
@@ -495,7 +488,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
 
             Thread.Sleep(TimeSpan.FromSeconds(5));
 
@@ -503,7 +496,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsFalse(ok);
+            ok.Should().BeFalse();
         }
 
         [Test]
@@ -544,7 +537,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
            var alertPublisher2 =
                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
 
-
             var dic = new Dictionary<string, HealthReportEntry>();
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
@@ -564,7 +556,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
             //Assert
-            Assert.IsTrue(ok);
+            ok.Should().BeTrue();
         }
     }
 }

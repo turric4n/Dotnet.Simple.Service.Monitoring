@@ -1,11 +1,10 @@
 ﻿using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using System;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
-using RabbitMQ.Client;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
+using System;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -29,13 +28,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            var connectionFactory = new RabbitMQ.Client.ConnectionFactory();
-            connectionFactory.Uri = new Uri(HealthCheck.EndpointOrHost);
-
-            HealthChecksBuilder.AddRabbitMQ(provider =>
+            var connectionFactory = new RabbitMQ.Client.ConnectionFactory
             {
-                return connectionFactory;
-            }, HealthCheck.Name, HealthStatus.Unhealthy);
+                Uri = new Uri(HealthCheck.EndpointOrHost)
+            };
+
+            HealthChecksBuilder.AddRabbitMQ(provider => connectionFactory.CreateConnectionAsync(), HealthCheck.Name, HealthStatus.Unhealthy);
         }
     }
 }

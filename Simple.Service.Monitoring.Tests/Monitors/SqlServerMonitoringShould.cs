@@ -5,6 +5,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using System;
 using System.Collections.Generic;
 using Simple.Service.Monitoring.Library;
+using FluentAssertions; // Added for FluentAssertions
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -50,10 +51,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             var sqlMonitoring = new MsSqlServiceMonitoring(healthChecksBuilder, sqlHealthCheck);
             //Assert
-            Assert.DoesNotThrow(() =>
-            {
-                sqlMonitoring.SetUp();
-            });
+            Action act = () => sqlMonitoring.SetUp();
+            act.Should().NotThrow();
         }
     }
 }

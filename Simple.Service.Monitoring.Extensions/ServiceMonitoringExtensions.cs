@@ -1,36 +1,35 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Simple.Service.Monitoring.Library.Options;
 
-namespace Simple.Service.Monitoring.Extensions
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceMonitoringExtensions
     {
-        public static IServiceMonitoringBuilder UseServiceMonitoring(this IServiceCollection serviceCollection, 
+        public static IServiceCollection AddServiceMonitoring(this IServiceCollection serviceCollection, 
             IConfiguration configuration)
         {
-
-            //Refactor!!!!!!
-
             var monitoringsection = configuration.GetSection("Monitoring");
 
             serviceCollection.Configure<MonitorOptions>(monitoringsection);
 
-            serviceCollection.AddSingleton<IStackMonitoring, StandardStackMonitoring>();
-
             serviceCollection.AddSingleton<IServiceMonitoringBuilder, ServiceMonitoringBuilder>();
+
+            serviceCollection.AddSingleton<IStackMonitoring, StandardStackMonitoring>();
 
             var healthChecksBuilder = serviceCollection.AddHealthChecks();
 
             serviceCollection.AddSingleton(provider => healthChecksBuilder);
 
-            var sp = serviceCollection.BuildServiceProvider();
+            return serviceCollection;
+        }
 
-            var builder = sp.GetRequiredService<IServiceMonitoringBuilder>();
-
-            return builder;
+        public static IServiceMonitoringBuilder UseServiceMonitoring(this IApplicationBuilder applicationBuilder)
+        {
+            return applicationBuilder.ApplicationServices.GetService<IServiceMonitoringBuilder>();
         }
     }
 }
