@@ -1,40 +1,76 @@
 ﻿@page "/monitoring"
+@using Microsoft.Extensions.Diagnostics.HealthChecks
+@using Simple.Service.Monitoring.UI.Services
 @model Simple.Service.Monitoring.UI.Models.IndexModel
 @{
     ViewData["Title"] = "Service Monitoring";
+    var overallStatus = Model.GetOverallStatus();
 }
 
 <h1>Service Monitoring Dashboard</h1>
 
-@foreach (var report in Model.HealthReports)
-{
-    <div class="card mb-3">
-        <div class="card-header">
-            <h5>Status: @report.Status</h5>
-            <small>Duration: @report.TotalDuration.TotalMilliseconds ms</small>
-        </div>
-        <div class="card-body">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Service</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Duration</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach (var entry in report.Entries)
-                {
-                    <tr>
-                        <td>@entry.Key</td>
-                        <td>@entry.Value.Status</td>
-                        <td>@entry.Value.Description</td>
-                        <td>@entry.Value.Duration.TotalMilliseconds ms</td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-@GetStatusColor(overallStatus)">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">System Health</h4>
+                    <span class="badge bg-@GetStatusColor(overallStatus) text-white">@overallStatus</span>
+                </div>
+                <small>Last Updated: @DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC")</small>
+            </div>
+            <div class="card-body">
+                <h5>Health Checks</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Description</th>
+                                <th>Duration</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var check in Model.HealthChecks)
+                            {
+                                <tr class="@GetRowClass(check.Status)">
+                                    <td><strong>@check.Name</strong></td>
+                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
+                                    <td>@check.Description</td>
+                                    <td>@check.Duration.TotalMilliseconds ms</td>
+                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+
+@functions {
+    private string GetStatusColor(HealthStatus status)
+    {
+        return status switch
+        {
+            HealthStatus.Healthy => "success",
+            HealthStatus.Degraded => "warning",
+            HealthStatus.Unhealthy => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetRowClass(HealthStatus status)
+    {
+        return status switch
+        {
+            HealthStatus.Healthy => "table-success",
+            HealthStatus.Degraded => "table-warning",
+            HealthStatus.Unhealthy => "table-danger",
+            _ => ""
+        };
+    }
 }

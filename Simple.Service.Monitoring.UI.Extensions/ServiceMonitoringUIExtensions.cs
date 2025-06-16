@@ -1,18 +1,13 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.FileProviders;
 using Simple.Service.Monitoring.Extensions;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers;
-using Simple.Service.Monitoring.UI;
 using Simple.Service.Monitoring.UI.Models;
 using Simple.Service.Monitoring.UI.Services;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
-using System.Reflection;
 using System.Text.Json;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -26,19 +21,17 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(monitoringConfigurationService), "ServiceMonitoringConfigurationService cannot be null");
             }
 
+            var monitoringDataService = new MonitoringDataService();
+
             // Register data service for sharing health reports
-            services.AddSingleton<MonitoringDataService>();
+            services.AddSingleton(monitoringDataService);
 
             // Register RazorPages from the UI project
             services.AddRazorPages()
                 .AddApplicationPart(typeof(IndexModel).Assembly);
 
-            // Get or register the monitoring data service
-            var serviceProvider = services.BuildServiceProvider();
-            var dataService = serviceProvider.GetRequiredService<MonitoringDataService>();
-
             // Register the observer that will capture health reports
-            monitoringConfigurationService.WithAdditionalPublisherObserver(new ReportObserver(dataService, true));
+            monitoringConfigurationService.WithAdditionalPublisherObserver(new ReportObserver(monitoringDataService, true));
 
             return monitoringConfigurationService;
         }
@@ -65,43 +58,44 @@ namespace Microsoft.Extensions.DependencyInjection
             endpoints.MapGet("/monitoring-api", async context =>
             {
                 var dataService = context.RequestServices.GetRequiredService<MonitoringDataService>();
-                var reports = dataService.GetHealthReports();
+                var healthChecks = dataService.GetAllHealthChecks();
+                var overallStatus = dataService.GetOverallStatus();
 
-                var reportsList = new List<ExpandoObject>();
+                var response = new ExpandoObject();
+                response.TryAdd("Status", overallStatus.ToString());
+                response.TryAdd("LastUpdated", DateTime.UtcNow.ToString("o"));
 
-                foreach (var healthReport in reports)
+                var checks = new List<ExpandoObject>();
+                foreach (var check in healthChecks)
                 {
-                    var report = new ExpandoObject();
+                    var checkData = new ExpandoObject();
+                    checkData.TryAdd("Name", check.Name);
+                    checkData.TryAdd("Status", check.Status.ToString());
+                    checkData.TryAdd("Description", check.Description);
+                    checkData.TryAdd("Duration", check.Duration.TotalMilliseconds);
+                    checkData.TryAdd("LastUpdated", check.LastUpdated.ToString("o"));
 
-                    report.TryAdd("Status", healthReport.Status.ToString());
-                    report.TryAdd("TotalDuration", healthReport.TotalDuration.ToString());
-
-                    var entries = new List<ExpandoObject>();
-
-                    foreach (var entry in healthReport.Entries)
+                    // Add any additional data if available in the entry
+                    if (check.Entry.Data?.Count > 0)
                     {
-                        var entryReport = new ExpandoObject();
-                        entryReport.TryAdd("Name", entry.Key);
-                        entryReport.TryAdd("Status", entry.Value.Status.ToString());
-                        entryReport.TryAdd("Description", entry.Value.Description);
-                        entryReport.TryAdd("Duration", entry.Value.Duration.ToString());
+                        var data = new ExpandoObject();
+                        foreach (var dataItem in check.Entry.Data)
                         {
-                            var data = new ExpandoObject();
-                            foreach (var dataItem in entry.Value.Data)
-                            {
-                                ((IDictionary<string, object>)data).TryAdd(dataItem.Key, dataItem.Value);
-                            }
-                            entryReport.TryAdd("Data", data);
+                            ((IDictionary<string, object>)data).TryAdd(dataItem.Key, dataItem.Value);
                         }
-                        entries.Add(entryReport);
+                        checkData.TryAdd("Data", data);
                     }
 
-                    report.TryAdd("Entries", entries);
-                    reportsList.Add(report);
+                    checks.Add(checkData);
                 }
 
+                response.TryAdd("HealthChecks", checks);
+
                 context.Response.Headers.Add("Content-Type", "application/json");
-                await context.Response.WriteAsync(JsonSerializer.Serialize(reportsList));
+                await context.Response.WriteAsync(JsonSerializer.Serialize(response, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                }));
             });
 
             // Map Razor Pages

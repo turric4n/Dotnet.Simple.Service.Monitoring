@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.UI.Services;
+using System.Collections.Generic;
+using static Simple.Service.Monitoring.UI.Services.MonitoringDataService;
 
 namespace Simple.Service.Monitoring.UI.Models
 {
@@ -14,11 +15,13 @@ namespace Simple.Service.Monitoring.UI.Models
             _monitoringService = monitoringService;
         }
 
-        public IEnumerable<HealthReport> HealthReports { get; private set; }
+        public IEnumerable<HealthCheckData> HealthChecks { get; private set; }
+
+        public HealthStatus GetOverallStatus() => _monitoringService.GetOverallStatus();
 
         public void OnGet()
         {
-            HealthReports = _monitoringService.GetHealthReports();
+            HealthChecks = _monitoringService.GetAllHealthChecks();
         }
     }
 }
