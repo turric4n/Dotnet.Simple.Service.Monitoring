@@ -5,7 +5,6 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System;
 using System.Net.Http;
-using HealthChecks.Uris;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
