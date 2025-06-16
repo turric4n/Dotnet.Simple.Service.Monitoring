@@ -106,12 +106,12 @@ namespace Simple.Service.Monitoring.Extensions
             return this;
         }
 
-        public IServiceMonitoringConfigurationService WithAdditionalPublisherObserver(IObserver<HealthReport> observer)
+        public IServiceMonitoringConfigurationService WithAdditionalPublisherObserver(IReportObserver observer, bool useAlertingRules = true)
         {
             _stackMonitoring.GetPublishers()
                 .ForEach(publisher =>
             {
-                var observable = (IObservable<HealthReport>)publisher;
+                var observable = publisher;
                 observable.Subscribe(observer);
             });
 

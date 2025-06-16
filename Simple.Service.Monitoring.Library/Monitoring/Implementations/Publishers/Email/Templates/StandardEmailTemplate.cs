@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Templates
+﻿namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Templates
 {
     public static class StandardEmailTemplate
     {

@@ -9,5 +9,6 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\Simple.Service.Monitoring.Extensions\Simple.Service.Monitoring.Extensions.csproj" />
+    <ProjectReference Include="..\Simple.Service.Monitoring.UI\Simple.Service.Monitoring.UI.csproj" />
   </ItemGroup>
 </Project>

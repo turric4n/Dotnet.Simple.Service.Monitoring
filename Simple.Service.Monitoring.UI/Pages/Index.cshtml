@@ -1,0 +1,40 @@
+﻿@page "/monitoring"
+@model Simple.Service.Monitoring.UI.Models.IndexModel
+@{
+    ViewData["Title"] = "Service Monitoring";
+}
+
+<h1>Service Monitoring Dashboard</h1>
+
+@foreach (var report in Model.HealthReports)
+{
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5>Status: @report.Status</h5>
+            <small>Duration: @report.TotalDuration.TotalMilliseconds ms</small>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Description</th>
+                    <th>Duration</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var entry in report.Entries)
+                {
+                    <tr>
+                        <td>@entry.Key</td>
+                        <td>@entry.Value.Status</td>
+                        <td>@entry.Value.Description</td>
+                        <td>@entry.Value.Duration.TotalMilliseconds ms</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

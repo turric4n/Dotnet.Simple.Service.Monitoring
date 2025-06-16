@@ -19,8 +19,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
     public class EmailAlertingPublisher : PublisherBase
     {
         private readonly IMailSenderClient _mailSenderClient;
-        public SmtpMailMessageFactory _mailMessageFactory { get; }
-        private EmailTransportSettings _emailTransportSettings;
+        public SmtpMailMessageFactory MailMessageFactory { get; }
+        private readonly EmailTransportSettings _emailTransportSettings;
 
         public EmailAlertingPublisher(IHealthChecksBuilder healthChecksBuilder,
             ServiceHealthCheck healthCheck, 
@@ -29,7 +29,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         {
             _emailTransportSettings = (EmailTransportSettings)alertTransportSettings;
             _mailSenderClient = new SmtpMailSender(_emailTransportSettings);
-            _mailMessageFactory = new SmtpMailMessageFactory(_emailTransportSettings);
+            MailMessageFactory = new SmtpMailMessageFactory(_emailTransportSettings);
         }
 
         public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
@@ -42,7 +42,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 .Entries
                 .FirstOrDefault(x => x.Key == this._healthCheck.Name);
 
-            var lastchecktime = GetReportLastCheck(report.Status);
+            GetReportLastCheck(report.Status);
 
             var currentStatus = "[Undefined]";
 
@@ -77,7 +77,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             body = StandardEmailTemplate.TemplateBody.Replace("#replace", body);
 
             //Do work
-            var message = _mailMessageFactory.Create(_emailTransportSettings.To, subject, body);
+            var message = MailMessageFactory.Create(_emailTransportSettings.To, subject, body);
 
             _mailSenderClient.SendMessage(message);
 

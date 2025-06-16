@@ -28,10 +28,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             if (alert)
             {
-                lock (_reportDictionary)
-                {
-                    _reportDictionary.AddOrUpdate(DateTime.Now, report, (time, healthReport) => healthReport = report);
-                }
+                _reportDictionary.AddOrUpdate(DateTime.Now, report, (time, healthReport) => report);
             }
 
             return Task.CompletedTask;

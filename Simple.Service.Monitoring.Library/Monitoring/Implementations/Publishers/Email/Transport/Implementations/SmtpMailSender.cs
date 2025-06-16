@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
-using System.Threading.Tasks;
-using Simple.Service.Monitoring.Library.Models.TransportSettings;
+﻿using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Transport.Abstractions;
+using System.Net.Mail;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Transport.Implementations
 {

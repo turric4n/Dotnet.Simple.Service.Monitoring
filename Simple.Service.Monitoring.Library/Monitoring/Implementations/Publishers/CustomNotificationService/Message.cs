@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CustomNotificationService
+﻿namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CustomNotificationService
 {
     public class Message
     {

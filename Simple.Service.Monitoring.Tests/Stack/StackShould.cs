@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Moq;
 using NUnit.Framework;
+using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 
 namespace Simple.Service.Monitoring.Tests.Stack
 {
@@ -32,7 +33,7 @@ namespace Simple.Service.Monitoring.Tests.Stack
         [Test]
         public void Given_Valid_Configuration_File_Stack_Should_Be_Initialized()
         {
-            var observermock = new Mock<IObserver<HealthReport>>();
+            var observermock = new Mock<IReportObserver>();
             observermock.Setup(m => m.OnNext(It.IsAny<HealthReport>()))
                 .Callback<HealthReport>((report) =>
                 {

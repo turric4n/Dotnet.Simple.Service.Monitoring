@@ -3,6 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -11,12 +12,13 @@ using TimeZoneConverter;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
-    public abstract class PublisherBase : IHealthCheckPublisher, IObservable<HealthReport>
+    public abstract class PublisherBase : IHealthCheckPublisher
     {
         protected readonly IHealthChecksBuilder _healthChecksBuilder;
         protected readonly ServiceHealthCheck _healthCheck;
         protected AlertTransportSettings _alertTransportSettings;
-        protected List<IObserver<HealthReport>> _observers;
+        
+        protected readonly ConcurrentBag<IReportObserver> _observers = new ConcurrentBag<IReportObserver>();
 
         protected PublisherBase(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
@@ -25,15 +27,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             _healthChecksBuilder = healthChecksBuilder;
             _healthCheck = healthCheck;
             _alertTransportSettings = alertTransportSettings;
-            _observers = new List<IObserver<HealthReport>>();
         }
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<HealthReport>> _observers;
-            private IObserver<HealthReport> _observer;
+            private List<IReportObserver> _observers;
+            private IReportObserver _observer;
 
-            public Unsubscriber(List<IObserver<HealthReport>> observers, IObserver<HealthReport> observer)
+            public Unsubscriber(List<IReportObserver> observers,
+                IReportObserver observer)
             {
                 this._observers = observers;
                 this._observer = observer;
@@ -53,8 +55,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         public bool TimeBetweenIsOkToAlert(TimeSpan lastAlertTime, TimeSpan timeToAlert, TimeSpan currentTime)
         {
-            var timeok = (lastAlertTime.Ticks + timeToAlert.Ticks) <= currentTime.Ticks;
-            return timeok;
+            return lastAlertTime + timeToAlert <= currentTime;
         }
 
         public bool TimeBetweenScheduler(TimeSpan timeFrom, TimeSpan timeTo, TimeSpan currentTime)
@@ -65,9 +66,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         public DateTime GetReportLastCheck(HealthStatus status)
         {
-            var behaviour = _healthCheck
-                .AlertBehaviour
-                .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
+            var behaviour = GetAlertBehaviour();
 
             if (behaviour == null) return DateTime.MinValue;
             
@@ -84,9 +83,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         public bool ProcessAlertRules(HealthStatus status)
         {
-            var behaviour = _healthCheck
-                .AlertBehaviour
-                .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
+            var behaviour = GetAlertBehaviour();
 
             if (behaviour == null) return false;
 
@@ -96,31 +93,31 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                     ? HealthStatus.Healthy : behaviour.LastStatus;
 
             var failed = HealthFailed(status);
-            var lastfailed = HealthFailed(behaviour.LastStatus);
+            var lastFailed = HealthFailed(behaviour.LastStatus);
 
             behaviour.FailedCount = failed ? 
                 behaviour.FailedCount += 1 : 0;
 
             //Alert every
-            var timeisoktoalert = TimeBetweenIsOkToAlert(behaviour.LastPublished.TimeOfDay, 
+            var timeBetweenIsOkToAlert = TimeBetweenIsOkToAlert(behaviour.LastPublished.TimeOfDay, 
                 behaviour.AlertEvery,
                 DateTime.Now.TimeOfDay);
             
             //Scheduled 
-            var timeisokScheduled =  TimeBetweenScheduler(behaviour.StartAlertingOn, behaviour.StopAlertingOn,
+            var timeBetweenScheduler =  TimeBetweenScheduler(behaviour.StartAlertingOn, behaviour.StopAlertingOn,
                 DateTime.Now.TimeOfDay);
 
-            var isOkToAlert = timeisoktoalert && timeisokScheduled;
+            var isOkToAlert = timeBetweenIsOkToAlert && timeBetweenScheduler;
 
             // Unhealthy and has to alert
             var alert = (isOkToAlert) && (behaviour.FailedCount >= behaviour.AlertByFailCount) &&
                         (
                             // When we want to alert always
-                            (failed && lastfailed && !behaviour.AlertOnce) ||
+                            (failed && lastFailed && !behaviour.AlertOnce) ||
                             // When failed retries
-                            (failed && lastfailed && !behaviour.LatestErrorPublished) ||
+                            (failed && lastFailed && !behaviour.LatestErrorPublished) ||
                             // Always when is time to alert and latest
-                            (failed && !lastfailed)
+                            (failed && !lastFailed)
                         );
 
             if (alert)
@@ -129,7 +126,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             }
 
             // On Recovered if and latest error has been published
-            if (!failed && lastfailed && behaviour.AlertOnServiceRecovered && behaviour.LatestErrorPublished)
+            if (!failed && lastFailed && behaviour.AlertOnServiceRecovered && behaviour.LatestErrorPublished)
             {
                 alert = true;
                 behaviour.LatestErrorPublished = false;
@@ -143,38 +140,33 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         protected bool HasToPublishAlert(HealthReport report)
         {
-            lock (this)
+            var entry = report
+                .Entries
+                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+
+            var behaviour = GetAlertBehaviour();
+
+            if (behaviour == null) return false;
+
+            if (entry.Key != this._healthCheck.Name) return false;
+
+            var alert = this.ProcessAlertRules(entry.Value.Status);
+
+            behaviour.LastStatus = entry.Value.Status;
+
+            behaviour.LastCheck = DateTime.Now;
+
+            behaviour.LastPublished = alert ? DateTime.Now : behaviour.LastPublished;
+
+            Parallel.ForEach(_observers, observer =>
             {
-                var entry = report
-                    .Entries
-                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
-
-                var behaviour = _healthCheck
-                    .AlertBehaviour
-                    .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
-
-                if (behaviour == null) return false;
-
-                if (entry.Key != this._healthCheck.Name) return false;
-
-                var alert = this.ProcessAlertRules(entry.Value.Status);
-
-                behaviour.LastStatus = entry.Value.Status;
-
-                behaviour.LastCheck = DateTime.Now;
-
-                behaviour.LastPublished = alert ? DateTime.Now : behaviour.LastPublished;
-
-                if (alert)
+                if (alert || observer.ExecuteAlways)
                 {
-                    lock (_observers)
-                    {
-                        _observers.ForEach(x => x.OnNext(report));
-                    }
+                    observer.OnNext(report);
                 }
+            });
 
-                return alert;
-            }
+            return alert;
         }
 
         public abstract Task PublishAsync(HealthReport report, CancellationToken cancellationToken);
@@ -190,14 +182,21 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             SetPublishing();
         }
 
-        public IDisposable Subscribe(IObserver<HealthReport> observer)
+        public IDisposable Subscribe(IReportObserver observer)
         {
             lock (_observers)
             {
                 if (!_observers.Contains(observer))
                     _observers.Add(observer);
-                return new Unsubscriber(_observers, observer);
+                return new Unsubscriber(_observers.ToList(), observer);
             }
+        }
+
+        private AlertBehaviour GetAlertBehaviour()
+        {
+            return _healthCheck
+                .AlertBehaviour
+                .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
         }
     }
 }

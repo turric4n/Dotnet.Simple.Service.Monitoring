@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -168,7 +169,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
                 {
@@ -255,7 +256,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
                 {
@@ -292,7 +293,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() => { ok = !ok; });
 
@@ -354,7 +355,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
                 {
@@ -433,7 +434,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
                 {
@@ -476,7 +477,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheck", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() => { ok = !ok; });
 
@@ -541,7 +542,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Healthy, "", TimeSpan.Zero, null, null));
 
-            var healthobserver = new Mock<IObserver<HealthReport>>();
+            var healthobserver = new Mock<IReportObserver>();
             healthobserver.Setup(
                 observer => observer.OnNext(It.IsAny<HealthReport>())).Callback(() =>
             {
