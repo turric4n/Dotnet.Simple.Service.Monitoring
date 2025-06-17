@@ -67,7 +67,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
                     collector.Write("health_check", fields, tags);
                 }
-            });
+            }, cancellationToken);
 
             return Task.CompletedTask;
         }
