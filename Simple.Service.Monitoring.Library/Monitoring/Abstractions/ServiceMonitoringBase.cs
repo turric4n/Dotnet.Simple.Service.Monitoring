@@ -16,7 +16,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             
             HealthChecksBuilder = healthChecksBuilder;
             HealthCheck = healthCheck;
-            MonitorId = new Guid();
+            MonitorId = Guid.NewGuid();
             Name = healthCheck.Name;
         }
 
