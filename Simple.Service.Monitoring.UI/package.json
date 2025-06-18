@@ -1,0 +1,23 @@
+{
+  "name": "simple.service.monitoring.ui",
+  "version": "1.0.0",
+  "description": "Frontend for Service Monitoring Dashboard",
+  "private": true,
+  "scripts": {
+    "build": "webpack --mode=production",
+    "dev": "webpack --mode=development --watch",
+    "watch": "webpack --mode=development --watch"
+  },
+  "dependencies": {
+    "@microsoft/signalr": "^8.0.0"
+  },
+  "devDependencies": {
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "eslint": "^9.29.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.2.2",
+    "webpack": "^5.99.9",
+    "webpack-cli": "^6.0.1"
+  }
+}

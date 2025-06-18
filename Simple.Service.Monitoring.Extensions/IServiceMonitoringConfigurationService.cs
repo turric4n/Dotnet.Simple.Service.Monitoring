@@ -13,5 +13,6 @@ namespace Simple.Service.Monitoring.Extensions
         IServiceMonitoringConfigurationService WithRuntimeSettings(MonitorOptions options);
         IServiceMonitoringConfigurationService WithAdditionalPublisherObserver(IReportObserver observer, bool useAlertingRules = true);
         IServiceMonitoringConfigurationService WithAdditionalPublishing(ServiceHealthCheck monitor);
+        IServiceMonitoringConfigurationService WithAdditionalPublisher(PublisherBase publisher);
     }
 }

@@ -29,6 +29,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             _alertTransportSettings = alertTransportSettings;
         }
 
+        protected PublisherBase(IHealthChecksBuilder healthChecksBuilder)
+        {
+            _healthChecksBuilder = healthChecksBuilder;
+        }
+
         private class Unsubscriber : IDisposable
         {
             private List<IReportObserver> _observers;

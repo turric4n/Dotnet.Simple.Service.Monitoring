@@ -77,6 +77,12 @@ namespace Simple.Service.Monitoring.Extensions
             return this;
         }
 
+        public IServiceMonitoringConfigurationService WithAdditionalPublisher(PublisherBase publisher)
+        {
+            _stackMonitoring.AddCustomPublisher(publisher);
+            return this;
+        }
+
         public IServiceMonitoringConfigurationService WithApplicationSettings()
         {
             var validOptions = _options?.HealthChecks != null;

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "sourceMap": true,
+    "outDir": "./wwwroot/js",
+    "rootDir": "./Front/src",
+    "lib": [ "ES2020", "DOM", "DOM.Iterable" ],
+    "removeComments": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [ "Front/src/**/*.ts" ],
+  "exclude": [ "node_modules", "wwwroot" ]
+}

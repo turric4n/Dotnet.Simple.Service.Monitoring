@@ -44,15 +44,15 @@ namespace Simple.Service.Monitoring
             {
                 endpoints.MapServiceMonitoringUi();
 
-                endpoints.MapGet("/", async context =>
-                {
-                    var stackMonitoring = context.RequestServices.GetRequiredService<IStackMonitoring>();
+                //endpoints.MapGet("/", async context =>
+                //{
+                //    var stackMonitoring = context.RequestServices.GetRequiredService<IStackMonitoring>();
 
-                    var monitors = stackMonitoring.GetMonitors();
-                    var publishers = stackMonitoring.GetPublishers();
+                //    var monitors = stackMonitoring.GetMonitors();
+                //    var publishers = stackMonitoring.GetPublishers();
 
-                    await context.Response.WriteAsync($"Monitors : {JsonConvert.SerializeObject(monitors)} \r\n Publishers : {JsonConvert.SerializeObject(publishers)}");
-                });
+                //    await context.Response.WriteAsync($"Monitors : {JsonConvert.SerializeObject(monitors)} \r\n Publishers : {JsonConvert.SerializeObject(publishers)}");
+                //});
             });
         }
     }

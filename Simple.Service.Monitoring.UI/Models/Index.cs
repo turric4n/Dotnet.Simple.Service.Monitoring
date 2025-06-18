@@ -2,26 +2,31 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.UI.Services;
 using System.Collections.Generic;
-using static Simple.Service.Monitoring.UI.Services.MonitoringDataService;
+using System.Linq;
 
 namespace Simple.Service.Monitoring.UI.Models
 {
     public class IndexModel : PageModel
     {
-        private readonly MonitoringDataService _monitoringService;
+        private readonly IMonitoringDataService _monitoringService;
 
-        public IndexModel(MonitoringDataService monitoringService)
+        public IndexModel(IMonitoringDataService monitoringService)
         {
             _monitoringService = monitoringService;
         }
 
-        public IEnumerable<HealthCheckData> HealthChecks { get; private set; }
+        // Expose the latest report directly
+        public HealthReport Report { get; private set; }
 
-        public HealthStatus GetOverallStatus() => _monitoringService.GetOverallStatus();
+        // Convenience properties for the view
+        public IEnumerable<HealthCheckData> HealthChecks => Report?.HealthChecks ?? [];
+        public string OverallStatus => Report?.Status ?? "Unknown";
+        public string LastUpdated => Report?.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC") ?? "";
 
         public void OnGet()
         {
-            HealthChecks = _monitoringService.GetAllHealthChecks();
+            // Get the latest report (if any)
+            Report = _monitoringService.GetHealthCheckReport();
         }
     }
 }

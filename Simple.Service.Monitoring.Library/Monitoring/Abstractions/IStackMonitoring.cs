@@ -11,6 +11,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
         IStackMonitoring AddMonitoring(ServiceHealthCheck monitor);
         IStackMonitoring AddCustomHealthCheck(IHealthCheck healthCheck, string name, IEnumerable<string> tags);
         IStackMonitoring AddPublishing(AlertTransportSettings alertTransportSettings, ServiceHealthCheck monitor);
+        IStackMonitoring AddCustomPublisher(PublisherBase publisher);
         CustomMonitoring GetCustomMonitor(string name);
         List<ServiceMonitoringBase> GetMonitors();
         List<PublisherBase> GetPublishers();

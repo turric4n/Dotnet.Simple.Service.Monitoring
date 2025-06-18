@@ -28,7 +28,9 @@ namespace Simple.Service.Monitoring.UI.Services
 
         public void OnNext(HealthReport value)
         {
-            _dataService.AddHealthReport(value);
+            _dataService
+                .AddHealthReport(value)
+                .ConfigureAwait(false);
         }
     }
 }

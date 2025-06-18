@@ -2,6 +2,7 @@
 using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CallbackPublisher;
 using Simple.Service.Monitoring.Library.Options;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -25,6 +26,12 @@ namespace Microsoft.Extensions.DependencyInjection
             var stackMonitoring = new StandardStackMonitoring(healthChecksBuilder);
 
             var serviceMonitoringBuilder = new ServiceMonitoringConfigurationService(stackMonitoring, currentOptions);
+
+            var callbackPublisher = new CallbackPublisher(healthChecksBuilder);
+
+            stackMonitoring.AddCustomPublisher(callbackPublisher);
+
+            serviceCollection.AddSingleton<IReportObservable>(callbackPublisher);
 
             serviceCollection.AddSingleton<IStackMonitoring>(stackMonitoring);
 

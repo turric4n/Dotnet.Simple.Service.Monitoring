@@ -143,6 +143,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             return this;
         }
 
+        public IStackMonitoring AddCustomPublisher(PublisherBase publisher)
+        {
+            lock (_publishers)
+            {
+                _publishers?.Add(publisher);
+                publisher.SetUp();
+            }
+
+            return this;
+        }
+
         public List<ServiceMonitoringBase> GetMonitors()
         {
             return _monitors;
