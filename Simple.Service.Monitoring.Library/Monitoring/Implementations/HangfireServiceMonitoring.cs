@@ -37,7 +37,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 options.MinimumAvailableServers = minimumAvailableServers;
 
                 options.MaximumJobsFailed = maximumJobsFailed;
-            }, this.HealthCheck.Name);
+            }, this.HealthCheck.Name, null, GetTags());
         }
 
     }

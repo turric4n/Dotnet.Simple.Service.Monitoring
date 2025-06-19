@@ -29,7 +29,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             var connection = HealthCheck.ConnectionString;
 
             this.HealthChecksBuilder.AddRedis(connection, HealthCheck.Name, HealthStatus.Unhealthy,
-                new List<string>(), TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.RedisBehaviour.TimeOutMs));
+                GetTags(), TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.RedisBehaviour.TimeOutMs));
         }
     }
 }

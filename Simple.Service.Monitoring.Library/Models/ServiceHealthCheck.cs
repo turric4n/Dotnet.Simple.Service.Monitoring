@@ -9,6 +9,7 @@ namespace Simple.Service.Monitoring.Library.Models
         {
             HealthCheckConditions = new HealthCheckConditions();
             AlertBehaviour = new List<AlertBehaviour>();
+            AdditionalTags = new List<string>();
         }
 
         public string Name { get; set; }
@@ -20,5 +21,6 @@ namespace Simple.Service.Monitoring.Library.Models
         public bool Alert { get; set; }
         public List<AlertBehaviour> AlertBehaviour { get; set; }
         public string FullClassName { get; set; }
+        public List<string> AdditionalTags { get; set; }
     }
 }

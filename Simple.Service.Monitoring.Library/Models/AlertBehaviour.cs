@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Simple.Service.Monitoring.Library.Models.TransportSettings;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System;
 
 namespace Simple.Service.Monitoring.Library.Models
 {

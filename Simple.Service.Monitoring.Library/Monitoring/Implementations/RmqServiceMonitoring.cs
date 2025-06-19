@@ -33,7 +33,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 Uri = new Uri(HealthCheck.EndpointOrHost)
             };
 
-            HealthChecksBuilder.AddRabbitMQ(provider => connectionFactory.CreateConnectionAsync(), HealthCheck.Name, HealthStatus.Unhealthy);
+            HealthChecksBuilder.AddRabbitMQ(provider => connectionFactory.CreateConnectionAsync(), 
+                HealthCheck.Name, 
+                HealthStatus.Unhealthy, 
+                GetTags());
         }
     }
 }

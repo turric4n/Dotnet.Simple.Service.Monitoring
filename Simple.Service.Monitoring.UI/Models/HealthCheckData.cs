@@ -15,6 +15,7 @@ namespace Simple.Service.Monitoring.UI.Models
             Duration = healthReportEntry.Duration.Milliseconds.ToString();
             Description = healthReportEntry.Description ?? "No description provided";
             CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : "Unknown";
+            ServiceType = healthReportEntry.Tags.FirstOrDefault("ServiceType").Split(",")[1];
         }
 
         // Default constructor for serialization
@@ -28,5 +29,6 @@ namespace Simple.Service.Monitoring.UI.Models
         public string Duration { get; set; }
         public string Description { get; set; }
         public string CheckError { get; set; }
+        public string ServiceType { get; set; }
     }
 }

@@ -83,7 +83,7 @@ export class DashboardComponent {
         row.className = this.getRowClass(status);
         
         const name = check.name || '';
-        const description = check.description || '';
+        const checkError = check.checkError || '';
         const lastUpdated = check.lastUpdated 
           ? new Date(check.lastUpdated).toISOString().replace('T', ' ').substring(0, 19) 
           : '';
@@ -91,7 +91,8 @@ export class DashboardComponent {
         row.innerHTML = `
           <td><strong>${this.escapeHtml(name)}</strong></td>
           <td><span class="badge bg-${this.getStatusColor(status)}">${this.escapeHtml(status)}</span></td>
-          <td>${this.escapeHtml(description)}</td>
+          <td>${check.type}</td>
+          <td>${this.escapeHtml(checkError)}</td>
           <td>${check.duration} ms</td>
           <td>${lastUpdated} UTC</td>
         `;

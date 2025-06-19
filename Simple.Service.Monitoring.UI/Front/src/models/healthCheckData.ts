@@ -11,4 +11,6 @@ export interface HealthCheckData {
     status: HealthStatus;
     duration: number; // milliseconds
     description: string;
+    checkError: string;
+    type: string;
 }

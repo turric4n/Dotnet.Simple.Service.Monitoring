@@ -1,5 +1,6 @@
 ﻿using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
@@ -30,7 +31,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 {
                     options.AddHost(endpoint, 1000);
                 }
-            }, HealthCheck.Name);
+            }, HealthCheck.Name, null, GetTags());
         }
 
     }

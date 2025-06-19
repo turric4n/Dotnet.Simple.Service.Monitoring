@@ -66,7 +66,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     }
                 }
 
-            }, HealthCheck.Name);
+            }, HealthCheck.Name, null, GetTags());
         }
 
     }

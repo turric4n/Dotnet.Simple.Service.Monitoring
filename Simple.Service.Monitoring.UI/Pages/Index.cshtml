@@ -28,8 +28,9 @@
                         <thead class="table-light">
                             <tr>
                                 <th>Service</th>
+                                <th>Check Type</th>
                                 <th>Status</th>
-                                <th>Description</th>
+                                <th>Failure Information</th>
                                 <th>Duration</th>
                                 <th>Last Updated</th>
                             </tr>
@@ -39,8 +40,9 @@
                             {
                                     <tr class="@GetRowClass(check.Status)">
                                         <td><strong>@check.Name</strong></td>
+                                        <td>@check.ServiceType</td>
                                         <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                        <td>@check.Description</td>
+                                        <td>@check.CheckError</td>
                                         <td>@check.Duration ms</td>
                                         <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
                                     </tr>
