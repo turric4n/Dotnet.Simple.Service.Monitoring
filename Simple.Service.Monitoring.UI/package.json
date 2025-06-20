@@ -9,7 +9,8 @@
     "watch": "webpack --mode=development --watch"
   },
   "dependencies": {
-    "@microsoft/signalr": "^8.0.0"
+    "@microsoft/signalr": "^8.0.0",
+    "chartjs-plugin-stacked100": "^1.7.0"
   },
   "devDependencies": {
     "clean-webpack-plugin": "^4.0.0",

@@ -12,14 +12,8 @@ namespace Simple.Service.Monitoring.UI.Services
 {
     public class MonitoringDataService : IMonitoringDataService, IReportObserver
     {
-        // Single HealthReport instance instead of a dictionary
-        private Models.HealthReport _healthReport = new Models.HealthReport
-        {
-            Status = "Unknown",
-            LastUpdated = DateTime.UtcNow,
-            HealthChecks = new List<HealthCheckData>()
-        };
-        
+        // Simulated database
+        private readonly List<HealthCheckData> _healthCheckDatabase = new();
         private readonly IHubContext<MonitoringHub> _hubContext;
 
         public MonitoringDataService(
@@ -31,11 +25,46 @@ namespace Simple.Service.Monitoring.UI.Services
         }
 
         /// <summary>
-        /// Returns the current health report
+        /// Returns the latest health report (latest entry for each name)
         /// </summary>
         public Models.HealthReport GetHealthCheckReport()
         {
-            return _healthReport;
+            var latestChecks = _healthCheckDatabase
+                .GroupBy(hc => hc.Name)
+                .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
+                .ToList();
+
+            return new Models.HealthReport
+            {
+                Status = GetOverallStatus().ToString(),
+                LastUpdated = latestChecks.Any() ? latestChecks.Max(hc => hc.LastUpdated) : DateTime.UtcNow,
+                HealthChecks = latestChecks
+            };
+        }
+
+        /// <summary>
+        /// Returns a health report for entries between the given date range.
+        /// </summary>
+        public Models.HealthReport GetHealthReportByDateRange(DateTime from, DateTime to)
+        {
+            var checksInRange = _healthCheckDatabase
+                .Where(hc => hc.LastUpdated >= from && hc.LastUpdated <= to)
+                .GroupBy(hc => hc.Name)
+                .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
+                .ToList();
+
+            var status = HealthStatus.Healthy;
+            if (checksInRange.Any(c => c.Status == HealthStatus.Unhealthy))
+                status = HealthStatus.Unhealthy;
+            else if (checksInRange.Any(c => c.Status == HealthStatus.Degraded))
+                status = HealthStatus.Degraded;
+
+            return new Models.HealthReport
+            {
+                Status = status.ToString(),
+                LastUpdated = checksInRange.Any() ? checksInRange.Max(hc => hc.LastUpdated) : DateTime.UtcNow,
+                HealthChecks = checksInRange
+            };
         }
 
         /// <summary>
@@ -43,36 +72,21 @@ namespace Simple.Service.Monitoring.UI.Services
         /// </summary>
         public async Task AddHealthReport(Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport report)
         {
-            var statusChanged = false;
             var previousStatus = GetOverallStatus();
-            var previousReportStatus = _healthReport.Status;
 
-            // Convert incoming report to our model
-            var newHealthReport = new Models.HealthReport
+            foreach (var entry in report.Entries)
             {
-                Status = report.Status.ToString(),
-                LastUpdated = DateTime.UtcNow,
-                TotalDuration = report.TotalDuration,
-                HealthChecks = report.Entries.Select(entry => 
-                    new HealthCheckData(entry.Value) { Name = entry.Key }
-                ).ToList()
-            };
-
-            // Check if status changed
-            if (previousReportStatus != newHealthReport.Status)
-            {
-                statusChanged = true;
+                var healthCheckData = new HealthCheckData(entry.Value) { Name = entry.Key };
+                _healthCheckDatabase.Add(healthCheckData);
             }
-
-            // Update the health report
-            _healthReport = newHealthReport;
 
             var currentStatus = GetOverallStatus();
 
             if (_hubContext != null)
             {
-                await NotifyStatusChange(previousStatus, currentStatus);
-                
+                if (previousStatus != currentStatus)
+                    await NotifyStatusChange(previousStatus, currentStatus);
+
                 // Notify clients with the full report
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
             }
@@ -80,14 +94,18 @@ namespace Simple.Service.Monitoring.UI.Services
 
         public HealthStatus GetOverallStatus()
         {
-            // Convert string status from the report to HealthStatus enum
-            if (_healthReport == null || string.IsNullOrEmpty(_healthReport.Status))
+            var latestChecks = _healthCheckDatabase
+                .GroupBy(hc => hc.Name)
+                .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
+                .ToList();
+
+            if (!latestChecks.Any())
                 return HealthStatus.Unhealthy;
 
-            if (_healthReport.Status.Equals("Unhealthy", StringComparison.OrdinalIgnoreCase))
+            if (latestChecks.Any(c => c.Status == HealthStatus.Unhealthy))
                 return HealthStatus.Unhealthy;
 
-            if (_healthReport.Status.Equals("Degraded", StringComparison.OrdinalIgnoreCase))
+            if (latestChecks.Any(c => c.Status == HealthStatus.Degraded))
                 return HealthStatus.Degraded;
 
             return HealthStatus.Healthy;
@@ -95,11 +113,8 @@ namespace Simple.Service.Monitoring.UI.Services
 
         // IReportObserver implementation
         public bool ExecuteAlways => true;
-
         public void OnCompleted() { /* No action needed */ }
-
         public void OnError(Exception error) { /* Optionally log error */ }
-
         public void OnNext(Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport value)
         {
             _ = AddHealthReport(value);

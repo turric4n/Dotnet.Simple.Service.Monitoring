@@ -12,5 +12,5 @@ export interface HealthCheckData {
     duration: number; // milliseconds
     description: string;
     checkError: string;
-    type: string;
+    serviceType: string;
 }

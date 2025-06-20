@@ -1,5 +1,4 @@
 ﻿@page "/monitoring"
-@using Microsoft.Extensions.Diagnostics.HealthChecks
 @model Simple.Service.Monitoring.UI.Models.IndexModel
 @{
     ViewData["Title"] = "Service Monitoring";
@@ -50,10 +49,82 @@
                         </tbody>
                     </table>
                 </div>
+
+                <h5 class="mt-4">Last Five Health Checks</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Service</th>
+                                <th>Check Type</th>
+                                <th>Status</th>
+                                <th>Failure Information</th>
+                                <th>Duration</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var check in Model.LastFiveHealthChecks)
+                            {
+                                    <tr class="@GetRowClass(check.Status)">
+                                        <td><strong>@check.Name</strong></td>
+                                        <td>@check.ServiceType</td>
+                                        <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
+                                        <td>@check.CheckError</td>
+                                        <td>@check.Duration ms</td>
+                                        <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                    </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <h5 class="mt-4">Failed Health Checks Timeline</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Service</th>
+                                <th>Check Type</th>
+                                <th>Status</th>
+                                <th>Failure Information</th>
+                                <th>Duration</th>
+                                <th>Last Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var check in Model.FailedHealthChecksTimeline)
+                            {
+                                    <tr class="@GetRowClass(check.Status)">
+                                        <td><strong>@check.Name</strong></td>
+                                        <td>@check.ServiceType</td>
+                                        <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
+                                        <td>@check.CheckError</td>
+                                        <td>@check.Duration ms</td>
+                                        <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                    </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Visual Timeline Chart -->
+                <h5 class="mt-4">Health Checks Timeline</h5>
+                <div class="mb-4">
+                    <canvas id="timeline-chart"></canvas>
+                </div>
+
+                <!-- Timeline Controls -->
+                <div class="btn-group mb-4">
+                    <button id="show-all-timeline" class="btn btn-outline-primary">All Checks</button>
+                    <button id="show-last-five" class="btn btn-outline-primary">Last 5 Checks</button>
+                    <button id="show-failed-timeline" class="btn btn-outline-primary">Failed Checks</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 
 @functions {
     private string GetStatusColor(object statusObj)

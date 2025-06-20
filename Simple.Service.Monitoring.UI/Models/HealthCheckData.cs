@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Confluent.Kafka.Admin;
 
 namespace Simple.Service.Monitoring.UI.Models
 {
@@ -9,6 +10,7 @@ namespace Simple.Service.Monitoring.UI.Models
     {
         public HealthCheckData(HealthReportEntry healthReportEntry)
         {
+            CreationDate = DateTime.UtcNow;
             Status = healthReportEntry.Status;
             Name = healthReportEntry.Tags?.FirstOrDefault() ?? "Unknown";
             LastUpdated = DateTime.UtcNow;
@@ -22,6 +24,7 @@ namespace Simple.Service.Monitoring.UI.Models
         public HealthCheckData() { }
 
         // Changed from fields to properties
+        public DateTime CreationDate { get; set; }
         public string Name { get; set; }
         public DateTime LastUpdated { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
