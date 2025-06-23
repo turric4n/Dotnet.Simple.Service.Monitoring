@@ -1,36 +1,41 @@
-﻿<!DOCTYPE html>
+﻿@using Simple.Service.Monitoring.UI.Helpers
+@addTagHelper *, Simple.Service.Monitoring.UI
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Monitoring UI</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/monitoring-static/css/site.css" rel="stylesheet" />
+    <link href="@AssetHelper.GetCssPath("site")" rel="stylesheet" />
 </head>
 <body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container">
-            <a class="navbar-brand" href="/monitoring">Service Monitoring</a>
-        </div>
-    </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
-
-<footer class="border-top footer text-muted">
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" href="/monitoring">Service Monitoring</a>
+            </div>
+        </nav>
+    </header>
     <div class="container">
-        &copy; @DateTime.Now.Year - Service Monitoring
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
     </div>
-</footer>
-    
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/monitoring-static/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
-<script src="/monitoring-static/js/vendors.bundle.js"></script>
-<script src="/monitoring-static/js/monitoring.bundle.js"></script>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; @DateTime.Now.Year - Service Monitoring
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/monitoring-static/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+    <!-- Dynamic webpack assets with improved caching -->
+    <script src="@AssetHelper.GetJsPath("vendors")"></script>
+    <script src="@AssetHelper.GetJsPath("monitoring")"></script>
 
 </body>
 </html>
