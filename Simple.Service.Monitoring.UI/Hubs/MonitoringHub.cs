@@ -25,6 +25,11 @@ namespace Simple.Service.Monitoring.UI.Hubs
             return Task.FromResult(healthChecksReport);
         }
 
+        public async Task RequestHealthChecksTimeline(int hours = 24)
+        {
+            await _monitoringDataService.SendHealthCheckTimeline(hours);
+        }
+
         public override Task OnConnectedAsync()
         {
             _logger.LogInformation($"[Client Connected] > {Context.ConnectionId} - {Context?.User?.Identity?.Name}");

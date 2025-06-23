@@ -29,6 +29,9 @@ export class MonitoringService {
         this._onConnectionChange = handler;
     }
 
+    // New public property for timeline data handler
+    public onHealthChecksTimelineReceived: ((timeline: any) => void) | null = null;
+
     constructor() {
         this.connection = new HubConnectionBuilder()
             .withUrl('/monitoringHub')
@@ -58,6 +61,13 @@ export class MonitoringService {
         this.connection.on('ReceiveStatusChange', (data: StatusChange) => {
             if (this._onStatusChanged) {
                 this._onStatusChanged(data);
+            }
+        });
+
+        // New handler for timeline data
+        this.connection.on('ReceiveHealthChecksTimeline', (timeline: any) => {
+            if (this.onHealthChecksTimelineReceived) {
+                this.onHealthChecksTimelineReceived(timeline);
             }
         });
 
@@ -255,6 +265,14 @@ export class MonitoringService {
         });
         
         return Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+    }
+
+    // New method to request timeline data
+    public requestTimelineData(hours: number = 24): void {
+        if (this.connection && this.connection.state === HubConnectionState.Connected) {
+            this.connection.invoke("RequestHealthChecksTimeline", hours)
+                .catch(err => console.error("Error requesting timeline data:", err));
+        }
     }
 }
 

@@ -18,8 +18,12 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: 'ts-loader',
+        use: 'ts-loader', // Fixed: removed style-loader and css-loader from here
         exclude: /node_modules/
+      },
+      {
+        test: /\.css$/,  // Added: new rule for CSS files
+        use: ['style-loader', 'css-loader']
       }
     ]
   },
@@ -37,6 +41,10 @@ module.exports = {
         {
           from: 'node_modules/@microsoft/signalr/dist/browser',
           to: 'lib/microsoft/signalr/dist/browser'
+        },
+        {
+          from: 'node_modules/vis-timeline/styles', // Added: copy vis-timeline CSS
+          to: 'lib/vis-timeline/styles'
         }
       ]
     })
@@ -48,11 +56,11 @@ module.exports = {
       name: 'vendors'
     }
   },
-  // Add watch configuration
+  // Watch configuration remains unchanged
   watch: true,
   watchOptions: {
-    aggregateTimeout: 300, // Delay before rebuilding
-    poll: 1000, // Check for changes every second (useful in VMs or containers)
+    aggregateTimeout: 300,
+    poll: 1000,
     ignored: /node_modules/,
     followSymlinks: false
   }
