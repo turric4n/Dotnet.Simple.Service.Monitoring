@@ -31,15 +31,21 @@ export class DashboardComponent {
         this.initializeConnection();
         
         // Set up timeline view buttons for different time ranges
+        const timelinePreference = localStorage.getItem('monitoring-timeline-preference') || 'timeline-24h';
+        let timeRangeHours = 24; // Default
+        
+        if (timelinePreference === 'timeline-1h') timeRangeHours = 1;
+        else if (timelinePreference === 'timeline-7d') timeRangeHours = 24 * 7;
+        
+        // Set up timeline view buttons for different time ranges
         const timeline1h = document.getElementById('timeline-1h');
         if (timeline1h) {
             timeline1h.addEventListener('click', () => {
                 if (this.timelineComponent) {
-                    this.timelineComponent.setTimeRange(1); // Set to 1 hour
+                    this.timelineComponent.setTimeRange(1);
+                    localStorage.setItem('monitoring-timeline-preference', 'timeline-1h');
                 }
                 this.monitoringService.requestTimelineData(1);
-                
-                // Update active button state
                 this.setActiveTimelineButton('timeline-1h');
             });
         }
@@ -48,30 +54,29 @@ export class DashboardComponent {
         if (timeline24h) {
             timeline24h.addEventListener('click', () => {
                 if (this.timelineComponent) {
-                    this.timelineComponent.setTimeRange(24); // Set to 24 hours
+                    this.timelineComponent.setTimeRange(24);
+                    localStorage.setItem('monitoring-timeline-preference', 'timeline-24h');
                 }
                 this.monitoringService.requestTimelineData(24);
-                
-                // Update active button state
                 this.setActiveTimelineButton('timeline-24h');
             });
         }
-        
+
         const timeline7d = document.getElementById('timeline-7d');
         if (timeline7d) {
             timeline7d.addEventListener('click', () => {
                 if (this.timelineComponent) {
-                    this.timelineComponent.setTimeRange(24 * 7); // Set to 7 days
+                    this.timelineComponent.setTimeRange(24 * 7);
+                    localStorage.setItem('monitoring-timeline-preference', 'timeline-7d');
                 }
                 this.monitoringService.requestTimelineData(24 * 7);
-                
-                // Update active button state
                 this.setActiveTimelineButton('timeline-7d');
             });
         }
-
-        // Set default active button (24h)
-        this.setActiveTimelineButton('timeline-24h');
+        
+        // Initialize with stored preference
+        this.setActiveTimelineButton(timelinePreference);
+        this.monitoringService.requestTimelineData(timeRangeHours);
     }
 
     // New method to handle timeline data
@@ -176,7 +181,8 @@ export class DashboardComponent {
     private updateConnectionStatus(isConnected: boolean): void {
         const statusElement = document.getElementById('connection-status');
         if (statusElement) {
-            statusElement.className = isConnected ? 'text-success' : 'text-danger';
+            // Cambiar color en vez de clase para compatibilidad con modo oscuro
+            statusElement.style.color = isConnected ? 'var(--bs-success)' : 'var(--bs-danger)';
             statusElement.textContent = isConnected ? 'Connected' : 'Disconnected';
         }
     }
@@ -208,37 +214,16 @@ export class DashboardComponent {
             .replace(/'/g, "&#039;");
     }
 
-    // Agrega un método auxiliar para manejar el estado activo de los botones
     private setActiveTimelineButton(activeButtonId: string): void {
         const buttons = ['timeline-1h', 'timeline-24h', 'timeline-7d'];
         buttons.forEach(id => {
             const button = document.getElementById(id);
             if (button) {
-                // Opción 1: Para botones que usan btn-outline-*
-                if (id === activeButtonId) {
-                    button.classList.remove('btn-outline-primary');
-                    button.classList.add('btn-primary');
-                    button.classList.add('active');
-                } else {
-                    button.classList.remove('btn-primary');
-                    button.classList.remove('active');
-                    button.classList.add('btn-outline-primary');
-                }
-                
-                // Alternativa: Si lo anterior no funciona
-                // Solo usar la clase active sin cambiar el tipo de botón
-                /*
                 if (id === activeButtonId) {
                     button.classList.add('active');
                 } else {
                     button.classList.remove('active');
                 }
-                */
-                
-                // Agrega log para depuración
-                console.log(`Button ${id} active state: ${button.classList.contains('active')}`);
-            } else {
-                console.warn(`Button with id ${id} not found`);
             }
         });
     }

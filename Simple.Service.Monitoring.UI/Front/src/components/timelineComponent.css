@@ -1,0 +1,148 @@
+/* Timeline Component Styles */
+.timeline-header {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.timeline-group-name {
+    font-weight: bold;
+}
+
+.timeline-chart {
+    border-radius: 4px;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+}
+
+/* Status colors */
+.status-healthy {
+    background-color: #28a745 !important;
+    color: white;
+    border: none !important;
+}
+
+.status-degraded {
+    background-color: #ffc107 !important;
+    color: black;
+    border: none !important;
+}
+
+.status-unhealthy {
+    background-color: #dc3545 !important;
+    color: white;
+    border: none !important;
+}
+
+.status-unknown {
+    background-color: #6c757d !important;
+    color: white;
+    border: none !important;
+}
+
+/* Uptime stats */
+.uptime-container {
+    margin-top: 20px;
+    text-align: right;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.uptime-item {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.service-name {
+    font-weight: bold;
+}
+
+.uptime-value {
+    color: #666;
+}
+
+/* Timeline button styling */
+.btn-group .btn-outline-primary.active {
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* Dark mode specific timeline styles */
+.dark-mode .timeline-header h5 {
+    color: #f0f0f0;
+}
+
+.dark-mode .timeline-chart {
+    background-color: #383838;
+}
+
+.dark-mode .timeline-group-name {
+    color: #f0f0f0;
+}
+
+.dark-mode .vis-timeline {
+    background-color: #383838;
+    border-color: #444444 !important;
+}
+
+.dark-mode .vis-panel {
+    background-color: #383838;
+}
+
+.dark-mode .vis-label {
+    color: #f0f0f0;
+}
+
+.dark-mode .vis-text {
+    color: #f0f0f0;
+}
+
+.dark-mode .vis-grid {
+    border-color: #444444;
+}
+
+.dark-mode .vis-time-axis .vis-text {
+    color: #f0f0f0;
+}
+
+.dark-mode .vis-time-axis .vis-grid.vis-minor {
+    border-color: #444444;
+}
+
+.dark-mode .vis-time-axis .vis-grid.vis-major {
+    border-color: #555555;
+}
+
+.dark-mode .uptime-container {
+    background-color: #383838;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .uptime-value {
+    color: #bbb;
+}
+
+.dark-mode .service-name {
+    color: #f0f0f0;
+}
+
+/* Timeline alerts */
+.dark-mode .alert-info {
+    background-color: #2d4a61;
+    color: #f0f0f0;
+    border-color: #375a74;
+}
+
+.dark-mode .alert-danger {
+    background-color: #5c2532;
+    color: #f0f0f0;
+    border-color: #6e2c3c;
+}
+
+/* Tooltips in dark mode */
+.dark-mode .vis-tooltip {
+    background-color: #444;
+    border-color: #555;
+    color: #f0f0f0;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}

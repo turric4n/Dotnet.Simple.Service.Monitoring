@@ -1,4 +1,5 @@
 import { Timeline, DataSet, TimelineOptions } from "vis-timeline/standalone";
+import "./timelineComponent.css"; // Import the externalized CSS
 
 // Define interfaces for timeline items and groups
 interface TimelineItem {
@@ -31,7 +32,7 @@ export class TimelineComponent {
 
     constructor(containerId: string) {
         this.containerElement = document.getElementById(containerId);
-        this.addTimelineStyles();
+        // No need to call addTimelineStyles() anymore since we're importing the CSS file
     }
 
     // New method to set the time range
@@ -212,57 +213,36 @@ export class TimelineComponent {
         }
     }
 
-    private addTimelineStyles(): void {
-        const styleId = 'timeline-component-styles';
+    // Set active timeline range method
+    public setActiveTimelineRange(hours: number): void {
+        // Set the time range
+        this.setTimeRange(hours);
         
-        // Only add styles once
-        if (!document.getElementById(styleId)) {
-            const style = document.createElement('style');
-            style.id = styleId;
-            style.textContent = `
-                .timeline-header {
-                    margin-bottom: 20px;
-                    font-weight: bold;
+        // Update the active button state
+        const buttonMap: {[key: number]: string} = {
+            1: 'timeline-1h',
+            24: 'timeline-24h',
+            168: 'timeline-7d'  // 7 days = 168 hours
+        };
+        
+        const buttonId = buttonMap[hours] || 'timeline-24h';
+        this.setActiveButton(buttonId);
+    }
+
+    private setActiveButton(activeButtonId: string): void {
+        const buttons = ['timeline-1h', 'timeline-24h', 'timeline-7d'];
+        buttons.forEach(id => {
+            const button = document.getElementById(id);
+            if (button) {
+                if (id === activeButtonId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
                 }
-                .timeline-group-name {
-                    font-weight: bold;
-                }
-                .status-healthy {
-                    background-color: #28a745 !important;
-                    color: white;
-                    border: none !important;
-                }
-                .status-degraded {
-                    background-color: #ffc107 !important;
-                    color: black;
-                    border: none !important;
-                }
-                .status-unhealthy {
-                    background-color: #dc3545 !important;
-                    color: white;
-                    border: none !important;
-                }
-                .status-unknown {
-                    background-color: #6c757d !important;
-                    color: white;
-                    border: none !important;
-                }
-                .uptime-container {
-                    margin-top: 20px;
-                    text-align: right;
-                }
-                .uptime-item {
-                    margin-bottom: 8px;
-                    font-size: 0.9rem;
-                }
-                .service-name {
-                    font-weight: bold;
-                }
-                .uptime-value {
-                    color: #666;
-                }
-            `;
-            document.head.appendChild(style);
-        }
+            }
+        });
+        
+        // Store the preference
+        localStorage.setItem('monitoring-timeline-preference', activeButtonId);
     }
 }

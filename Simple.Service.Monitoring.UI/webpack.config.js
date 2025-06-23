@@ -66,7 +66,7 @@ module.exports = {
     optimization: {
         splitChunks: {
             chunks: 'all',
-            name: 'vendors'
+            name: 'monitoring-vendors'
         }
     },
     watch: true,
