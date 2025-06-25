@@ -16,5 +16,6 @@ namespace Simple.Service.Monitoring.UI.Services
         Task SendHealthCheckTimeline(int hours = 24);
         Models.HealthReport GetHealthReportByDateRange(DateTime from, DateTime to);
         Task AddHealthReport(HealthReport report);
+        void Init();
     }
 }

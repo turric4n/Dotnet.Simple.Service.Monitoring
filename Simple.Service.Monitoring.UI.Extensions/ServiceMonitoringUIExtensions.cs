@@ -67,6 +67,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 }
             });
 
+            app.ApplicationServices.GetService<IMonitoringDataService>()?.Init();
+
             return app;
         }
 

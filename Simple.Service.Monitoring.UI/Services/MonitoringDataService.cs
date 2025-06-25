@@ -10,17 +10,18 @@ using System.Threading.Tasks;
 
 namespace Simple.Service.Monitoring.UI.Services
 {
-    public class MonitoringDataService : IMonitoringDataService, IReportObserver
+    public class MonitoringDataService : IMonitoringDataService, IReportObserver, IDisposable
     {
         // Simulated database
         private readonly List<HealthCheckData> _healthCheckDatabase = new();
+        private readonly IReportObservable _reportObservable;
         private readonly IHubContext<MonitoringHub> _hubContext;
 
         public MonitoringDataService(
             IReportObservable reportObservable,
             IHubContext<MonitoringHub> hubContext)
         {
-            reportObservable.Subscribe(this);
+            _reportObservable = reportObservable;
             _hubContext = hubContext;
         }
 
@@ -210,6 +211,11 @@ namespace Simple.Service.Monitoring.UI.Services
             }
         }
 
+        public void Init()
+        {
+            _reportObservable.Subscribe(this);
+        }
+
         public HealthStatus GetOverallStatus()
         {
             var latestChecks = _healthCheckDatabase
@@ -250,6 +256,11 @@ namespace Simple.Service.Monitoring.UI.Services
                     CurrentStatus = currentStatus.ToString(),
                     LastUpdated = DateTime.UtcNow.ToString("o")
                 });
+        }
+
+        public void Dispose()
+        {
+            //
         }
     }
 

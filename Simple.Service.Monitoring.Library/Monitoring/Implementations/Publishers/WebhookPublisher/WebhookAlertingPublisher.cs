@@ -38,17 +38,18 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
             _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
+            var content = new StringContent(serializedReport, System.Text.Encoding.UTF8, "application/json");
+
             switch (_webhookTransportSettings.HttpBehaviour.HttpVerb)
             {
                 case HttpVerb.Get:
                     return _httpClient.GetAsync(_webhookTransportSettings.WebhookUrl, cancellationToken);
-                    break;
                 case HttpVerb.Post:
-                    break;
+                    return _httpClient.PostAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken);
                 case HttpVerb.Put:
-                    break;
+                    return _httpClient.PutAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken);
                 case HttpVerb.Delete:
-                    break;
+                    return _httpClient.DeleteAsync(_webhookTransportSettings.WebhookUrl, cancellationToken);
                 default:
                     throw new ArgumentOutOfRangeException();
             }
