@@ -1,149 +1,182 @@
 # Dotnet.Simple.Service.Monitoring
 
-Simplify Health Check Implementations with Easy Monitoring
+> Simplify Health Check Implementations with Easy Monitoring
 
-Forget about complex health check implementations. With just a few lines added to your settings, you can effortlessly monitor the status of your services using an amazing monitoring solution.
+## Overview
 
-This code snippet, often referred to colloquially as a wannabe library/framework/wrapper, aims to simplify the .NET health checks framework. It leverages the power of the .NET HealthChecks engine and the fantastic AspNetCore.HealthChecks library by Xabaril (available at https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks).
+Dotnet.Simple.Service.Monitoring is a lightweight wrapper that simplifies the implementation of health checks in .NET applications. It leverages the .NET HealthChecks framework and the [AspNetCore.Diagnostics.HealthChecks](https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks) library by Xabaril.
 
-By utilizing this code, you can achieve the same functionality with ease. Additionally, it provides the capability to publish health check results to various communication providers, including Email, Telegram, and Slack.
+With minimal configuration, you can monitor various services and receive alerts through multiple channels when issues arise.
 
-How does it work? Simply add a few lines to your settings file, and voila! Health checks and transport providers will be automatically configured.
+## Features
 
-## Initialization code : 
+- **Simple Configuration**: Define health checks through configuration files
+- **Multiple Service Types**: Support for HTTP, ElasticSearch, SQL Server, RabbitMQ, Hangfire, and ICMP
+- **Flexible Alerting**: Configure alerts based on specific conditions and timeframes
+- **Multiple Transport Methods**: Publish alerts via Email, Slack, Telegram, and InfluxDB
+- **Recovery Notifications**: Get notified when services recover
 
-Startup.cs
+## Getting Started
 
+### Installation
+
+```bash
+dotnet add package Dotnet.Simple.Service.Monitoring
 ```
-  var monitoring = services.UseServiceMonitoring(Configuration)
-      .UseSettings()
-      .Build();
+
+### Basic Setup
+
+In your `Startup.cs` or `Program.cs`:
+
+```csharp
+var monitoring = services.UseServiceMonitoring(Configuration)
+  .UseSettings()
+  .Build();
 ```
 
-## Settings :
+## Configuration
 
-appSettings.json
+You can configure the monitoring in either JSON or YAML format.
 
-```
+### JSON Configuration (appSettings.json)
+
+```json
 {
   "Monitoring": {
-    "HealthChecks": [
+  "HealthChecks": [
+    {
+    "Name": "Test",
+    "ServiceType": "Http",
+    "EndpointOrHost": "https://www.testendpoint.com/",
+    "Port": 443,
+    "HealthCheckConditions": {
+      "HttpBehaviour": {
+      "HttpExpectedResponseTimeMs": 300,
+      "HttpExpectedCode": 200,
+      "HttpVerb": "Get"
+      },
+      "ServiceReach": true,
+      "ServiceConnectionEstablished": true
+    },
+    "PublishChecks": true,
+    "Alert": true,
+    "AlertBehaviour": [
       {
-        "Name": "Test",
-        "ServiceType": "Http",
-        "EndpointOrHost": "https://www.testendpoint.com/",
-        "Port": 443,
-        "HealthCheckConditions": {
-          "HttpBehaviour": {
-            "HttpExpectedResponseTimeMs": 300,
-            "HttpExpectedCode": 200,
-            "HttpVerb": "Get"
-          },
-          "ServiceReach": true,
-          "ServiceConnectionEstablished": true
-        },
-        "PublishChecks": true,
-        "Alert": true,
-        "AlertBehaviour": [
-          {
-            "TransportMethod": "Email",
-            "TransportName": "StandardEmailTransport",
-            "AlertOnce": true,
-            "AlertOnServiceRecovered": true,
-            "StartAlertingOn": "",
-            "StopAlertingOn": "",
-            "AlertEvery": "00:00:05",
-            "AlertOn": ""
-          }
-        ]
-      }
-    ],
-    "EmailTransportSettings": [
-      {
-        "Name": "StandardEmailTransport",
-        "From": "test@test.com",
-        "To": "test@test.com",
-        "SmtpHost": "test.test.com",
-        "SmtpPort": 25,
-        "Authentication": false,
-        "Username": "",
-        "Password": "",
-        "Template": "Plain"
+      "TransportMethod": "Email",
+      "TransportName": "StandardEmailTransport",
+      "AlertOnce": true,
+      "AlertOnServiceRecovered": true,
+      "StartAlertingOn": "",
+      "StopAlertingOn": "",
+      "AlertEvery": "00:00:05",
+      "AlertOn": ""
       }
     ]
+    }
+  ],
+  "EmailTransportSettings": [
+    {
+    "Name": "StandardEmailTransport",
+    "From": "test@test.com",
+    "To": "test@test.com",
+    "SmtpHost": "test.test.com",
+    "SmtpPort": 25,
+    "Authentication": false,
+    "Username": "",
+    "Password": "",
+    "Template": "Plain"
+    }
+  ]
   }
 }
 ```
 
-Or use appsettings.yml
+### YAML Configuration (appsettings.yml)
 
-```
+```yaml
 Monitoring:
   HealthChecks:
   - Name: Test
-    ServiceType: Http
-    EndpointOrHost: https://www.testendpoint.com/
-    Port: 443
-    HealthCheckConditions:
-      HttpBehaviour:
-        HttpExpectedResponseTimeMs: 300
-        HttpExpectedCode: 200
-        HttpVerb: Get
-      ServiceReach: true
-      ServiceConnectionEstablished: true
-    PublishChecks: true
-    Alert: true
-    AlertBehaviour:
-    - TransportMethod: Email
-      TransportName: StandardEmailTransport
-      AlertOnce: true
-      AlertOnServiceRecovered: true
-      StartAlertingOn: ''
-      StopAlertingOn: ''
-      AlertEvery: '00:00:05'
-      AlertOn: ''
+  ServiceType: Http
+  EndpointOrHost: https://www.testendpoint.com/
+  Port: 443
+  HealthCheckConditions:
+    HttpBehaviour:
+    HttpExpectedResponseTimeMs: 300
+    HttpExpectedCode: 200
+    HttpVerb: Get
+    ServiceReach: true
+    ServiceConnectionEstablished: true
+  PublishChecks: true
+  Alert: true
+  AlertBehaviour:
+  - TransportMethod: Email
+    TransportName: StandardEmailTransport
+    AlertOnce: true
+    AlertOnServiceRecovered: true
+    StartAlertingOn: ''
+    StopAlertingOn: ''
+    AlertEvery: '00:00:05'
+    AlertOn: ''
   EmailTransportSettings:
   - Name: StandardEmailTransport
-    From: test@test.com
-    To: test@test.com
-    SmtpHost: test.test.com
-    SmtpPort: 25
-    Authentication: false
-    Username: ''
-    Password: ''
-    Template: Plain    
- ```
- 
- ## Monitoring properties :
- 
-- **HealthChecks (Array)**
-  - **Name:** Health check unique name
-  - **Service Type:** Type of service you want to monitor (Enum)
-    - **Http:** Typical http or https URI
-    - **ElasticSearch:** ElasticSearch endpoint is supported
-    - **MsSql:** Microsoft SQL Server
-    - **Rmq:** Rabbit MQ
-    - **Hangfire**
-    - **Ping:** ICMP
-  - **EndpointOrHost:** Mandatory when monitoring HTTP or ElasticSearch, just an URI
-  - **PublishChecks:** Enable check publishing, disable when you don't want to hear anything from this check
-  - **Alert:** Enable when you want to publish checks into implicated transport methods
-  - **AlertBehaviour (Object):**
-    - **TransportMethod (Array):** Transport methods you want to use
-      - **Email**
-      - **Slack**
-      - **Telegram**
-      - **InfluxDb**
-    - **TransportName:** Name of the defined transport in the config file, go to transport section
-    - **AlertOnce:** Just send one notification on health check failure
-    - **AlertOnServiceRecovered:** Send notification when health check is recovered
-    - **StartAlertingOn:** Start to send alerts on suggested DateTime
-    - **StopAlertingOn:** Stop sending alerts on suggested DateTime
-    - **AlertEvery:** Time between alerts
- 
-## Transport properties :
-- EmailTransportSettings (Array) (Object)
-  - Name (Transport unique name)
-    
-(TBC)
- 
+  From: test@test.com
+  To: test@test.com
+  SmtpHost: test.test.com
+  SmtpPort: 25
+  Authentication: false
+  Username: ''
+  Password: ''
+  Template: Plain    
+```
+
+## Configuration Reference
+
+### Health Checks Properties
+
+| Property | Description | Type |
+|----------|-------------|------|
+| `Name` | Unique identifier for the health check | String |
+| `ServiceType` | Type of service to monitor | Enum: `Http`, `ElasticSearch`, `MsSql`, `Rmq`, `Hangfire`, `Ping` |
+| `EndpointOrHost` | URI or host address of the service | String |
+| `Port` | Port number for the service | Integer |
+| `HealthCheckConditions` | Specific conditions to check | Object |
+| `PublishChecks` | Enable/disable check publishing | Boolean |
+| `Alert` | Enable/disable alerts | Boolean |
+| `AlertBehaviour` | Alert configuration | Array of Objects |
+
+### Alert Behaviour Properties
+
+| Property | Description | Type |
+|----------|-------------|------|
+| `TransportMethod` | Method to send alerts | Enum: `Email`, `Slack`, `Telegram`, `InfluxDb` |
+| `TransportName` | Name of the defined transport | String |
+| `AlertOnce` | Send only one notification on failure | Boolean |
+| `AlertOnServiceRecovered` | Send notification when service recovers | Boolean |
+| `StartAlertingOn` | Start alerts at specific time | DateTime |
+| `StopAlertingOn` | Stop alerts at specific time | DateTime |
+| `AlertEvery` | Time interval between alerts | TimeSpan |
+
+### Transport Settings
+
+#### Email Transport Properties
+
+| Property | Description | Type |
+|----------|-------------|------|
+| `Name` | Unique identifier for the transport | String |
+| `From` | Sender email address | String |
+| `To` | Recipient email address | String |
+| `SmtpHost` | SMTP server address | String |
+| `SmtpPort` | SMTP server port | Integer |
+| `Authentication` | Enable SMTP authentication | Boolean |
+| `Username` | SMTP username (if authentication enabled) | String |
+| `Password` | SMTP password (if authentication enabled) | String |
+| `Template` | Email template type | String |
+
+#### Slack, Telegram, and InfluxDB Transport Properties
+
+Documentation for these transport methods is coming soon.
+
+## License
+
+MIT

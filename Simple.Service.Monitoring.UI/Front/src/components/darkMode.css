@@ -1,0 +1,235 @@
+/* Lighter Dark Mode Styles */
+.dark-mode {
+    background-color: #2d2d2d;
+    color: #f0f0f0;
+}
+
+/* Navbar styling */
+.dark-mode .navbar {
+    background-color: #333333 !important;
+    border-color: #444444 !important;
+}
+
+.dark-mode .navbar-light .navbar-brand,
+.dark-mode .navbar-light .navbar-nav .nav-link {
+    color: #f0f0f0 !important;
+}
+
+.dark-mode .box-shadow {
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Card styling */
+.dark-mode .card {
+    background-color: #383838;
+    border-color: #444444;
+}
+
+.dark-mode .card-header:not(.bg-success):not(.bg-warning):not(.bg-danger) {
+    background-color: #404040;
+    color: #f0f0f0;
+}
+
+.dark-mode .card-body {
+    background-color: #383838;
+    color: #f0f0f0;
+}
+
+/* Table styling - IMPROVED */
+.dark-mode .table {
+    color: #f0f0f0 !important;
+    border-color: #444444 !important;
+}
+
+.dark-mode .table-bordered,
+.dark-mode .table-bordered td,
+.dark-mode .table-bordered th {
+    border-color: #444444 !important;
+}
+
+.dark-mode .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #f0f0f0 !important;
+}
+
+/* Table header styling */
+.dark-mode .table-light, 
+.dark-mode .table-light > td,
+.dark-mode .table-light > th,
+.dark-mode thead.table-light th {
+    background-color: #404040 !important;
+    color: #f0f0f0 !important;
+    border-color: #444444 !important;
+}
+
+/* Override Bootstrap table status classes */
+.dark-mode .table-success,
+.dark-mode .table-success > td,
+.dark-mode .table-success > th,
+.dark-mode tr.table-success {
+    background-color: rgba(40, 167, 69, 0.2) !important;
+    color: #f0f0f0 !important;
+    border-color: #444444 !important;
+}
+
+.dark-mode .table-warning,
+.dark-mode .table-warning > td,
+.dark-mode .table-warning > th,
+.dark-mode tr.table-warning {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+    color: #f0f0f0 !important;
+    border-color: #444444 !important;
+}
+
+.dark-mode .table-danger,
+.dark-mode .table-danger > td,
+.dark-mode .table-danger > th,
+.dark-mode tr.table-danger {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+    color: #f0f0f0 !important;
+    border-color: #444444 !important;
+}
+
+/* Ensure all table cells get dark styling */
+.dark-mode .table td,
+.dark-mode .table th {
+    color: #f0f0f0 !important;
+    background-color: transparent !important;
+}
+
+/* Button styling */
+.dark-mode .btn-outline-primary {
+    color: #8eb4ff;
+    border-color: #8eb4ff;
+}
+
+.dark-mode .btn-outline-primary:hover {
+    background-color: #3a5a9a;
+    color: white;
+}
+
+.dark-mode .btn-outline-primary.active {
+    background-color: #3a5a9a !important;
+    color: white !important;
+    border-color: #8eb4ff !important;
+}
+
+.dark-mode .btn-primary {
+    background-color: #3a5a9a;
+    border-color: #3a5a9a;
+}
+
+/* Timeline styling */
+.dark-mode #timeline-chart {
+    background-color: #383838;
+    color: #f0f0f0;
+}
+
+.dark-mode .timeline-group-name {
+    color: #f0f0f0;
+}
+
+.dark-mode .vis-timeline {
+    background-color: #383838;
+    border-color: #444444;
+}
+
+.dark-mode .vis-panel {
+    background-color: #383838;
+}
+
+.dark-mode .vis-text {
+    color: #f0f0f0;
+}
+
+.dark-mode .vis-grid {
+    border-color: #444444;
+}
+
+.dark-mode .uptime-container {
+    background-color: #383838;
+}
+
+.dark-mode .uptime-value {
+    color: #cccccc;
+}
+
+/* Dark mode toggle button */
+.dark-mode-toggle {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+}
+
+.dark-mode .dark-mode-toggle {
+    background-color: #444444;
+    color: #f0f0f0;
+}
+
+.dark-mode-toggle:hover {
+    background-color: #eeeeee;
+}
+
+.dark-mode .dark-mode-toggle:hover {
+    background-color: #555555;
+}
+
+/* Footer styling */
+.dark-mode .footer {
+    background-color: #333333;
+    border-color: #444444 !important;
+    color: #aaaaaa !important;
+}
+
+/* Badge styling fix */
+.dark-mode .badge.bg-secondary {
+    background-color: #6c757d !important;
+}
+
+/* Timeline specific overrides */
+.dark-mode .btn-group .btn-outline-primary {
+    color: #8eb4ff;
+    border-color: #8eb4ff;
+}
+
+.dark-mode .btn-group .btn-outline-primary:hover {
+    background-color: #3a5a9a;
+    color: white;
+}
+
+.dark-mode .btn-group .btn-outline-primary.active {
+    background-color: #3a5a9a !important;
+    color: white !important;
+    border-color: #8eb4ff !important;
+}
+
+/* Timeline container in dark mode */
+.dark-mode .card .card-body {
+    background-color: #383838;
+}
+
+/* Force contrast for timeline text */
+.dark-mode .vis-timeline,
+.dark-mode .vis-panel,
+.dark-mode .vis-labelset .vis-label {
+    color: #f0f0f0 !important;
+}
+
+/* Timeline animation transitions */
+.dark-mode .timeline-chart,
+.dark-mode .vis-timeline,
+.dark-mode .vis-panel,
+.dark-mode .vis-labelset,
+.dark-mode .vis-foreground,
+.dark-mode .vis-shadow,
+.dark-mode .vis-label,
+.dark-mode .vis-text,
+.dark-mode .vis-grid {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

@@ -1,36 +1,15 @@
 import { MonitoringService } from '../services/monitoringService';
 import { HealthReport } from '../models/healthReport';
 import { HealthCheckData } from '../models/healthCheckData';
-
-import {
-    Chart,
-    ChartDataset,
-    CategoryScale,
-    LinearScale,
-    BarController,
-    BarElement,
-    Tooltip,
-    Legend
-} from "chart.js";
-import ChartjsPluginStacked100 from "chartjs-plugin-stacked100";
-
-Chart.register(
-    CategoryScale,
-    LinearScale,
-    BarController,
-    BarElement,
-    Tooltip,
-    Legend,
-    ChartjsPluginStacked100
-);
+import { TimelineComponent, TimelineSegment } from './timelineComponent';
+import "vis-timeline/styles/vis-timeline-graph2d.css";
 
 export class DashboardComponent {
     private monitoringService: MonitoringService;
     private tableElement: HTMLTableElement | null = null;
     private statusBadgeElement: HTMLElement | null = null;
     private lastUpdatedElement: HTMLElement | null = null;
-    private timelineChartElement: HTMLCanvasElement | null = null;
-    private timelineChart: Chart | null = null;
+    private timelineComponent: TimelineComponent | null = null;
 
     constructor() {
         this.monitoringService = new MonitoringService();
@@ -39,156 +18,85 @@ export class DashboardComponent {
         this.tableElement = document.querySelector('table tbody') as HTMLTableElement;
         this.statusBadgeElement = document.querySelector('.card-header .badge') as HTMLElement;
         this.lastUpdatedElement = document.querySelector('.card-header small') as HTMLElement;
-        this.timelineChartElement = document.getElementById('timeline-chart') as HTMLCanvasElement;
+        
+        // Create timeline component
+        this.timelineComponent = new TimelineComponent('timeline-chart');
 
         // Set up event handlers
         this.monitoringService.onHealthChecksReportReceived = this.updateDashboard.bind(this);
+        this.monitoringService.onHealthChecksTimelineReceived = this.updateTimeline.bind(this);
         this.monitoringService.onConnectionChange = this.updateConnectionStatus.bind(this);
 
         // Initialize connection
         this.initializeConnection();
-
-        // Set up refresh button if it exists
-        const refreshButton = document.getElementById('refresh-monitoring');
-        if (refreshButton) {
-            refreshButton.addEventListener('click', () => {
-                this.monitoringService.refreshMonitoringData();
-            });
-        }
-
-        // Set up timeline view buttons
-        const lastFiveBtn = document.getElementById('show-last-five');
-        if (lastFiveBtn) {
-            lastFiveBtn.addEventListener('click', () => {
-                const checks = this.monitoringService.getLastFiveHealthChecks();
-                this.renderHealthChecks(checks);
-                this.renderTimelineChart(checks);
-            });
-        }
-        const failedTimelineBtn = document.getElementById('show-failed-timeline');
-        if (failedTimelineBtn) {
-            failedTimelineBtn.addEventListener('click', () => {
-                const checks = this.monitoringService.getFailedHealthChecksTimeline();
-                this.renderHealthChecks(checks);
-                this.renderTimelineChart(checks);
-            });
-        }
-
-        const allChecksBtn = document.getElementById('show-all-timeline');
-        if (allChecksBtn) {
-            allChecksBtn.addEventListener('click', () => {
-                const report = this.monitoringService.getLatestReport();
-                if (report) {
-                    const checks = report.healthChecks || [];
-                    this.renderHealthChecks(checks);
-                    this.renderTimelineChart(checks);
+        
+        // Set up timeline view buttons for different time ranges
+        const timelinePreference = localStorage.getItem('monitoring-timeline-preference') || 'timeline-24h';
+        let timeRangeHours = 24; // Default
+        
+        if (timelinePreference === 'timeline-1h') timeRangeHours = 1;
+        else if (timelinePreference === 'timeline-7d') timeRangeHours = 24 * 7;
+        
+        // Set up timeline view buttons for different time ranges
+        const timeline1h = document.getElementById('timeline-1h');
+        if (timeline1h) {
+            timeline1h.addEventListener('click', () => {
+                if (this.timelineComponent) {
+                    this.timelineComponent.setTimeRange(1);
+                    localStorage.setItem('monitoring-timeline-preference', 'timeline-1h');
                 }
+                this.monitoringService.requestTimelineData(1);
+                this.setActiveTimelineButton('timeline-1h');
             });
         }
+
+        const timeline24h = document.getElementById('timeline-24h');
+        if (timeline24h) {
+            timeline24h.addEventListener('click', () => {
+                if (this.timelineComponent) {
+                    this.timelineComponent.setTimeRange(24);
+                    localStorage.setItem('monitoring-timeline-preference', 'timeline-24h');
+                }
+                this.monitoringService.requestTimelineData(24);
+                this.setActiveTimelineButton('timeline-24h');
+            });
+        }
+
+        const timeline7d = document.getElementById('timeline-7d');
+        if (timeline7d) {
+            timeline7d.addEventListener('click', () => {
+                if (this.timelineComponent) {
+                    this.timelineComponent.setTimeRange(24 * 7);
+                    localStorage.setItem('monitoring-timeline-preference', 'timeline-7d');
+                }
+                this.monitoringService.requestTimelineData(24 * 7);
+                this.setActiveTimelineButton('timeline-7d');
+            });
+        }
+        
+        // Initialize with stored preference
+        this.setActiveTimelineButton(timelinePreference);
+        this.monitoringService.requestTimelineData(timeRangeHours);
     }
 
-private renderTimelineChart(healthChecks: HealthCheckData[]): void {
-    if (this.timelineChart) {
-        this.timelineChart.destroy();
-        this.timelineChart = null;
+    // New method to handle timeline data
+    private updateTimeline(timelineData: Record<string, TimelineSegment[]>): void {
+        if (!this.timelineComponent) return;
+        
+        console.log('Timeline data received:', timelineData);
+        
+        // Validate data format
+        if (!timelineData || typeof timelineData !== 'object') {
+            console.error('Invalid timeline data format');
+            return;
+        }
+        
+        try {
+            this.timelineComponent.renderTimeline(timelineData);
+        } catch (error) {
+            console.error('Error rendering timeline:', error);
+        }
     }
-
-    if (!this.timelineChartElement || !healthChecks.length) return;
-
-    // Agrupar por servicio y por hora
-    const groupedByService: Record<string, Record<string, HealthCheckData[]>> = {};
-    healthChecks.forEach(check => {
-        const service = check.name || 'Unknown';
-        const hour = new Date(check.lastUpdated).toISOString().substring(0, 13); // yyyy-MM-ddTHH
-        if (!groupedByService[service]) groupedByService[service] = {};
-        if (!groupedByService[service][hour]) groupedByService[service][hour] = [];
-        groupedByService[service][hour].push(check);
-    });
-
-    // Obtener todas las horas únicas ordenadas
-    const allHours = Array.from(
-        new Set(healthChecks.map(c => new Date(c.lastUpdated).toISOString().substring(0, 13)))
-    ).sort();
-
-    // Obtener todos los servicios únicos
-    const allServices = Object.keys(groupedByService);
-
-    // Estados posibles
-    const statusList = ['Healthy', 'Degraded', 'Unhealthy', 'Unknown'];
-    const statusColors: Record<string, string> = {
-        'Healthy': '#28a745',
-        'Degraded': '#ffc107',
-        'Unhealthy': '#dc3545',
-        'Unknown': '#6c757d'
-    };
-
-    // Crear datasets para cada status
-    const datasets: ChartDataset<'bar'>[] = statusList.map(status => {
-        return {
-            label: status,
-            backgroundColor: statusColors[status],
-            data: allServices.map(service => {
-                // Para cada servicio, calcular cuántos checks hay de este status
-                let total = 0;
-                allHours.forEach(hour => {
-                    const checks = groupedByService[service][hour] || [];
-                    total += checks.filter(c => (c.status || 'Unknown') === status).length;
-                });
-                return total;
-            })
-        };
-    });
-
-    // Crea el nuevo gráfico con orientación horizontal
-    this.timelineChart = new Chart(this.timelineChartElement, {
-        type: "bar",
-        data: {
-            labels: allServices,
-            datasets: datasets
-        },
-        options: {
-            indexAxis: 'y', // Esta es la clave para hacerlo horizontal
-            responsive: true,
-            plugins: {
-                stacked100: { enable: true, replaceTooltipLabel: false },
-                tooltip: {
-                    callbacks: {
-                        label: (tooltipItem: any) => {
-                            const data = tooltipItem.chart.data as any;
-                            const datasetIndex = tooltipItem.datasetIndex;
-                            const index = tooltipItem.dataIndex;
-                            const status = data.datasets[datasetIndex].label || "";
-                            const service = data.labels[index];
-                            const originalValue = data.originalData
-                                ? data.originalData[datasetIndex][index]
-                                : tooltipItem.raw;
-                            const rateValue = data.calculatedData
-                                ? data.calculatedData[datasetIndex][index]
-                                : tooltipItem.parsed.x;
-                            return `${service} - ${status}: ${rateValue}% (raw ${originalValue})`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { 
-                    stacked: true,
-                    title: { display: true, text: 'Porcentaje (%)' },
-                    beginAtZero: true,
-                    max: 100
-                },
-                y: {
-                    stacked: true,
-                    title: { display: true, text: 'Servicio' }
-                }
-            },
-            interaction: { mode: 'index', intersect: false }
-        },
-        plugins: [ChartjsPluginStacked100]
-    });
-}
-
-
 
     private renderHealthChecks(healthChecks: HealthCheckData[]): void {
         if (!this.tableElement) return;
@@ -231,17 +139,6 @@ private renderTimelineChart(healthChecks: HealthCheckData[]): void {
         this.tableElement.appendChild(fragment);
     }
 
-    private async initializeConnection(): Promise<void> {
-        try {
-            await this.monitoringService.start();
-        } catch (error) {
-            console.error('Failed to start connection:', error);
-            setTimeout(() => {
-                this.initializeConnection();
-            }, 5000);
-        }
-    }
-
     private updateDashboard(report: HealthReport): void {
         if (!report) return;
 
@@ -250,11 +147,6 @@ private renderTimelineChart(healthChecks: HealthCheckData[]): void {
         // Update the table
         if (this.tableElement) {
             this.renderHealthChecks(healthChecks);
-        }
-
-        // Update the timeline chart
-        if (this.timelineChartElement) {
-            this.renderTimelineChart(healthChecks);
         }
 
         // Update status badge and last updated
@@ -270,12 +162,27 @@ private renderTimelineChart(healthChecks: HealthCheckData[]): void {
                 : new Date().toISOString().replace('T', ' ').substring(0, 19);
             this.lastUpdatedElement.textContent = `Last Updated: ${lastUpdated} UTC`;
         }
+
+        // Request timeline data
+        this.monitoringService.requestTimelineData(24);
+    }
+
+    private async initializeConnection(): Promise<void> {
+        try {
+            await this.monitoringService.start();
+        } catch (error) {
+            console.error('Failed to start connection:', error);
+            setTimeout(() => {
+                this.initializeConnection();
+            }, 5000);
+        }
     }
 
     private updateConnectionStatus(isConnected: boolean): void {
         const statusElement = document.getElementById('connection-status');
         if (statusElement) {
-            statusElement.className = isConnected ? 'text-success' : 'text-danger';
+            // Cambiar color en vez de clase para compatibilidad con modo oscuro
+            statusElement.style.color = isConnected ? 'var(--bs-success)' : 'var(--bs-danger)';
             statusElement.textContent = isConnected ? 'Connected' : 'Disconnected';
         }
     }
@@ -305,5 +212,19 @@ private renderTimelineChart(healthChecks: HealthCheckData[]): void {
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
+    }
+
+    private setActiveTimelineButton(activeButtonId: string): void {
+        const buttons = ['timeline-1h', 'timeline-24h', 'timeline-7d'];
+        buttons.forEach(id => {
+            const button = document.getElementById(id);
+            if (button) {
+                if (id === activeButtonId) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            }
+        });
     }
 }

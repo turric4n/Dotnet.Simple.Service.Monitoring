@@ -38,7 +38,7 @@ namespace Simple.Service.Monitoring
 
             app.UseRouting();
 
-            app.UseServiceMonitoringUi();
+            app.UseServiceMonitoringUi(env);
 
             app.UseEndpoints(endpoints =>
             {
