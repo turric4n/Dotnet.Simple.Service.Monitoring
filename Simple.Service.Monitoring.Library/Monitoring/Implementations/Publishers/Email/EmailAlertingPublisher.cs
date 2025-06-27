@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading;
@@ -32,56 +33,77 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             MailMessageFactory = new SmtpMailMessageFactory(_emailTransportSettings);
         }
 
-        public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
+        public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            var alert = this.HasToPublishAlert(report);
-
-            if (!alert) return Task.CompletedTask;
-
-            var entry = report
-                .Entries
-                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
-
-            GetReportLastCheck(report.Status);
-
-            var currentStatus = "[Undefined]";
-
-            switch (entry.Value.Status)
+            var ownedEntry = this.GetOwnedEntry(report);
+            var interceptedEntries = this.GetInterceptedEntries(report);
+            
+            var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
+            
+            if (ownedAlerting)
             {
-                case HealthStatus.Unhealthy:
-                    currentStatus = "[Unhealthy]";
-                    break;
-                case HealthStatus.Degraded:
-                    currentStatus = "[Degraded]";
-                    break;
-                case HealthStatus.Healthy:
-                    currentStatus = "[Healthy]";
-                    break;
+                await SendEmailAlertAsync(ownedEntry, cancellationToken);
             }
-
-
-            var subject = $"{currentStatus} - Alert Triggered : {_healthCheck.Name} ";
-
-            var body = $"{currentStatus} - Alert Triggered : {_healthCheck.Name} <br>" +
-                       $"Triggered On    : {DateTime.Now} <br>" +
-                       $"Service Type    : {_healthCheck.ServiceType} <br>" +
-                       $"Alert Endpoint  : {_healthCheck.EndpointOrHost} <br>" +
-                       $"Alert Status    : {entry.Value.Status} <br>" +
-                       $"Alert Details   : {entry.Value.Description} <br>";
-
-            foreach (var extraData in entry.Value.Data)
+            
+            foreach (var interceptedEntry in interceptedEntries)
             {
-                body += $"Alert Tags    : {extraData.Key} - {extraData.Value} <br>";
+                if (this.IsOkToAlert(interceptedEntry, true))
+                {
+                    await SendEmailAlertAsync(interceptedEntry, cancellationToken);
+                }
             }
+        }
 
-            body = StandardEmailTemplate.TemplateBody.Replace("#replace", body);
+        private Task SendEmailAlertAsync(KeyValuePair<string, HealthReportEntry> entry, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var healthCheckName = entry.Key;
+                var healthCheckEntry = entry.Value;
 
-            //Do work
-            var message = MailMessageFactory.Create(_emailTransportSettings.To, subject, body);
+                GetReportLastCheck(healthCheckEntry.Status);
 
-            _mailSenderClient.SendMessage(message);
+                var currentStatus = healthCheckEntry.Status switch
+                {
+                    HealthStatus.Unhealthy => "[Unhealthy]",
+                    HealthStatus.Degraded => "[Degraded]",
+                    HealthStatus.Healthy => "[Healthy]",
+                    _ => "[Undefined]"
+                };
 
-            return Task.CompletedTask;
+                var subject = $"{currentStatus} - Alert Triggered : {healthCheckName}";
+
+                var body = $"{currentStatus} - Alert Triggered : {healthCheckName} <br>" +
+                          $"Triggered On    : {DateTime.Now} <br>" +
+                          $"Service Type    : {_healthCheck.ServiceType} <br>" +
+                          $"Alert Endpoint  : {_healthCheck.EndpointOrHost} <br>" +
+                          $"Alert Status    : {healthCheckEntry.Status} <br>" +
+                          $"Alert Duration  : {healthCheckEntry.Duration.TotalMilliseconds}ms <br>" +
+                          $"Alert Details   : {healthCheckEntry.Description} <br>";
+
+                if (healthCheckEntry.Exception != null)
+                {
+                    body += $"Exception      : {healthCheckEntry.Exception.Message} <br>";
+                }
+
+                foreach (var extraData in healthCheckEntry.Data)
+                {
+                    body += $"Alert Tags    : {extraData.Key} - {extraData.Value} <br>";
+                }
+
+                body = StandardEmailTemplate.TemplateBody.Replace("#replace", body);
+
+                var message = MailMessageFactory.Create(_emailTransportSettings.To, subject, body);
+                _mailSenderClient.SendMessage(message);
+
+                return Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                // Log exception but don't throw to avoid breaking health checks
+                System.Diagnostics.Debug.WriteLine($"Failed to send email alert: {ex.Message}");
+                return Task.CompletedTask;
+            }
         }
 
         protected internal override void Validate()

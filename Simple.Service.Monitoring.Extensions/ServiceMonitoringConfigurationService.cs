@@ -4,6 +4,7 @@ using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Simple.Service.Monitoring.Extensions
@@ -112,7 +113,7 @@ namespace Simple.Service.Monitoring.Extensions
             return this;
         }
 
-        public IServiceMonitoringConfigurationService WithAdditionalPublisherObserver(IReportObserver observer, bool useAlertingRules = true)
+        public IServiceMonitoringConfigurationService WithAdditionalPublisherObserver(IObserver<KeyValuePair<string, HealthReportEntry>> observer, bool useAlertingRules = true)
         {
             _stackMonitoring.GetPublishers()
                 .ForEach(publisher =>

@@ -42,10 +42,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 await SendTelegramMessage(ownedEntry, cancellationToken);
             }
 
-            foreach (var entry in interceptedEntries)
+            foreach (var interceptedEntry in interceptedEntries)
             {
-                this.IsOkToAlert(entry, false);
-                await SendTelegramMessage(ownedEntry, cancellationToken);
+                if (this.IsOkToAlert(interceptedEntry, true))
+                {
+                    await SendTelegramMessage(ownedEntry, cancellationToken);
+                }
             }
         }
 

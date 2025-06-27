@@ -7,6 +7,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using StackExchange.Redis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,38 +76,68 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         {
             try
             {
-                // Get the connection from the pool (or create a new one)
-                var connection = GetConnection();
-                var database = connection.GetDatabase(_redisTransportSettings.DatabaseNumber);
+                var ownedEntry = this.GetOwnedEntry(report);
+                var interceptedEntries = this.GetInterceptedEntries(report);
 
-                // Create a channel name for publishing health reports
-                var channelName = $"health-check:{_healthCheck.Name}";
+                var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
 
-                // Serialize the health report to JSON
-                var serializedReport = System.Text.Json.JsonSerializer.Serialize(new
+                if (ownedAlerting)
                 {
-                    TimeStamp = DateTime.UtcNow,
-                    ServiceName = _healthCheck.Name,
-                    ServiceType = _healthCheck.ServiceType.ToString(),
-                    Status = report.Status.ToString(),
-                    HealthChecks = report.Entries.Select(e => new
-                    {
-                        Name = e.Key,
-                        Status = e.Value.Status.ToString(),
-                        Duration = e.Value.Duration.TotalMilliseconds,
-                        Description = e.Value.Description,
-                        Error = e.Value.Exception?.Message,
-                        Data = e.Value.Data
-                    })
-                });
+                    await PublishToRedisAsync(ownedEntry, cancellationToken);
+                }
 
-                // Publish the health report to Redis
-                await database.PublishAsync(channelName, serializedReport);
+                foreach (var interceptedEntry in interceptedEntries)
+                {
+                    if (this.IsOkToAlert(interceptedEntry, true))
+                    {
+                        await PublishToRedisAsync(interceptedEntry, cancellationToken);
+                    }
+                }
             }
             catch (Exception ex)
             {
                 // Log the exception, but don't throw to avoid breaking health checks
                 System.Diagnostics.Debug.WriteLine($"Failed to publish health report to Redis: {ex.Message}");
+            }
+        }
+
+        private async Task PublishToRedisAsync(KeyValuePair<string, HealthReportEntry> entry, CancellationToken cancellationToken)
+        {
+            try
+            {
+                // Get the connection from the pool (or create a new one)
+                var connection = GetConnection();
+                var database = connection.GetDatabase(_redisTransportSettings.DatabaseNumber);
+
+                // Create a channel name for publishing health reports
+                var channelName = $"health-check:{entry.Key}";
+
+                // Serialize the health check entry to JSON
+                var serializedReport = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    TimeStamp = DateTime.UtcNow,
+                    ServiceName = entry.Key,
+                    ServiceType = _healthCheck.ServiceType.ToString(),
+                    Status = entry.Value.Status.ToString(),
+                    Duration = entry.Value.Duration.TotalMilliseconds,
+                    Description = entry.Value.Description,
+                    Error = entry.Value.Exception?.Message,
+                    Data = entry.Value.Data
+                });
+
+                // Publish the health report to Redis
+                await database.PublishAsync(channelName, serializedReport);
+                
+                // Also store the latest state in a key with the same name
+                await database.StringSetAsync(
+                    $"health-check-latest:{entry.Key}", 
+                    serializedReport,
+                    expiry: TimeSpan.FromDays(1) // Expire after 1 day to prevent stale data
+                );
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to publish entry {entry.Key} to Redis: {ex.Message}");
             }
         }
         

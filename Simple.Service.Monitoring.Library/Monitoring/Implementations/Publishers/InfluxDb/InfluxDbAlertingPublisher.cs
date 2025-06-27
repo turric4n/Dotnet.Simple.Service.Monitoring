@@ -30,43 +30,58 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         {
             Task.Run(() =>
             {
-                var alert = this.HasToPublishAlert(report);
+                var ownedEntry = this.GetOwnedEntry(report);
 
-                if (alert)
+                var interceptedEntries = this.GetInterceptedEntries(report);
+
+                var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
+
+                if (ownedAlerting)
                 {
-                    using var collector = new CollectorConfiguration()
-                        .Tag.With("name", _healthCheck.Name)
-                        .Batch.AtInterval(TimeSpan.FromSeconds(2))
-                        .WriteTo.InfluxDB(_influxDBTransportSettings.Host, _influxDBTransportSettings.Database)
-                        .CreateCollector();
-
-                    var entry = report
-                        .Entries
-                        .FirstOrDefault(x => x.Key == this._healthCheck.Name);
-
-                    var tags = new Dictionary<string, string>()
-                    {
-                        { "endpoint", _healthCheck.EndpointOrHost ?? _healthCheck.ConnectionString }
-                    };
-
-                    var fields = new Dictionary<string, object>()
-                    {
-                        { "status", (int)entry.Value.Status },
-                        { "error", entry.Value.Exception },
-                        { "responsetime", entry.Value.Duration.Milliseconds },
-                        { "description", entry.Value.Description },
-                    };
-
-                    foreach (var valueTag in entry.Value.Data)
-                    {
-                        fields.Add(valueTag.Key, valueTag.Value);
-                    }
-
-                    collector.Write("health_check", fields, tags);
+                    SendEntryToInflux(ownedEntry);
                 }
+
+                foreach (var entry in interceptedEntries)
+                {
+                    if (this.IsOkToAlert(entry, false))
+                    {
+                        SendEntryToInflux(entry);
+                    }
+                }
+
             }, cancellationToken);
 
             return Task.CompletedTask;
+        }
+
+        private void SendEntryToInflux(KeyValuePair<string, HealthReportEntry> healthReportEntry)
+        {
+            using var collector = new CollectorConfiguration()
+                .Tag.With("name", _healthCheck.Name)
+                .Batch.AtInterval(TimeSpan.FromSeconds(2))
+                .WriteTo.InfluxDB(_influxDBTransportSettings.Host, _influxDBTransportSettings.Database)
+                .CreateCollector();
+
+
+            var tags = new Dictionary<string, string>()
+            {
+                { "endpoint", _healthCheck.EndpointOrHost ?? _healthCheck.ConnectionString }
+            };
+
+            var fields = new Dictionary<string, object>()
+            {
+                { "status", (int)healthReportEntry.Value.Status },
+                { "error", healthReportEntry.Value.Exception },
+                { "responsetime", healthReportEntry.Value.Duration.Milliseconds },
+                { "description", healthReportEntry.Value.Description },
+            };
+
+            foreach (var valueTag in healthReportEntry.Value.Data)
+            {
+                fields.Add(valueTag.Key, valueTag.Value);
+            }
+
+            collector.Write("health_check", fields, tags);
         }
 
         protected internal override void Validate()

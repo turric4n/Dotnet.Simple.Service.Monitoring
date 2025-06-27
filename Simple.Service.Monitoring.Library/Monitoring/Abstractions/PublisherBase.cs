@@ -20,7 +20,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         protected readonly Dictionary<string, AlertBehaviour> _interceptedBehaviours;
         
-        protected readonly ConcurrentBag<IReportObserver> _observers = new ConcurrentBag<IReportObserver>();
+        protected readonly ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers = new ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>>();
 
         protected PublisherBase(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
@@ -39,11 +39,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         private class Unsubscriber : IDisposable
         {
-            private List<IReportObserver> _observers;
-            private IReportObserver _observer;
+            private List<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers;
+            private IObserver<KeyValuePair<string, HealthReportEntry>> _observer;
 
-            public Unsubscriber(List<IReportObserver> observers,
-                IReportObserver observer)
+            public Unsubscriber(List<IObserver<KeyValuePair<string, HealthReportEntry>>> observers,
+                IObserver<KeyValuePair<string, HealthReportEntry>> observer)
             {
                 this._observers = observers;
                 this._observer = observer;
@@ -158,15 +158,19 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
             behaviour.LastPublished = alert ? DateTime.Now : behaviour.LastPublished;
 
-            //Parallel.ForEach(_observers, observer =>
-            //{
-            //    if (alert || observer.ExecuteAlways)
-            //    {
-            //        observer.OnNext(report);
-            //    }
-            //});
-
             return alert;
+        }
+
+        //Only use it for testing purposes
+        public void AlertObservers(KeyValuePair<string, HealthReportEntry> entry)
+        {
+            lock (_observers)
+            {
+                Parallel.ForEach(_observers, observer =>
+                {
+                    observer.OnNext(entry);
+                });
+            }
         }
 
         public KeyValuePair<string, HealthReportEntry> GetOwnedEntry(HealthReport report)
@@ -206,7 +210,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             SetPublishing();
         }
 
-        public IDisposable Subscribe(IReportObserver observer)
+        public IDisposable Subscribe(IObserver<KeyValuePair<string, HealthReportEntry>> observer)
         {
             lock (_observers)
             {

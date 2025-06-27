@@ -5,7 +5,7 @@ using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -27,25 +27,63 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
         public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            var alert = this.HasToPublishAlert(report);
+            try
+            {
+                var ownedEntry = this.GetOwnedEntry(report);
+                var interceptedEntries = this.GetInterceptedEntries(report);
 
-            if (alert)
+                var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
+
+                if (ownedAlerting)
+                {
+                    await SendCustomNotificationAsync(ownedEntry, cancellationToken);
+                }
+
+                foreach (var interceptedEntry in interceptedEntries)
+                {
+                    if (this.IsOkToAlert(interceptedEntry, true))
+                    {
+                        await SendCustomNotificationAsync(interceptedEntry, cancellationToken);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in custom notification publisher: {ex.Message}");
+                // Log but don't rethrow to avoid breaking health checks
+            }
+        }
+
+        private async Task SendCustomNotificationAsync(KeyValuePair<string, HealthReportEntry> entry, CancellationToken cancellationToken)
+        {
+            try
             {
                 var notificationEndpoint = new Uri(_customNotificationTransportSettings.BaseEndpoint);
 
                 using var httpclient = new HttpClient();
                 httpclient.BaseAddress = notificationEndpoint;
 
-                var entry = report
-                    .Entries
-                    .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+                var healthCheckName = entry.Key;
+                var healthCheckEntry = entry.Value;
 
-                var body = $"Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
+                var body = $"Alert Triggered : {healthCheckName} {Environment.NewLine}" +
                            $"Triggered On    : {DateTime.Now} {Environment.NewLine}" +
                            $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
-                           $"Alert Endpoint : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                           $"Alert Status   : {entry.Value.Status} {Environment.NewLine}" +
-                           $"Alert Details  : {entry.Value.Description} {Environment.NewLine}";
+                           $"Alert Endpoint  : {_healthCheck.EndpointOrHost ?? _healthCheck.ConnectionString} {Environment.NewLine}" +
+                           $"Alert Status    : {healthCheckEntry.Status} {Environment.NewLine}" +
+                           $"Alert Duration  : {healthCheckEntry.Duration.TotalMilliseconds}ms {Environment.NewLine}" +
+                           $"Alert Details   : {healthCheckEntry.Description} {Environment.NewLine}";
+
+                if (healthCheckEntry.Exception != null)
+                {
+                    body += $"Exception      : {healthCheckEntry.Exception.Message} {Environment.NewLine}";
+                }
+
+                // Add any additional data
+                foreach (var dataItem in healthCheckEntry.Data)
+                {
+                    body += $"Data: {dataItem.Key} = {dataItem.Value} {Environment.NewLine}";
+                }
 
                 var msg = new Message()
                 {
@@ -64,20 +102,32 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     "application/json"
                 );
 
-                var response = await httpclient.PostAsync("/notification/notify", httpContent);
+                var response = await httpclient.PostAsync("/notification/notify", httpContent, cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception(
-                        "failed to send message."
-                    );
+                    System.Diagnostics.Debug.WriteLine($"Failed to send notification: {response.StatusCode}");
                 }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error sending custom notification: {ex.Message}");
+                // Log but don't rethrow
             }
         }
 
         protected internal override void Validate()
         {
-            //
+            // Basic validation could be added here
+            if (string.IsNullOrEmpty(_customNotificationTransportSettings.BaseEndpoint))
+            {
+                throw new ArgumentException("BaseEndpoint is required for custom notification");
+            }
+            
+            if (string.IsNullOrEmpty(_customNotificationTransportSettings.ApiKey))
+            {
+                throw new ArgumentException("ApiKey is required for custom notification");
+            }
         }
 
         protected internal override void SetPublishing()
