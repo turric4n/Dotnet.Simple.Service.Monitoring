@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System;
+﻿using System;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Confluent.Kafka.Admin;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Simple.Service.Monitoring.UI.Models
+namespace Simple.Service.Monitoring.Library.Models
 {
     public class HealthCheckData
     {
@@ -17,7 +16,7 @@ namespace Simple.Service.Monitoring.UI.Models
             Duration = healthReportEntry.Duration.Milliseconds.ToString();
             Description = healthReportEntry.Description ?? "No description provided";
             CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : "Unknown";
-            ServiceType = healthReportEntry.Tags.FirstOrDefault("ServiceType").Split(",")[1];
+            ServiceType = healthReportEntry.Tags.FirstOrDefault(tag => tag.StartsWith("ServiceType:"))?.Split(":").ElementAtOrDefault(1) ?? "Unknown";
         }
 
         // Default constructor for serialization

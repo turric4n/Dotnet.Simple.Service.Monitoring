@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "chartjs": "^0.3.24",
+    "chartjs-plugin-stacked100": "^1.7.0"
+  }
+}

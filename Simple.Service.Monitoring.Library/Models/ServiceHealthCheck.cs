@@ -10,10 +10,12 @@ namespace Simple.Service.Monitoring.Library.Models
             HealthCheckConditions = new HealthCheckConditions();
             AlertBehaviour = new List<AlertBehaviour>();
             AdditionalTags = new List<string>();
+            ExcludedInterceptionNames = new List<string>();
         }
 
         public string Name { get; set; }
         public ServiceType ServiceType { get; set; }
+        public List<string> ExcludedInterceptionNames { get; set; } 
         public string EndpointOrHost { get; set; }
         public string ConnectionString { get; set; }
         public TimeSpan MonitoringInterval { get; set; }

@@ -6,11 +6,11 @@ using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
-
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram
 {
@@ -18,27 +18,39 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
     {
         private readonly TelegramTransportSettings _telegramTransportSettings;
 
+        private readonly TelegramBotClient _telegramBot;
+
         public TelegramAlertingPublisher(IHealthChecksBuilder healthChecksBuilder,
             ServiceHealthCheck healthCheck,
             AlertTransportSettings alertTransportSettings) :
             base(healthChecksBuilder, healthCheck, alertTransportSettings)
         {
             _telegramTransportSettings = (TelegramTransportSettings)alertTransportSettings;
+            _telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
         }
 
         public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            var alert = this.HasToPublishAlert(report);
+            var ownedEntry = this.GetOwnedEntry(report);
 
-            if (!alert) return;
+            var interceptedEntries = this.GetInterceptedEntries(report);
 
-            var telegramBot = new TelegramBotClient(_telegramTransportSettings.BotApiToken);
+            var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
 
-            var entry = report
-                .Entries
-                .FirstOrDefault(x =>
-                    x.Key == this._healthCheck.Name);
+            if (ownedAlerting)
+            {
+                await SendTelegramMessage(ownedEntry, cancellationToken);
+            }
 
+            foreach (var entry in interceptedEntries)
+            {
+                this.IsOkToAlert(entry, false);
+                await SendTelegramMessage(ownedEntry, cancellationToken);
+            }
+        }
+
+        private async Task SendTelegramMessage(KeyValuePair<string, HealthReportEntry> entry, CancellationToken cancellationToken)
+        {
             var currentStatus = "[Undefined]";
 
             switch (entry.Value.Status)
@@ -66,7 +78,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 body += $"Alert Tags    : {extraData.Key} - {extraData.Value} {Environment.NewLine}";
             }
 
-            await telegramBot.SendMessage(_telegramTransportSettings.ChatId, body, cancellationToken: cancellationToken);
+            await _telegramBot.SendMessage(_telegramTransportSettings.ChatId, body, cancellationToken: cancellationToken);
         }
 
     protected internal override void Validate()

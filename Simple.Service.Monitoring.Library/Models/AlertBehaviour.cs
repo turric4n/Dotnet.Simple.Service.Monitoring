@@ -5,6 +5,25 @@ namespace Simple.Service.Monitoring.Library.Models
 {
     public class AlertBehaviour
     {
+        public AlertBehaviour()
+        {
+        }
+
+        public AlertBehaviour(AlertBehaviour alertBehaviour)
+        {
+            TransportMethod = alertBehaviour.TransportMethod;
+            TransportName = alertBehaviour.TransportName;
+            AlertOnce = alertBehaviour.AlertOnce;
+            AlertOnServiceRecovered = alertBehaviour.AlertOnServiceRecovered;
+            AlertEvery = alertBehaviour.AlertEvery;
+            StartAlertingOn = alertBehaviour.StartAlertingOn;
+            StopAlertingOn = alertBehaviour.StopAlertingOn;
+            AlertByFailCount = alertBehaviour.AlertByFailCount;
+            PublishAllResults = alertBehaviour.PublishAllResults;
+            IncludeEnvironment = alertBehaviour.IncludeEnvironment;
+            Timezone = alertBehaviour.Timezone;
+        }
+
         public AlertTransportMethod TransportMethod { get; set; }
         public string TransportName { get; set; }
         public bool AlertOnce { get; set; }

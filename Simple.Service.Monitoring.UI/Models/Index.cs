@@ -3,6 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.UI.Services;
 using System.Collections.Generic;
 using System.Linq;
+using Simple.Service.Monitoring.Library.Models;
 
 namespace Simple.Service.Monitoring.UI.Models
 {

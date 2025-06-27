@@ -60,6 +60,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 case ServiceType.MySql:
                     mymonitor = new MySqlServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
+                case ServiceType.Interceptor:
+                    mymonitor = new MySqlServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
 

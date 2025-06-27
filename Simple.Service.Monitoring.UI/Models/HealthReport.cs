@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Simple.Service.Monitoring.Library.Models;
 
 namespace Simple.Service.Monitoring.UI.Models
 {

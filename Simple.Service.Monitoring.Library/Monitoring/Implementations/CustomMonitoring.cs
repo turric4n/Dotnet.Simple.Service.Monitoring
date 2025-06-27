@@ -85,7 +85,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 var classInstance = ActivatorUtilities.CreateInstance(_serviceProvider, classType) as IHealthCheck;
                 HealthChecksBuilder.AddCheck(Name, classInstance);
             }
-
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.UI.Hubs;
-using Simple.Service.Monitoring.UI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -195,6 +195,27 @@ namespace Simple.Service.Monitoring.UI.Services
                 var healthCheckData = new HealthCheckData(entry.Value) { Name = entry.Key };
                 _healthCheckDatabase.Add(healthCheckData);
             }
+
+            var currentStatus = GetOverallStatus();
+
+            if (_hubContext != null)
+            {
+                if (previousStatus != currentStatus)
+                    await NotifyStatusChange(previousStatus, currentStatus);
+
+                // Notify clients with the full report
+                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
+                
+                // Also send updated timeline data
+                await SendHealthCheckTimeline(24); // Default to 24 hours
+            }
+        }
+
+        public async Task AddHealthCheckData(HealthCheckData healthCheckData)
+        {
+            var previousStatus = GetOverallStatus();
+
+            _healthCheckDatabase.Add(healthCheckData);
 
             var currentStatus = GetOverallStatus();
 

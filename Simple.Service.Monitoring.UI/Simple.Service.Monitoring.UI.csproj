@@ -1,25 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>Simple health check library UI for internal or external services made in C#
+    
+     - Added SQL/MySQL query healthCheck and result</Description>
+		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Version>1.0.5</Version>
+		<AssemblyVersion>1.0.5</AssemblyVersion>
+		<FileVersion>1.0.5</FileVersion>
+		<Authors>Turrican with help of my fellow friends</Authors>
+		<Company>Turrican Software</Company>
+		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="wwwroot\**\*" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="wwwroot\**\*" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Front\src\components\" />
-    <Folder Include="Front\src\services\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Front\src\components\" />
+		<Folder Include="Front\src\services\" />
+		<Folder Include="Handlers\" />
+		<Folder Include="Helpers\" />
+		<Folder Include="wwwroot\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+	</ItemGroup>
 </Project>

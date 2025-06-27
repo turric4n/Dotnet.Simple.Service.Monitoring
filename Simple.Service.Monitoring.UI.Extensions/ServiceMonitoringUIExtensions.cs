@@ -67,7 +67,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 }
             });
 
-            app.ApplicationServices.GetService<IMonitoringDataService>()?.Init();
+            app
+                .ApplicationServices
+                .GetService<IMonitoringDataService>()?.Init();
 
             return app;
         }
@@ -79,6 +81,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Map SignalR Hub
             endpoints.MapHub<MonitoringHub>("/monitoringhub");
+
+            //var requestDelegate = new HealthChecksRequestHandler();
+
+            //endpoints.MapPost("/heatlhchecks-webhook", requestDelegate.HandleHealthChecksRequest());
 
             return endpoints;
         }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using CuttingEdge.Conditions;
 
 namespace Simple.Service.Monitoring.Library.Models.TransportSettings
 {

@@ -1,33 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	  <Description>Simple Service Monitoring Extensions and Health checks for .NET
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Description>Simple Service Monitoring Extensions and Health checks for .NET
 
 - Added SQL/MySQL query healthCheck and result</Description>
-	  <Copyright>Turrican Software</Copyright>
-	  <PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.4.2</Version>
-    <AssemblyVersion>1.0.4.2</AssemblyVersion>
-    <FileVersion>1.0.4.2</FileVersion>
-	  <RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
-	  <Company>Turrican Software</Company>
-	  <Authors>Turrican with help of my fellow friends</Authors>
-	  <PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
-	  <RepositoryType>GIT</RepositoryType>
-  </PropertyGroup>
+		<Copyright>Turrican Software</Copyright>
+		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Version>1.0.5</Version>
+		<AssemblyVersion>1.0.5</AssemblyVersion>
+		<FileVersion>1.0.5</FileVersion>
+		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
+		<Company>Turrican Software</Company>
+		<Authors>Turrican with help of my fellow friends</Authors>
+		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
+		<RepositoryType>GIT</RepositoryType>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.3.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.3.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.3.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
+	</ItemGroup>
 
 </Project>

@@ -10,6 +10,7 @@
         Hangfire,
         Ping,
         Redis,
-        MySql
+        MySql,
+        Interceptor
     }
 }

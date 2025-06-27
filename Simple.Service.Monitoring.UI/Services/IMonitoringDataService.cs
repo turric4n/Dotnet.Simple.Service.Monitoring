@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Simple.Service.Monitoring.Library.Models;
 
 namespace Simple.Service.Monitoring.UI.Services
 {
@@ -16,6 +17,7 @@ namespace Simple.Service.Monitoring.UI.Services
         Task SendHealthCheckTimeline(int hours = 24);
         Models.HealthReport GetHealthReportByDateRange(DateTime from, DateTime to);
         Task AddHealthReport(HealthReport report);
+        Task AddHealthCheckData(HealthCheckData healthCheckData);
         void Init();
     }
 }

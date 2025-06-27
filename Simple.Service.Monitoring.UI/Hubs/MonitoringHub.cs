@@ -4,6 +4,7 @@ using Simple.Service.Monitoring.UI.Models;
 using Simple.Service.Monitoring.UI.Services;
 using System;
 using System.Threading.Tasks;
+using Simple.Service.Monitoring.Library.Models;
 
 namespace Simple.Service.Monitoring.UI.Hubs
 {
@@ -29,6 +30,12 @@ namespace Simple.Service.Monitoring.UI.Hubs
         {
             await _monitoringDataService.SendHealthCheckTimeline(hours);
         }
+
+        public async Task SendHealthCheck(HealthCheckData healthCheckData)
+        {
+            await _monitoringDataService.AddHealthCheckData(healthCheckData);
+        }
+
 
         public override Task OnConnectedAsync()
         {
