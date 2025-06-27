@@ -559,5 +559,60 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Assert
             ok.Should().BeTrue();
         }
+
+        [Test]
+        public void Given_Well_Formed_Alert_Behaviour_Will_Publish_All_Results_Even_Unhealthy()
+        {
+            // Arrange
+            var ok = false;
+            var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheckalways",
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    HttpBehaviour = new HttpBehaviour()
+                    {
+                        HttpExpectedCode = 200,
+                        HttpTimeoutMs = 1000,
+                        HttpVerb = HttpVerb.Get
+                    },
+                },
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        AlertEvery = TimeSpan.FromSeconds(5),
+                        AlertOnServiceRecovered = true,
+                        TransportName = "Dummy",
+                        TransportMethod = AlertTransportMethod.Email,
+                        PublishAllResults = true
+                    }
+                },
+                ExcludedInterceptionNames = new List<string>() 
+                {
+                    "testhealthcheckalways"
+                },
+                EndpointOrHost = "https://www.google.com",
+                MonitoringInterval = TimeSpan.FromSeconds(1),
+                ServiceType = ServiceType.Http,
+                Alert = true
+            };
+            var alertPublisher2 =
+                new DictionaryPublisher(healthChecksBuilder, httpendpointhealthcheck, alertTransportSettings);
+            var dic = new Dictionary<string, HealthReportEntry>();
+            dic.Add("testhealthcheckalways", new HealthReportEntry(HealthStatus.Unhealthy, "", TimeSpan.Zero, null, null));
+            var healthobserver = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            healthobserver.Setup(
+                observer => observer.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>())).Callback(() =>
+            {
+                ok = !ok;
+            });
+            var healthReportMock = new HealthReport(dic, TimeSpan.Zero);
+            alertPublisher2.Subscribe(healthobserver.Object);
+            //Act
+            alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
+            //Assert
+            ok.Should().BeTrue();
+        }
     }
 }

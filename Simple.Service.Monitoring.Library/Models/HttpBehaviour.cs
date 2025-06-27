@@ -9,7 +9,7 @@
     }
     public class HttpBehaviour : ConnectionBehaviour
     {
-        public int HttpExpectedCode { get; set; }
+        public int HttpExpectedCode { get; set; } = 200;
         public int HttpTimeoutMs { get; set; } = 5000;
         public HttpVerb HttpVerb { get; set; }
     }

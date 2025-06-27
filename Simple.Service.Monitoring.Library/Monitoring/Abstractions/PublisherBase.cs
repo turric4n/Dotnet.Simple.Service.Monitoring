@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using RabbitMQ.Client.Events;
 using TimeZoneConverter;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
@@ -146,6 +147,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         public bool IsOkToAlert(KeyValuePair<string, HealthReportEntry> entry, bool intercepted = false)
         {
+            if (default(KeyValuePair<string, HealthReportEntry>).Equals(entry)) return false;
+
             var behaviour = intercepted ? GetInterceptedBehaviour(entry.Key, GetAlertBehaviour()) : GetAlertBehaviour();
 
             if (behaviour == null) return false;
@@ -177,7 +180,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
         {
             var ownedEntry = report
                 .Entries
-                .FirstOrDefault(x => x.Key == this._healthCheck.Name);
+                .FirstOrDefault(x => x.Key == this._healthCheck.Name);  
 
             return ownedEntry;
         }

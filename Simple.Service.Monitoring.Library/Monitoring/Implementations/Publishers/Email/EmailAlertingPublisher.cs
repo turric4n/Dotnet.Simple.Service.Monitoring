@@ -37,14 +37,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         {
             var ownedEntry = this.GetOwnedEntry(report);
             var interceptedEntries = this.GetInterceptedEntries(report);
-            
             var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
             
             if (ownedAlerting)
             {
                 await SendEmailAlertAsync(ownedEntry, cancellationToken);
             }
-            
+
             foreach (var interceptedEntry in interceptedEntries)
             {
                 if (this.IsOkToAlert(interceptedEntry, true))
