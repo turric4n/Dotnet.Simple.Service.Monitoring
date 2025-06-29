@@ -60,6 +60,10 @@ namespace Simple.Service.Monitoring.Extensions
                             transport = _options.SlackTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
+                        case AlertTransportMethod.SignalR:
+                            transport = _options.SignalRTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }

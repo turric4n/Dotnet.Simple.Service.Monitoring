@@ -13,4 +13,5 @@ export interface HealthCheckData {
     description: string;
     checkError: string;
     serviceType: string;
+    machineName: string;
 }

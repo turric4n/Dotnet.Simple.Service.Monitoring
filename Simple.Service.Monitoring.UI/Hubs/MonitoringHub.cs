@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Simple.Service.Monitoring.UI.Models;
 using Simple.Service.Monitoring.UI.Services;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Simple.Service.Monitoring.Library.Models;
 
@@ -36,6 +37,10 @@ namespace Simple.Service.Monitoring.UI.Hubs
             await _monitoringDataService.AddHealthCheckData(healthCheckData);
         }
 
+        public async Task SendHealthChecks(List<HealthCheckData> healthChecksData)
+        {
+            await _monitoringDataService.AddHealthChecksData(healthChecksData);
+        }
 
         public override Task OnConnectedAsync()
         {

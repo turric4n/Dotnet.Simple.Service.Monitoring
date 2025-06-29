@@ -232,6 +232,34 @@ namespace Simple.Service.Monitoring.UI.Services
             }
         }
 
+        public async Task AddHealthChecksData(List<HealthCheckData> healthChecksData)
+        {
+            if (healthChecksData == null || !healthChecksData.Any())
+                return;
+
+            var previousStatus = GetOverallStatus();
+
+            // Add all health check data entries to the database
+            foreach (var healthCheckData in healthChecksData)
+            {
+                _healthCheckDatabase.Add(healthCheckData);
+            }
+
+            var currentStatus = GetOverallStatus();
+
+            if (_hubContext != null)
+            {
+                if (previousStatus != currentStatus)
+                    await NotifyStatusChange(previousStatus, currentStatus);
+
+                // Notify clients with the full report
+                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
+
+                // Also send updated timeline data
+                await SendHealthCheckTimeline(24); // Default to 24 hours
+            }
+        }
+
         public void Init()
         {
             _reportObservable.Subscribe(this);

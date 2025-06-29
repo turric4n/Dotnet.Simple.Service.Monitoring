@@ -123,8 +123,9 @@ export class DashboardComponent {
 
                 row.innerHTML = `
                     <td><strong>${this.escapeHtml(name)}</strong></td>
-                    <td><span class="badge bg-${this.getStatusColor(status)}">${this.escapeHtml(status)}</span></td>
                     <td>${check.serviceType || ''}</td>
+                    <td>${check.machineName || ''}</td>
+                    <td><span class="badge bg-${this.getStatusColor(status)}">${this.escapeHtml(status)}</span></td>                    
                     <td>${this.escapeHtml(checkError)}</td>
                     <td>${check.duration} ms</td>
                     <td>${lastUpdated} UTC</td>

@@ -11,6 +11,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Te
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.SignalRPublisher;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -87,59 +88,71 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             switch (alertTransportSettings)
             {
                 case EmailTransportSettings _:
-                {
-                    publisher = new EmailAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
-                    lock (_publishers)
                     {
-                        _publishers.Add(publisher);
-                    }
+                        publisher = new EmailAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers)
+                        {
+                            _publishers.Add(publisher);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
                 case InfluxDbTransportSettings _:
-                {
-                    publisher = new InfluxDbAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
-                    lock (_publishers)
                     {
-                        _publishers.Add(publisher);
-                    }
+                        publisher = new InfluxDbAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers)
+                        {
+                            _publishers.Add(publisher);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case CustomNotificationTransportSettings _:
-                {
-                    publisher = new CustomNotificationAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
-                    lock (_publishers)
                     {
-                        _publishers.Add(publisher);
-                    }
+                        publisher = new CustomNotificationAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers)
+                        {
+                            _publishers.Add(publisher);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case TelegramTransportSettings _:
-                {
-                    publisher = new TelegramAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
-                    lock (_publishers)
                     {
-                        _publishers.Add(publisher);
-                    }
+                        publisher = new TelegramAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers)
+                        {
+                            _publishers.Add(publisher);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
 
                 case SlackTransportSettings _:
-                {
-                    publisher = new SlackAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
-                    lock (_publishers)
                     {
-                        _publishers.Add(publisher);
+                        publisher = new SlackAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers)
+                        {
+                            _publishers.Add(publisher);
+                        }
+
+                        break;
                     }
 
-                    break;
-                }
+                case SignalRTransportSettings _:
+                    {
+
+                        publisher = new SignalRAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers)
+                        {
+                            _publishers.Add(publisher);
+                        }
+                        break;
+                    }
             }
+
 
             publisher?.SetUp();
 

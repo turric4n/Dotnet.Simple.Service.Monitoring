@@ -18,6 +18,7 @@ namespace Simple.Service.Monitoring.UI.Services
         Models.HealthReport GetHealthReportByDateRange(DateTime from, DateTime to);
         Task AddHealthReport(HealthReport report);
         Task AddHealthCheckData(HealthCheckData healthCheckData);
+        Task AddHealthChecksData(List<HealthCheckData> healthChecksData);
         void Init();
     }
 }

@@ -82,10 +82,6 @@ namespace Microsoft.Extensions.DependencyInjection
             // Map SignalR Hub
             endpoints.MapHub<MonitoringHub>("/monitoringhub");
 
-            //var requestDelegate = new HealthChecksRequestHandler();
-
-            //endpoints.MapPost("/heatlhchecks-webhook", requestDelegate.HandleHealthChecksRequest());
-
             return endpoints;
         }
     }

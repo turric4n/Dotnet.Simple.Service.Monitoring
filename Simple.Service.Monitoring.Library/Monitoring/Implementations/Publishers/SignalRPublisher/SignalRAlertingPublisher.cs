@@ -39,24 +39,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
 
             // We need to resolve the hub URL from the settings
-            var hubUrl = _signalRTransportSettings.HubPath;
-            
-            // If not a complete URL, assume it's a relative path
-            if (!Uri.IsWellFormedUriString(hubUrl, UriKind.Absolute))
-            {
-                // Try to get the base URL from the health check
-                var baseUrl = _healthCheck.EndpointOrHost;
-                if (!string.IsNullOrEmpty(baseUrl))
-                {
-                    // Ensure the base URL ends with a /
-                    baseUrl = baseUrl.TrimEnd('/') + "/";
-                    
-                    // Ensure the hub path starts without a /
-                    var hubPath = _signalRTransportSettings.HubPath.TrimStart('/');
-                    
-                    hubUrl = baseUrl + hubPath;
-                }
-            }
+            var hubUrl = _signalRTransportSettings.HubUrl;
 
             _hubConnection = new HubConnectionBuilder()
                 .WithUrl(hubUrl)
@@ -86,27 +69,21 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     return;
                 }
 
-                // Create alert data object
-                var alertData = new
+                // Convert health entries to HealthCheckData objects
+                var healthCheckDataList = report.Entries.Select(e => new HealthCheckData(e.Value)
                 {
-                    TimeStamp = DateTime.UtcNow,
-                    ServiceName = _healthCheck.Name,
+                    Name = e.Key,
+                    CreationDate = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow,
                     ServiceType = _healthCheck.ServiceType.ToString(),
-                    Status = report.Status.ToString(),
-                    HealthChecks = report.Entries.Select(e => new
-                    {
-                        Name = e.Key,
-                        Status = e.Value.Status.ToString(),
-                        Duration = e.Value.Duration.TotalMilliseconds,
-                        Description = e.Value.Description,
-                        Error = e.Value.Exception?.Message
-                    })
-                };
+                    MachineName = Environment.MachineName
+                }).ToList();
+
 
                 // Send the alert through SignalR
                 await connection.InvokeAsync(
                     _signalRTransportSettings.HubMethod,
-                    alertData,
+                    healthCheckDataList,
                     cancellationToken);
             }
             catch (Exception ex)
@@ -119,7 +96,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         protected internal override void Validate()
         {
             Condition.WithExceptionOnFailure<SignalRValidationError>()
-                .Requires(_signalRTransportSettings.HubPath)
+                .Requires(_signalRTransportSettings.HubUrl)
                 .IsNotNullOrWhiteSpace();
 
             Condition.WithExceptionOnFailure<SignalRValidationError>()

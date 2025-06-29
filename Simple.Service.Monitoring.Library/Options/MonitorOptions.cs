@@ -17,5 +17,6 @@ namespace Simple.Service.Monitoring.Library.Options
         public List<TelegramTransportSettings> TelegramTransportSettings { get; set; }
         public List<InfluxDbTransportSettings> InfluxDbTransportSettings { get; set; }
         public List<CustomNotificationTransportSettings> CustomNotificationTransportSettings { get; set; }
+        public List<SignalRTransportSettings> SignalRTransportSettings { get; set; }
     }
 }

@@ -9,11 +9,7 @@ namespace Simple.Service.Monitoring.Library.Models.TransportSettings
         /// Default is "ReceiveHealthAlert"
         /// </summary>
         public string HubMethod { get; set; } = "ReceiveHealthAlert";
-        
-        /// <summary>
-        /// Gets or sets the hub path.
-        /// Default is "/monitoringHub"
-        /// </summary>
-        public string HubPath { get; set; } = "/monitoringHub";
+
+        public string HubUrl { get; set; }
     }
 }

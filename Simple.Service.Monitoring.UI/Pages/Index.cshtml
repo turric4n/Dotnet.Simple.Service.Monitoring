@@ -1,4 +1,6 @@
 ﻿@page "/monitoring"
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
 @model Simple.Service.Monitoring.UI.Models.IndexModel
 @{
     ViewData["Title"] = "Service Monitoring";
@@ -24,6 +26,7 @@
                             <tr>
                                 <th>Service</th>
                                 <th>Check Type</th>
+                                <th>Machine Name</th>
                                 <th>Status</th>
                                 <th>Failure Information</th>
                                 <th>Duration</th>
@@ -36,6 +39,7 @@
                                     <tr class="@GetRowClass(check.Status)">
                                         <td><strong>@check.Name</strong></td>
                                         <td>@check.ServiceType</td>
+                                        <td>@check.MachineName</td>
                                         <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
                                         <td>@check.CheckError</td>
                                         <td>@check.Duration ms</td>

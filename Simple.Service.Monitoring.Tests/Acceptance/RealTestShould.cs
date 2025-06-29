@@ -118,8 +118,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance
                                 .WithRuntimeSettings(monitorOptions);
 
                             services.AddHealthChecks()
-                                .AddCheck("test_healthy", () =>
-                                    HealthCheckResult.Healthy("Test is healthy"))
+                                .AddCheck("test_healthy", () => HealthCheckResult.Healthy("Test is healthy"))
                                 .AddCheck("test_degraded", () => HealthCheckResult.Degraded("Test is degraded"))
                                 .AddCheck("test_unhealthy", () => HealthCheckResult.Unhealthy("Test is unhealthy"));
 

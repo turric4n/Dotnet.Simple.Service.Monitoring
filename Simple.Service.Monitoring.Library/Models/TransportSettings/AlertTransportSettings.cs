@@ -3,6 +3,5 @@
     public abstract class AlertTransportSettings
     {
         public string Name { get; set; }
-        public bool InterceptAllHealthChecks { get; set; }
     }
 }

@@ -15,8 +15,9 @@ namespace Simple.Service.Monitoring.Library.Models
             LastUpdated = DateTime.UtcNow;
             Duration = healthReportEntry.Duration.Milliseconds.ToString();
             Description = healthReportEntry.Description ?? "No description provided";
-            CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : "Unknown";
-            ServiceType = healthReportEntry.Tags.FirstOrDefault(tag => tag.StartsWith("ServiceType:"))?.Split(":").ElementAtOrDefault(1) ?? "Unknown";
+            CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : "None";
+            ServiceType = healthReportEntry.Tags.FirstOrDefault(tag => tag.StartsWith("ServiceType:"))?.Split(":").ElementAtOrDefault(1) ?? "Custom HealthCheck";
+            MachineName = Environment.MachineName;
         }
 
         // Default constructor for serialization
@@ -32,5 +33,6 @@ namespace Simple.Service.Monitoring.Library.Models
         public string Description { get; set; }
         public string CheckError { get; set; }
         public string ServiceType { get; set; }
+        public string MachineName { get; set; }
     }
 }

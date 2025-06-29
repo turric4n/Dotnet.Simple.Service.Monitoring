@@ -7,6 +7,7 @@
         Telegram,
         Influx,
         Slack,
-        CustomApi
+        CustomApi,
+        SignalR,
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -24,8 +25,13 @@ namespace Simple.Service.Monitoring
         {
             services
                 .AddServiceMonitoring(Configuration)
-                .WithApplicationSettings()
-                .WithServiceMonitoringUi(services);
+                .WithServiceMonitoringUi(services)
+                .WithApplicationSettings();
+
+            //services.AddHealthChecks()
+            //    .AddCheck("test_healthy", () => HealthCheckResult.Healthy("Test is healthy"))
+            //    .AddCheck("test_degraded", () => HealthCheckResult.Degraded("Test is degraded"))
+            //    .AddCheck("test_unhealthy", () => HealthCheckResult.Unhealthy("Test is unhealthy"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,16 +49,6 @@ namespace Simple.Service.Monitoring
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapServiceMonitoringUi();
-
-                //endpoints.MapGet("/", async context =>
-                //{
-                //    var stackMonitoring = context.RequestServices.GetRequiredService<IStackMonitoring>();
-
-                //    var monitors = stackMonitoring.GetMonitors();
-                //    var publishers = stackMonitoring.GetPublishers();
-
-                //    await context.Response.WriteAsync($"Monitors : {JsonConvert.SerializeObject(monitors)} \r\n Publishers : {JsonConvert.SerializeObject(publishers)}");
-                //});
             });
         }
     }
