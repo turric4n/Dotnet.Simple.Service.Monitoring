@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.UI.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Simple.Service.Monitoring.Library.Models;
+using System.Threading.Tasks;
 
 namespace Simple.Service.Monitoring.UI.Models
 {
@@ -34,10 +36,24 @@ namespace Simple.Service.Monitoring.UI.Models
                 .Where(hc => hc.Status != HealthStatus.Healthy)
                 .OrderByDescending(hc => hc.LastUpdated);
 
-        public void OnGet()
+        public async Task OnGetAsync()
         {
-            // Get the latest report (if any)
-            Report = _monitoringService.GetHealthCheckReport();
+            try
+            {
+                // Get the latest report (if any)
+                Report = await _monitoringService.GetHealthCheckReport();
+            }
+            catch (Exception ex)
+            {
+                // Handle or log the exception
+                // You might want to set a default/empty report here
+                Report = new HealthReport
+                {
+                    Status = "Error",
+                    LastUpdated = DateTime.UtcNow,
+                    HealthChecks = new List<HealthCheckData>()
+                };
+            }
         }
     }
 }

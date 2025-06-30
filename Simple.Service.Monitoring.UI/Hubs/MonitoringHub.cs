@@ -20,11 +20,18 @@ namespace Simple.Service.Monitoring.UI.Hubs
             _monitoringDataService = monitoringDataService;
         }
 
-        public Task<HealthReport> RetrieveHealthChecksReport()
+        public async Task<HealthReport> RetrieveHealthChecksReport()
         {
-            var healthChecksReport = _monitoringDataService.GetHealthCheckReport();
-
-            return Task.FromResult(healthChecksReport);
+            try
+            {
+                var healthChecksReport = await _monitoringDataService.GetHealthCheckReport();
+                return healthChecksReport;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving health checks report");
+                throw;
+            }
         }
 
         public async Task RequestHealthChecksTimeline(int hours = 24)

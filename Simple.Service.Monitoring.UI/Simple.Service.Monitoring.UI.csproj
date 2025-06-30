@@ -9,9 +9,9 @@
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.9</Version>
-		<AssemblyVersion>1.0.9</AssemblyVersion>
-		<FileVersion>1.0.9</FileVersion>
+		<Version>1.0.10</Version>
+		<AssemblyVersion>1.0.10</AssemblyVersion>
+		<FileVersion>1.0.10</FileVersion>
 		<Authors>Turrican aka Enrique Fuentes</Authors>
 		<Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
@@ -44,6 +44,7 @@
 		<Folder Include="Front\src\components\" />
 		<Folder Include="Front\src\services\" />
 		<Folder Include="Helpers\" />
+		<Folder Include="Repositories\NewFolder\" />
 		<Folder Include="wwwroot\" />
     <None Include="README.md">
       <Pack>True</Pack>
@@ -52,6 +53,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="LiteDB" Version="5.0.21" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
 	</ItemGroup>
 

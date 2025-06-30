@@ -9,6 +9,8 @@ using Simple.Service.Monitoring.UI.Hubs;
 using Simple.Service.Monitoring.UI.Models;
 using Simple.Service.Monitoring.UI.Services;
 using System;
+using Simple.Service.Monitoring.UI.Repositories;
+using Simple.Service.Monitoring.UI.Settings;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -26,6 +28,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Register data service for sharing health reports
             services.AddSingleton<IMonitoringDataService, MonitoringDataService>();
+
+            services.AddOptions<MonitoringUiSettings>();
+
+            services.AddSingleton<IMonitoringDataRepositoryLocator, MonitoringDataRepositoryLocator>();
 
             // Register TagHelpers from the UI assembly
             services.AddRazorPages()

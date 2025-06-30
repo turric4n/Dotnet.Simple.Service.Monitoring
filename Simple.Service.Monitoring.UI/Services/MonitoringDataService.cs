@@ -3,6 +3,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.UI.Hubs;
+using Simple.Service.Monitoring.UI.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +13,16 @@ namespace Simple.Service.Monitoring.UI.Services
 {
     public class MonitoringDataService : IMonitoringDataService, IReportObserver, IDisposable
     {
-        // Simulated database
-        private readonly List<HealthCheckData> _healthCheckDatabase = new();
         private readonly IReportObservable _reportObservable;
         private readonly IHubContext<MonitoringHub> _hubContext;
+        private readonly IMonitoringDataRepository _repository;
 
         public MonitoringDataService(
+            IMonitoringDataRepositoryLocator monitoringDataRepositoryLocator,
             IReportObservable reportObservable,
             IHubContext<MonitoringHub> hubContext)
         {
+            _repository = monitoringDataRepositoryLocator.GetMonitoringDataRepository();
             _reportObservable = reportObservable;
             _hubContext = hubContext;
         }
@@ -28,16 +30,13 @@ namespace Simple.Service.Monitoring.UI.Services
         /// <summary>
         /// Returns the latest health report (latest entry for each name and machine name combination)
         /// </summary>
-        public Models.HealthReport GetHealthCheckReport()
+        public async Task<Models.HealthReport> GetHealthCheckReport()
         {
-            var latestChecks = _healthCheckDatabase
-                .GroupBy(hc => new { hc.Name, hc.MachineName })
-                .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
-                .ToList();
+            var latestChecks = await _repository.GetLatestHealthChecksAsync();
 
             return new Models.HealthReport
             {
-                Status = GetOverallStatus().ToString(),
+                Status = (await GetOverallStatus()).ToString(),
                 LastUpdated = latestChecks.Any() ? latestChecks.Max(hc => hc.LastUpdated) : DateTime.UtcNow,
                 HealthChecks = latestChecks
             };
@@ -46,13 +45,9 @@ namespace Simple.Service.Monitoring.UI.Services
         /// <summary>
         /// Returns a health report for entries between the given date range.
         /// </summary>
-        public Models.HealthReport GetHealthReportByDateRange(DateTime from, DateTime to)
+        public async Task<Models.HealthReport> GetHealthReportByDateRange(DateTime from, DateTime to)
         {
-            var checksInRange = _healthCheckDatabase
-                .Where(hc => hc.LastUpdated >= from && hc.LastUpdated <= to)
-                .GroupBy(hc => new { hc.Name, hc.MachineName })
-                .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
-                .ToList();
+            var checksInRange = await _repository.GetHealthChecksByDateRangeAsync(from, to);
 
             var status = HealthStatus.Healthy;
             if (checksInRange.Any(c => c.Status == HealthStatus.Unhealthy))
@@ -71,15 +66,15 @@ namespace Simple.Service.Monitoring.UI.Services
         /// <summary>
         /// Get timeline segments showing status changes for each service within a time window
         /// </summary>
-        public Dictionary<string, List<HealthCheckTimelineSegment>> GetHealthCheckTimeline(int hours = 24)
+        public async Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimeline(int hours = 24)
         {
             var endTime = DateTime.UtcNow;
             var startTime = endTime.AddHours(-hours);
 
             var result = new Dictionary<string, List<HealthCheckTimelineSegment>>();
 
-            // Group by service name and machine name
-            var groupedChecks = _healthCheckDatabase.GroupBy(hc => new { hc.Name, hc.MachineName });
+            // Get all health checks grouped by name and machine name
+            var groupedChecks = await _repository.GetGroupedHealthChecksAsync();
 
             foreach (var group in groupedChecks)
             {
@@ -177,52 +172,53 @@ namespace Simple.Service.Monitoring.UI.Services
             return result;
         }
 
-        // The rest of the code remains unchanged
         public async Task SendHealthCheckTimeline(int hours = 24)
         {
             if (_hubContext != null)
             {
-                var timeline = GetHealthCheckTimeline(hours);
+                var timeline = await GetHealthCheckTimeline(hours);
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksTimeline", timeline);
             }
         }
 
         public async Task AddHealthReport(Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport report)
         {
-            var previousStatus = GetOverallStatus();
+            var previousStatus = await GetOverallStatus();
+            var healthChecksToAdd = new List<HealthCheckData>();
 
             foreach (var entry in report.Entries)
             {
                 var healthCheckData = new HealthCheckData(entry.Value, entry.Key);
-                _healthCheckDatabase.Add(healthCheckData);
+                healthChecksToAdd.Add(healthCheckData);
             }
 
-            var currentStatus = GetOverallStatus();
+            await _repository.AddHealthChecksDataAsync(healthChecksToAdd);
+            var currentStatus = await GetOverallStatus();
 
             if (_hubContext != null)
             {
                 if (previousStatus != currentStatus)
                     await NotifyStatusChange(previousStatus, currentStatus);
 
-                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
+                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", await GetHealthCheckReport());
                 await SendHealthCheckTimeline(24);
             }
         }
 
         public async Task AddHealthCheckData(HealthCheckData healthCheckData)
         {
-            var previousStatus = GetOverallStatus();
+            var previousStatus = await GetOverallStatus();
 
-            _healthCheckDatabase.Add(healthCheckData);
+            await _repository.AddHealthCheckDataAsync(healthCheckData);
 
-            var currentStatus = GetOverallStatus();
+            var currentStatus = await GetOverallStatus();
 
             if (_hubContext != null)
             {
                 if (previousStatus != currentStatus)
                     await NotifyStatusChange(previousStatus, currentStatus);
 
-                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
+                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", await GetHealthCheckReport());
                 await SendHealthCheckTimeline(24);
             }
         }
@@ -232,21 +228,18 @@ namespace Simple.Service.Monitoring.UI.Services
             if (healthChecksData == null || !healthChecksData.Any())
                 return;
 
-            var previousStatus = GetOverallStatus();
+            var previousStatus = await GetOverallStatus();
 
-            foreach (var healthCheckData in healthChecksData)
-            {
-                _healthCheckDatabase.Add(healthCheckData);
-            }
+            await _repository.AddHealthChecksDataAsync(healthChecksData);
 
-            var currentStatus = GetOverallStatus();
+            var currentStatus = await GetOverallStatus();
 
             if (_hubContext != null)
             {
                 if (previousStatus != currentStatus)
                     await NotifyStatusChange(previousStatus, currentStatus);
 
-                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
+                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", await GetHealthCheckReport());
                 await SendHealthCheckTimeline(24);
             }
         }
@@ -256,12 +249,9 @@ namespace Simple.Service.Monitoring.UI.Services
             _reportObservable.Subscribe(this);
         }
 
-        public HealthStatus GetOverallStatus()
+        public async Task<HealthStatus> GetOverallStatus()
         {
-            var latestChecks = _healthCheckDatabase
-                .GroupBy(hc => new { hc.Name, hc.MachineName })
-                .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
-                .ToList();
+            var latestChecks = await _repository.GetLatestHealthChecksAsync();
 
             if (!latestChecks.Any())
                 return HealthStatus.Unhealthy;
@@ -297,7 +287,7 @@ namespace Simple.Service.Monitoring.UI.Services
 
         public void Dispose()
         {
-            //
+            // Dispose resources if needed
         }
     }
 
