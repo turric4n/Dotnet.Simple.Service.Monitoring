@@ -9,12 +9,12 @@
 		<Copyright>Turrican Software</Copyright>
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.7</Version>
-		<AssemblyVersion>1.0.7</AssemblyVersion>
-		<FileVersion>1.0.7</FileVersion>
-		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
-		<Company>Turrican Software</Company>
-		<Authors>Turrican with help of my fellow friends</Authors>
+    <Version>1.0.8</Version>
+    <AssemblyVersion>1.0.8</AssemblyVersion>
+    <FileVersion>1.0.8</FileVersion>
+    <Authors>Turrican aka Enrique Fuentes</Authors>
+    <Company>Turrican Software</Company>
+    <PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
 		<RepositoryType>GIT</RepositoryType>
 	</PropertyGroup>
