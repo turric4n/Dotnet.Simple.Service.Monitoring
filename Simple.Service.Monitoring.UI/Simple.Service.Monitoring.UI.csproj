@@ -26,13 +26,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Handlers\**" />
+	  <Content Remove="Handlers\**" />
+	  <EmbeddedResource Remove="Handlers\**" />
+	  <None Remove="Handlers\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Folder Include="Front\src\components\" />
 		<Folder Include="Front\src\services\" />
-		<Folder Include="Handlers\" />
 		<Folder Include="Helpers\" />
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
