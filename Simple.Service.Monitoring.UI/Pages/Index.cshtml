@@ -36,15 +36,15 @@
                         <tbody>
                             @foreach (var check in Model.HealthChecks)
                             {
-                                    <tr class="@GetRowClass(check.Status)">
-                                        <td><strong>@check.Name</strong></td>
-                                        <td>@check.ServiceType</td>
-                                        <td>@check.MachineName</td>
-                                        <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                        <td>@check.CheckError</td>
-                                        <td>@check.Duration ms</td>
-                                        <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
-                                    </tr>
+                                <tr class="@GetRowClass(check.Status)">
+                                    <td><strong>@check.Name</strong></td>
+                                    <td>@check.ServiceType</td>
+                                    <td>@check.MachineName</td>
+                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
+                                    <td>@check.CheckError</td>
+                                    <td>@check.Duration ms</td>
+                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -57,6 +57,7 @@
                             <tr>
                                 <th>Service</th>
                                 <th>Check Type</th>
+                                <th>Machine Name</th>
                                 <th>Status</th>
                                 <th>Failure Information</th>
                                 <th>Duration</th>
@@ -66,14 +67,15 @@
                         <tbody>
                             @foreach (var check in Model.LastFiveHealthChecks)
                             {
-                                    <tr class="@GetRowClass(check.Status)">
-                                        <td><strong>@check.Name</strong></td>
-                                        <td>@check.ServiceType</td>
-                                        <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                        <td>@check.CheckError</td>
-                                        <td>@check.Duration ms</td>
-                                        <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
-                                    </tr>
+                                <tr class="@GetRowClass(check.Status)">
+                                    <td><strong>@check.Name</strong></td>
+                                    <td>@check.ServiceType</td>
+                                    <td>@check.MachineName</td>
+                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
+                                    <td>@check.CheckError</td>
+                                    <td>@check.Duration ms</td>
+                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -86,6 +88,7 @@
                             <tr>
                                 <th>Service</th>
                                 <th>Check Type</th>
+                                <th>Machine Name</th>
                                 <th>Status</th>
                                 <th>Failure Information</th>
                                 <th>Duration</th>
@@ -95,14 +98,15 @@
                         <tbody>
                             @foreach (var check in Model.FailedHealthChecksTimeline)
                             {
-                                    <tr class="@GetRowClass(check.Status)">
-                                        <td><strong>@check.Name</strong></td>
-                                        <td>@check.ServiceType</td>
-                                        <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                        <td>@check.CheckError</td>
-                                        <td>@check.Duration ms</td>
-                                        <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
-                                    </tr>
+                                <tr class="@GetRowClass(check.Status)">
+                                    <td><strong>@check.Name</strong></td>
+                                    <td>@check.ServiceType</td>
+                                    <td>@check.MachineName</td>
+                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
+                                    <td>@check.CheckError</td>
+                                    <td>@check.Duration ms</td>
+                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                </tr>
                             }
                         </tbody>
                     </table>

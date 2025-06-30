@@ -9,17 +9,32 @@
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.8</Version>
-    <AssemblyVersion>1.0.8</AssemblyVersion>
-    <FileVersion>1.0.8</FileVersion>
+    <Version>1.0.9</Version>
+    <AssemblyVersion>1.0.9</AssemblyVersion>
+    <FileVersion>1.0.9</FileVersion>
     <Authors>Turrican aka Enrique Fuentes</Authors>
 		<Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>Simple Service Monitoring UI Extensions</Title>
+    <Copyright>Turrican 2025</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<ProjectReference Include="..\Simple.Service.Monitoring.Extensions\Simple.Service.Monitoring.Extensions.csproj" />
 		<ProjectReference Include="..\Simple.Service.Monitoring.UI\Simple.Service.Monitoring.UI.csproj" />
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+	<ItemGroup>
+	  <None Update="icon.png">
+	    <PackagePath>\</PackagePath>
+	    <Pack>True</Pack>
+	  </None>
 	</ItemGroup>
 </Project>

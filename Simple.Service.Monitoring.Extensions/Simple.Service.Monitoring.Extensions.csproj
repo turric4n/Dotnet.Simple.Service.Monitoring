@@ -9,14 +9,17 @@
 		<Copyright>Turrican Software</Copyright>
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.8</Version>
-    <AssemblyVersion>1.0.8</AssemblyVersion>
-    <FileVersion>1.0.8</FileVersion>
+    <Version>1.0.9</Version>
+    <AssemblyVersion>1.0.9</AssemblyVersion>
+    <FileVersion>1.0.9</FileVersion>
     <Authors>Turrican aka Enrique Fuentes</Authors>
     <Company>Turrican Software</Company>
-    <PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
 		<RepositoryType>GIT</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>Simple Service Monitoring Extensions</Title>
+    <Copyright>Turrican 2025</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -28,6 +31,17 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="icon.png">
+	    <PackagePath>\</PackagePath>
+	    <Pack>True</Pack>
+	  </None>
 	</ItemGroup>
 
 </Project>

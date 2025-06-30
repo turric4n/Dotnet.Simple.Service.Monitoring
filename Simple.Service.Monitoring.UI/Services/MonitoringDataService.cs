@@ -26,12 +26,12 @@ namespace Simple.Service.Monitoring.UI.Services
         }
 
         /// <summary>
-        /// Returns the latest health report (latest entry for each name)
+        /// Returns the latest health report (latest entry for each name and machine name combination)
         /// </summary>
         public Models.HealthReport GetHealthCheckReport()
         {
             var latestChecks = _healthCheckDatabase
-                .GroupBy(hc => hc.Name)
+                .GroupBy(hc => new { hc.Name, hc.MachineName })
                 .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
                 .ToList();
 
@@ -50,7 +50,7 @@ namespace Simple.Service.Monitoring.UI.Services
         {
             var checksInRange = _healthCheckDatabase
                 .Where(hc => hc.LastUpdated >= from && hc.LastUpdated <= to)
-                .GroupBy(hc => hc.Name)
+                .GroupBy(hc => new { hc.Name, hc.MachineName })
                 .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
                 .ToList();
 
@@ -75,38 +75,44 @@ namespace Simple.Service.Monitoring.UI.Services
         {
             var endTime = DateTime.UtcNow;
             var startTime = endTime.AddHours(-hours);
-            
+
             var result = new Dictionary<string, List<HealthCheckTimelineSegment>>();
-            
-            // Group by service name
-            var groupedChecks = _healthCheckDatabase.GroupBy(hc => hc.Name);
-            
+
+            // Group by service name and machine name
+            var groupedChecks = _healthCheckDatabase.GroupBy(hc => new { hc.Name, hc.MachineName });
+
             foreach (var group in groupedChecks)
             {
-                var serviceName = group.Key;
+                var serviceName = group.Key.Name;
+                var machineName = group.Key.MachineName;
                 if (string.IsNullOrEmpty(serviceName)) continue;
-                
+
+                // Create composite key for the dictionary
+                var compositeKey = string.IsNullOrEmpty(machineName)
+                    ? serviceName
+                    : $"{serviceName} ({machineName})";
+
                 var serviceChecks = group.OrderBy(c => c.LastUpdated).ToList();
                 var segments = new List<HealthCheckTimelineSegment>();
-                
+
                 // Find the last check before our window starts
                 var initialStatus = "Unknown";
                 var checksBeforeWindow = serviceChecks.Where(c => c.LastUpdated < startTime)
                     .OrderByDescending(c => c.LastUpdated).FirstOrDefault();
-                
+
                 if (checksBeforeWindow != null)
                 {
                     initialStatus = checksBeforeWindow.Status.ToString() ?? "Unknown";
                 }
-                
+
                 string lastStatus = initialStatus;
                 DateTime lastTimestamp = startTime;
-                
+
                 // Get checks within our time window
                 var checksInWindow = serviceChecks
                     .Where(c => c.LastUpdated >= startTime && c.LastUpdated <= endTime)
                     .ToList();
-                
+
                 // If no checks in window, just add one segment with initial status
                 if (!checksInWindow.Any())
                 {
@@ -117,16 +123,16 @@ namespace Simple.Service.Monitoring.UI.Services
                         Status = initialStatus,
                         UptimePercentage = initialStatus == "Healthy" ? 100 : 0
                     });
-                    
-                    result[serviceName] = segments;
+
+                    result[compositeKey] = segments;
                     continue;
                 }
-                
+
                 // Create segments for each status change
                 foreach (var check in checksInWindow)
                 {
                     var currentStatus = check.Status.ToString() ?? "Unknown";
-                    
+
                     if (currentStatus != lastStatus)
                     {
                         segments.Add(new HealthCheckTimelineSegment
@@ -135,12 +141,12 @@ namespace Simple.Service.Monitoring.UI.Services
                             EndTime = check.LastUpdated,
                             Status = lastStatus
                         });
-                        
+
                         lastStatus = currentStatus;
                         lastTimestamp = check.LastUpdated;
                     }
                 }
-                
+
                 // Add final segment
                 segments.Add(new HealthCheckTimelineSegment
                 {
@@ -148,32 +154,30 @@ namespace Simple.Service.Monitoring.UI.Services
                     EndTime = endTime,
                     Status = lastStatus
                 });
-                
+
                 // Calculate uptime percentage
                 var totalDuration = (endTime - startTime).TotalSeconds;
                 var healthyDuration = segments
                     .Where(s => s.Status == "Healthy")
                     .Sum(s => (s.EndTime - s.StartTime).TotalSeconds);
-                
-                var uptimePercentage = totalDuration > 0 
+
+                var uptimePercentage = totalDuration > 0
                     ? Math.Round((healthyDuration / totalDuration) * 100, 2)
                     : 0;
-                
+
                 // Add uptime percentage to first segment
                 if (segments.Any())
                 {
                     segments[0].UptimePercentage = uptimePercentage;
                 }
-                
-                result[serviceName] = segments;
+
+                result[compositeKey] = segments;
             }
-            
+
             return result;
         }
-        
-        /// <summary>
-        /// Send timeline data to clients
-        /// </summary>
+
+        // The rest of the code remains unchanged
         public async Task SendHealthCheckTimeline(int hours = 24)
         {
             if (_hubContext != null)
@@ -183,16 +187,13 @@ namespace Simple.Service.Monitoring.UI.Services
             }
         }
 
-        /// <summary>
-        /// Updates health report data and notifies clients if status changes.
-        /// </summary>
         public async Task AddHealthReport(Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport report)
         {
             var previousStatus = GetOverallStatus();
 
             foreach (var entry in report.Entries)
             {
-                var healthCheckData = new HealthCheckData(entry.Value) { Name = entry.Key };
+                var healthCheckData = new HealthCheckData(entry.Value, entry.Key);
                 _healthCheckDatabase.Add(healthCheckData);
             }
 
@@ -203,11 +204,8 @@ namespace Simple.Service.Monitoring.UI.Services
                 if (previousStatus != currentStatus)
                     await NotifyStatusChange(previousStatus, currentStatus);
 
-                // Notify clients with the full report
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
-                
-                // Also send updated timeline data
-                await SendHealthCheckTimeline(24); // Default to 24 hours
+                await SendHealthCheckTimeline(24);
             }
         }
 
@@ -224,11 +222,8 @@ namespace Simple.Service.Monitoring.UI.Services
                 if (previousStatus != currentStatus)
                     await NotifyStatusChange(previousStatus, currentStatus);
 
-                // Notify clients with the full report
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
-                
-                // Also send updated timeline data
-                await SendHealthCheckTimeline(24); // Default to 24 hours
+                await SendHealthCheckTimeline(24);
             }
         }
 
@@ -239,7 +234,6 @@ namespace Simple.Service.Monitoring.UI.Services
 
             var previousStatus = GetOverallStatus();
 
-            // Add all health check data entries to the database
             foreach (var healthCheckData in healthChecksData)
             {
                 _healthCheckDatabase.Add(healthCheckData);
@@ -252,11 +246,8 @@ namespace Simple.Service.Monitoring.UI.Services
                 if (previousStatus != currentStatus)
                     await NotifyStatusChange(previousStatus, currentStatus);
 
-                // Notify clients with the full report
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksReport", GetHealthCheckReport());
-
-                // Also send updated timeline data
-                await SendHealthCheckTimeline(24); // Default to 24 hours
+                await SendHealthCheckTimeline(24);
             }
         }
 
@@ -268,7 +259,7 @@ namespace Simple.Service.Monitoring.UI.Services
         public HealthStatus GetOverallStatus()
         {
             var latestChecks = _healthCheckDatabase
-                .GroupBy(hc => hc.Name)
+                .GroupBy(hc => new { hc.Name, hc.MachineName })
                 .Select(g => g.OrderByDescending(hc => hc.LastUpdated).First())
                 .ToList();
 
@@ -293,9 +284,6 @@ namespace Simple.Service.Monitoring.UI.Services
             _ = AddHealthReport(value);
         }
 
-        /// <summary>
-        /// Notifies all SignalR clients about a status change.
-        /// </summary>
         private async Task NotifyStatusChange(HealthStatus previousStatus, HealthStatus currentStatus)
         {
             await _hubContext.Clients.All.SendAsync("ReceiveStatusChange",
@@ -313,7 +301,6 @@ namespace Simple.Service.Monitoring.UI.Services
         }
     }
 
-    // New model for timeline segments
     public class HealthCheckTimelineSegment
     {
         public DateTime StartTime { get; set; }

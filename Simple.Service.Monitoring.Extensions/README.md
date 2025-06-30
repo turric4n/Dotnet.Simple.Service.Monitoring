@@ -11,7 +11,7 @@ A set of extension methods and helpers for the Simple.Service.Monitoring library
 
 ## Installation
 
-Install via NuGet:
+Install via NuGet: 
 
 ```
 dotnet add package Simple.Service.Monitoring.Extensions

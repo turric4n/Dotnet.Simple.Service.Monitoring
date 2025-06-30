@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+using Confluent.Kafka;
+using Elastic.Clients.Elasticsearch.IndexLifecycleManagement;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,8 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.SignalRPublisher;
 using Simple.Service.Monitoring.Library.Options;
 using Simple.Service.Monitoring.Sample.API.External;
+using System.Collections.Generic;
+using HealthChecks.ApplicationStatus.DependencyInjection;
 
 namespace Simple.Service.Monitoring.Sample.API
 {
@@ -34,6 +37,18 @@ namespace Simple.Service.Monitoring.Sample.API
                 .AddCheck("test_degraded", () => HealthCheckResult.Degraded("Test is degraded"))
                 .AddCheck("test_unhealthy", () => HealthCheckResult.Unhealthy("Test is unhealthy"));
 
+            services
+                .AddHealthChecks()
+                .AddApplicationStatus("Application Status", null, new List<string>()
+                {
+                    "ServiceType,ApplicationStatus"
+                })
+                .AddProcessAllocatedMemoryHealthCheck(2048, "Allocated Memory", null, new List<string>()
+                {
+                    "ServiceType,AllocatedMemory"
+                });
+
+
             services.AddTransient<IExternalService, ExternalService>();
 
             var runtimeSettings = new MonitorOptions();
@@ -51,6 +66,13 @@ namespace Simple.Service.Monitoring.Sample.API
 
             runtimeSettings.HealthChecks = new List<ServiceHealthCheck>()
             {
+                new ServiceHealthCheck()
+                {
+                    Alert = true,
+                    Name = "Testing http",
+                    ServiceType = ServiceType.Http,
+                    EndpointOrHost = "https://isnotworking",
+                },
                 new ServiceHealthCheck()
                 {
                     Alert = true,

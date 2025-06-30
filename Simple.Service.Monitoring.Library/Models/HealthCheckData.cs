@@ -7,16 +7,20 @@ namespace Simple.Service.Monitoring.Library.Models
 {
     public class HealthCheckData
     {
-        public HealthCheckData(HealthReportEntry healthReportEntry)
+        public HealthCheckData(HealthReportEntry healthReportEntry, string name)
         {
             CreationDate = DateTime.UtcNow;
             Status = healthReportEntry.Status;
-            Name = healthReportEntry.Tags?.FirstOrDefault() ?? "Unknown";
+            Name = name;
             LastUpdated = DateTime.UtcNow;
             Duration = healthReportEntry.Duration.Milliseconds.ToString();
             Description = healthReportEntry.Description ?? "No description provided";
             CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : "None";
-            ServiceType = healthReportEntry.Tags.FirstOrDefault(tag => tag.StartsWith("ServiceType:"))?.Split(":").ElementAtOrDefault(1) ?? "Custom HealthCheck";
+
+            ServiceType = healthReportEntry
+                .Tags
+                .FirstOrDefault(tag => tag.StartsWith("ServiceType,"))?.Split(",")
+                .ElementAtOrDefault(1) ?? "Custom HealthCheck";
             MachineName = Environment.MachineName;
         }
 

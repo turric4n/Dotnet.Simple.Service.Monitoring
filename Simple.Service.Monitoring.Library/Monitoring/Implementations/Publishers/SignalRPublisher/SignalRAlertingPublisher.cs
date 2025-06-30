@@ -70,14 +70,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 }
 
                 // Convert health entries to HealthCheckData objects
-                var healthCheckDataList = report.Entries.Select(e => new HealthCheckData(e.Value)
-                {
-                    Name = e.Key,
-                    CreationDate = DateTime.UtcNow,
-                    LastUpdated = DateTime.UtcNow,
-                    ServiceType = _healthCheck.ServiceType.ToString(),
-                    MachineName = Environment.MachineName
-                }).ToList();
+                var healthCheckDataList = report.Entries.Select(e => 
+                    new HealthCheckData(e.Value, e.Key)).ToList();
 
 
                 // Send the alert through SignalR
