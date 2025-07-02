@@ -41,7 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Front\src\components\" />
 		<Folder Include="Front\src\services\" />
 		<Folder Include="Helpers\" />
 		<Folder Include="Repositories\NewFolder\" />

@@ -21,7 +21,7 @@ namespace Simple.Service.Monitoring
         {
             services
                 .AddServiceMonitoring(Configuration)
-                .WithServiceMonitoringUi(services)
+                .WithServiceMonitoringUi(services, Configuration)
                 .WithApplicationSettings();
 
             //services.AddHealthChecks()

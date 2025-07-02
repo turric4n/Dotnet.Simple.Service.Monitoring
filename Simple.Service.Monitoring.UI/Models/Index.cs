@@ -6,15 +6,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
+using Simple.Service.Monitoring.UI.Options;
 
 namespace Simple.Service.Monitoring.UI.Models
 {
     public class IndexModel : PageModel
     {
         private readonly IMonitoringDataService _monitoringService;
+        private readonly IOptions<MonitoringUiOptions> _monitoringUiOptions;
 
-        public IndexModel(IMonitoringDataService monitoringService)
+        public IndexModel(IMonitoringDataService monitoringService, IOptions<MonitoringUiOptions> monitoringUiOptions)
         {
+            _monitoringUiOptions = monitoringUiOptions;
             _monitoringService = monitoringService;
         }
 
@@ -25,6 +29,12 @@ namespace Simple.Service.Monitoring.UI.Models
         public IEnumerable<HealthCheckData> HealthChecks => Report?.HealthChecks ?? [];
         public string OverallStatus => Report?.Status ?? "Unknown";
         public string LastUpdated => Report?.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC") ?? "";
+
+        public string TotalDuration => Report?.TotalDuration.ToString() ?? "0 ms";
+
+        public string HeaderTitle => $"{_monitoringUiOptions.Value.CompanyName} Health Monitoring Dashboard";
+
+        public string LogoUrl => _monitoringUiOptions.Value.HeaderLogoUrl ?? "/images/logo.png";
 
         // New: Last five health checks (most recent by LastUpdated)
         public IEnumerable<HealthCheckData> LastFiveHealthChecks =>

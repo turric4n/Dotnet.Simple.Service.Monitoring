@@ -19,7 +19,7 @@
                 <a class="navbar-brand" href="/monitoring">Service Monitoring</a>
                 <div class="d-flex ms-auto">
                     <!-- Dark Mode Toggle -->
-                    <div id="dark-mode-toggle" class="dark-mode-toggle me-3" title="Cambiar a modo oscuro">
+                    <div id="dark-mode-toggle" class="dark-mode-toggle me-3" title="Change to dark mode">
                         <i id="dark-mode-icon" class="bi bi-moon"></i>
                     </div>
                     <span id="connection-status" class="text-secondary my-auto me-2">Connecting...</span>
@@ -34,8 +34,13 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; @DateTime.Now.Year - Service Monitoring
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center">
+            <span>
+                &copy; @DateTime.Now.Year - Dotnet Service Monitoring
+            </span>
+            <span class="small text-secondary">
+                Powered by <a href="https://github.com/turric4n/Dotnet.Simple.Service.Monitoring" target="_blank" rel="noopener">Dotnet Simple Service Monitoring</a>
+            </span>
         </div>
     </footer>
 

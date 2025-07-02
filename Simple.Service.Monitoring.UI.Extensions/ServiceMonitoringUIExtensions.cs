@@ -10,13 +10,16 @@ using Simple.Service.Monitoring.UI.Models;
 using Simple.Service.Monitoring.UI.Services;
 using System;
 using Simple.Service.Monitoring.UI.Repositories;
-using Simple.Service.Monitoring.UI.Settings;
+using Simple.Service.Monitoring.UI.Options;
+using Simple.Service.Monitoring.Library.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class ServiceMonitoringUiExtensions
     {
-        public static IServiceMonitoringConfigurationService WithServiceMonitoringUi(this IServiceMonitoringConfigurationService monitoringConfigurationService, IServiceCollection services)
+        public static IServiceMonitoringConfigurationService WithServiceMonitoringUi(this IServiceMonitoringConfigurationService monitoringConfigurationService, 
+            IServiceCollection services, IConfiguration configuration)
         {
             if (monitoringConfigurationService == null)
             {
@@ -29,7 +32,12 @@ namespace Microsoft.Extensions.DependencyInjection
             // Register data service for sharing health reports
             services.AddSingleton<IMonitoringDataService, MonitoringDataService>();
 
-            services.AddOptions<MonitoringUiSettings>();
+            var monitoringSection = configuration.GetSection("MonitoringUi");
+
+            services
+                .AddOptions<MonitoringUiOptions>()
+                .Bind(monitoringSection)
+                .ValidateOnStart();
 
             services.AddSingleton<IMonitoringDataRepositoryLocator, MonitoringDataRepositoryLocator>();
 

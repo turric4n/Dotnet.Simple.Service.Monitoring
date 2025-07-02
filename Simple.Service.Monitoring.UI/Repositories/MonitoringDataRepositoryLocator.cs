@@ -1,15 +1,15 @@
 ﻿using Microsoft.Extensions.Options;
+using Simple.Service.Monitoring.UI.Options;
 using Simple.Service.Monitoring.UI.Repositories.Memory;
-using Simple.Service.Monitoring.UI.Settings;
 using System;
 
 namespace Simple.Service.Monitoring.UI.Repositories
 {
     public class MonitoringDataRepositoryLocator : IMonitoringDataRepositoryLocator
     {
-        private readonly IOptions<MonitoringUiSettings> _monitoringUiOptions;
+        private readonly IOptions<MonitoringUiOptions> _monitoringUiOptions;
 
-        public MonitoringDataRepositoryLocator(IOptions<MonitoringUiSettings> monitoringUiOptions)
+        public MonitoringDataRepositoryLocator(IOptions<MonitoringUiOptions> monitoringUiOptions)
         {
             _monitoringUiOptions = monitoringUiOptions;
         }

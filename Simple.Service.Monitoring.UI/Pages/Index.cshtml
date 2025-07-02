@@ -6,7 +6,11 @@
     ViewData["Title"] = "Service Monitoring";
 }
 
-<h1>Service Monitoring Dashboard</h1>
+<div class="text-center mb-3">
+    <img src="@Model.LogoUrl" alt="Logo" style="max-height:80px;" />
+</div>
+
+<h1>@Model.HeaderTitle</h1>
 
 <div class="row">
     <div class="col-12 mb-4">
@@ -21,7 +25,7 @@
             <div class="card-body">
                 <h5>Health Checks</h5>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table id="health-checks-table" class="table table-bordered table-hover" data-datatable="true" data-searchable="true" data-sortable="true" data-per-page="10">
                         <thead class="table-light">
                             <tr>
                                 <th>Service</th>
@@ -35,68 +39,6 @@
                         </thead>
                         <tbody>
                             @foreach (var check in Model.HealthChecks)
-                            {
-                                <tr class="@GetRowClass(check.Status)">
-                                    <td><strong>@check.Name</strong></td>
-                                    <td>@check.ServiceType</td>
-                                    <td>@check.MachineName</td>
-                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                    <td>@check.CheckError</td>
-                                    <td>@check.Duration ms</td>
-                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <h5 class="mt-4">Last Five Health Checks</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Service</th>
-                                <th>Check Type</th>
-                                <th>Machine Name</th>
-                                <th>Status</th>
-                                <th>Failure Information</th>
-                                <th>Duration</th>
-                                <th>Last Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var check in Model.LastFiveHealthChecks)
-                            {
-                                <tr class="@GetRowClass(check.Status)">
-                                    <td><strong>@check.Name</strong></td>
-                                    <td>@check.ServiceType</td>
-                                    <td>@check.MachineName</td>
-                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                    <td>@check.CheckError</td>
-                                    <td>@check.Duration ms</td>
-                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-                <h5 class="mt-4">Failed Health Checks Timeline</h5>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Service</th>
-                                <th>Check Type</th>
-                                <th>Machine Name</th>
-                                <th>Status</th>
-                                <th>Failure Information</th>
-                                <th>Duration</th>
-                                <th>Last Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var check in Model.FailedHealthChecksTimeline)
                             {
                                 <tr class="@GetRowClass(check.Status)">
                                     <td><strong>@check.Name</strong></td>

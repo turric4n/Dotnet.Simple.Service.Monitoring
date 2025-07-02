@@ -1,0 +1,185 @@
+﻿/* ../Simple.Service.Monitoring.UI/Front/src/components/dataTable.css */
+
+.datatable-controls {
+    display: flex;
+    flex-direction: column;
+}
+
+.datatable-search {
+    max-width: 300px;
+    margin-bottom: 10px;
+}
+
+.datatable-pagination {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+th.sorting {
+    position: relative;
+    cursor: pointer;
+}
+
+.sort-indicator {
+    margin-left: 5px;
+    font-size: 0.8em;
+}
+
+/* Add style for the active sort column */
+th.sorting-active-asc .sort-indicator::after {
+    content: '↑';
+}
+
+th.sorting-active-desc .sort-indicator::after {
+    content: '↓';
+}
+
+/* Transitions for smooth theme switching */
+.datatable-search input[type="text"],
+.datatable-search .form-control {
+    padding-left: 2.2rem;
+}
+.datatable-pagination .pagination,
+.datatable-pagination .page-link {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .datatable-controls {
+        flex-direction: column;
+    }
+
+    .datatable-search {
+        margin-bottom: 10px;
+        max-width: 100%;
+    }
+}
+
+/* Dark mode styles for DataTable */
+.dark-mode .datatable-controls {
+    color: #f0f0f0;
+}
+
+/* Search input styling */
+.dark-mode .datatable-search input[type="text"],
+.dark-mode .datatable-search .form-control {
+    background-color: #3a3a3a;
+    border-color: #555555;
+    color: #f0f0f0;
+    box-shadow: none;
+}
+
+    .dark-mode .datatable-search input[type="text"]:focus,
+    .dark-mode .datatable-search .form-control:focus {
+        background-color: #404040;
+        border-color: #666666;
+        color: #f0f0f0;
+        box-shadow: 0 0 0 0.2rem rgba(142, 180, 255, 0.25);
+    }
+
+/* Pagination styling */
+.dark-mode .datatable-pagination .pagination {
+    --bs-pagination-bg: #383838;
+    --bs-pagination-color: #f0f0f0;
+    --bs-pagination-border-color: #555555;
+    --bs-pagination-hover-bg: #444444;
+    --bs-pagination-hover-color: #ffffff;
+    --bs-pagination-hover-border-color: #666666;
+    --bs-pagination-focus-color: #ffffff;
+    --bs-pagination-focus-bg: #444444;
+    --bs-pagination-focus-box-shadow: 0 0 0 0.2rem rgba(142, 180, 255, 0.25);
+    --bs-pagination-active-color: #fff;
+    --bs-pagination-active-bg: #3a5a9a;
+    --bs-pagination-active-border-color: #3a5a9a;
+    --bs-pagination-disabled-color: #999999;
+    --bs-pagination-disabled-bg: #333333;
+    --bs-pagination-disabled-border-color: #555555;
+}
+
+.dark-mode .datatable-pagination .page-link {
+    background-color: var(--bs-pagination-bg);
+    border-color: var(--bs-pagination-border-color);
+    color: var(--bs-pagination-color);
+}
+
+    .dark-mode .datatable-pagination .page-link:hover {
+        background-color: var(--bs-pagination-hover-bg);
+        border-color: var(--bs-pagination-hover-border-color);
+        color: var(--bs-pagination-hover-color);
+    }
+
+.dark-mode .datatable-pagination .page-item.active .page-link {
+    background-color: var(--bs-pagination-active-bg);
+    border-color: var(--bs-pagination-active-border-color);
+    color: var(--bs-pagination-active-color);
+}
+
+.dark-mode .datatable-pagination .page-item.disabled .page-link {
+    background-color: var(--bs-pagination-disabled-bg);
+    border-color: var(--bs-pagination-disabled-border-color);
+    color: var(--bs-pagination-disabled-color);
+}
+
+/* Sort indicators */
+.dark-mode .sort-indicator {
+    color: #cccccc;
+}
+
+/* Empty and info messages */
+.dark-mode .datatable-info,
+.dark-mode .datatable-empty {
+    color: #cccccc;
+}
+
+/* Search input styling - Enhanced */
+.dark-mode .datatable-search .form-control {
+    background-color: #2d2d2d;
+    border-color: #555555;
+    color: #f0f0f0;
+    box-shadow: none;
+     /* Space for the search icon */
+    border-radius: 4px;
+}
+
+    .dark-mode .datatable-search .form-control:focus {
+        background-color: #333333;
+        border-color: #8eb4ff;
+        color: #ffffff;
+        box-shadow: 0 0 0 0.15rem rgba(142, 180, 255, 0.25);
+    }
+
+/* Add search icon with proper positioning */
+.datatable-search {
+    position: relative;
+}
+
+    .datatable-search::before {
+        content: "\f52a"; /* Bootstrap Icons search icon */
+        font-family: "bootstrap-icons";
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        opacity: 0.7;
+        pointer-events: none;
+    }
+
+.dark-mode .datatable-search::before {
+    color: #8eb4ff;
+    opacity: 0.7;
+}
+
+/* Add placeholder styling */
+.dark-mode .datatable-search .form-control::placeholder {
+    color: #999999;
+    opacity: 0.7;
+}
+
+/* Add subtle transition effect when typing */
+.dark-mode .datatable-search .form-control:not(:placeholder-shown) {
+    background-color: #333333;
+    border-color: #666666;
+}
+

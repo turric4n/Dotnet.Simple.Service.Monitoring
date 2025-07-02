@@ -68,6 +68,11 @@
 }
 
 /* Dark mode specific timeline styles */
+.dark-mode #timeline-chart {
+    background-color: #383838;
+    color: #f0f0f0;
+}
+
 .dark-mode .timeline-header h5 {
     color: #f0f0f0;
 }
@@ -119,11 +124,15 @@
 }
 
 .dark-mode .uptime-value {
-    color: #bbb;
+    color: #cccccc;
 }
 
 .dark-mode .service-name {
     color: #f0f0f0;
+}
+
+.dark-mode .status-unknown {
+    border: none !important;
 }
 
 /* Timeline alerts */
@@ -145,4 +154,41 @@
     border-color: #555;
     color: #f0f0f0;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Timeline specific overrides for buttons */
+.dark-mode .btn-group .btn-outline-primary {
+    color: #8eb4ff;
+    border-color: #8eb4ff;
+}
+
+    .dark-mode .btn-group .btn-outline-primary:hover {
+        background-color: #3a5a9a;
+        color: white;
+    }
+
+    .dark-mode .btn-group .btn-outline-primary.active {
+        background-color: #3a5a9a !important;
+        color: white !important;
+        border-color: #8eb4ff !important;
+    }
+
+/* Force contrast for timeline text */
+.dark-mode .vis-timeline,
+.dark-mode .vis-panel,
+.dark-mode .vis-labelset .vis-label {
+    color: #f0f0f0 !important;
+}
+
+/* Timeline animation transitions */
+.dark-mode .timeline-chart,
+.dark-mode .vis-timeline,
+.dark-mode .vis-panel,
+.dark-mode .vis-labelset,
+.dark-mode .vis-foreground,
+.dark-mode .vis-shadow,
+.dark-mode .vis-label,
+.dark-mode .vis-text,
+.dark-mode .vis-grid {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }

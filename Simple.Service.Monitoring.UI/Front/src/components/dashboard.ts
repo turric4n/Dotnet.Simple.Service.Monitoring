@@ -2,25 +2,42 @@ import { MonitoringService } from '../services/monitoringService';
 import { HealthReport } from '../models/healthReport';
 import { HealthCheckData } from '../models/healthCheckData';
 import { TimelineComponent, TimelineSegment } from './timelineComponent';
+import { DataTable } from './dataTable';
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
-export class DashboardComponent {
+export class Dashboard {
     private monitoringService: MonitoringService;
     private tableElement: HTMLTableElement | null = null;
     private statusBadgeElement: HTMLElement | null = null;
     private lastUpdatedElement: HTMLElement | null = null;
     private timelineComponent: TimelineComponent | null = null;
+    private dataTable: DataTable | null = null;
 
     constructor() {
         this.monitoringService = new MonitoringService();
 
         // Initialize UI references
-        this.tableElement = document.querySelector('table tbody') as HTMLTableElement;
+        this.tableElement = document.querySelector('table') as HTMLTableElement;
         this.statusBadgeElement = document.querySelector('.card-header .badge') as HTMLElement;
         this.lastUpdatedElement = document.querySelector('.card-header small') as HTMLElement;
         
         // Create timeline component
         this.timelineComponent = new TimelineComponent('timeline-chart');
+        
+        // Initialize DataTable if the table exists
+        if (this.tableElement) {
+            // Add necessary attributes if they're not already present
+            if (!this.tableElement.id) {
+                this.tableElement.id = 'health-checks-table';
+            }
+            
+            this.dataTable = new DataTable({
+                tableSelector: `#${this.tableElement.id}`,
+                searchable: true,
+                sortable: true,
+                perPage: 10
+            });
+        }
 
         // Set up event handlers
         this.monitoringService.onHealthChecksReportReceived = this.updateDashboard.bind(this);
@@ -31,6 +48,10 @@ export class DashboardComponent {
         this.initializeConnection();
         
         // Set up timeline view buttons for different time ranges
+        this.initializeTimelineControls();
+    }
+
+    private initializeTimelineControls(): void {
         const timelinePreference = localStorage.getItem('monitoring-timeline-preference') || 'timeline-24h';
         let timeRangeHours = 24; // Default
         
@@ -79,7 +100,7 @@ export class DashboardComponent {
         this.monitoringService.requestTimelineData(timeRangeHours);
     }
 
-    // New method to handle timeline data
+    // Method to handle timeline data
     private updateTimeline(timelineData: Record<string, TimelineSegment[]>): void {
         if (!this.timelineComponent) return;
         
@@ -101,10 +122,15 @@ export class DashboardComponent {
     private renderHealthChecks(healthChecks: HealthCheckData[]): void {
         if (!this.tableElement) return;
 
-        // Clear existing rows
-        while (this.tableElement.firstChild) {
-            this.tableElement.removeChild(this.tableElement.firstChild);
+        // Get the table body element
+        const tbody = this.tableElement.querySelector('tbody');
+        if (!tbody) {
+            console.error('Table body not found');
+            return;
         }
+
+        // Clear existing rows
+        tbody.innerHTML = '';
 
         const fragment = document.createDocumentFragment();
         healthChecks.forEach(check => {
@@ -137,7 +163,15 @@ export class DashboardComponent {
             }
         });
 
-        this.tableElement.appendChild(fragment);
+        tbody.appendChild(fragment);
+
+        // Update the DataTable after content changes
+        if (this.dataTable) {
+            // Use setTimeout to ensure DOM is updated before refreshing the DataTable
+            setTimeout(() => {
+                this.dataTable?.refresh();
+            }, 0);
+        }
     }
 
     private updateDashboard(report: HealthReport): void {
@@ -164,8 +198,8 @@ export class DashboardComponent {
             this.lastUpdatedElement.textContent = `Last Updated: ${lastUpdated} UTC`;
         }
 
-        // Request timeline data
-        this.monitoringService.requestTimelineData(24);
+        // Request timeline data (only if we don't receive it automatically)
+        // this.monitoringService.requestTimelineData(24);
     }
 
     private async initializeConnection(): Promise<void> {
@@ -182,7 +216,7 @@ export class DashboardComponent {
     private updateConnectionStatus(isConnected: boolean): void {
         const statusElement = document.getElementById('connection-status');
         if (statusElement) {
-            // Cambiar color en vez de clase para compatibilidad con modo oscuro
+            // Use CSS variables for better dark mode compatibility
             statusElement.style.color = isConnected ? 'var(--bs-success)' : 'var(--bs-danger)';
             statusElement.textContent = isConnected ? 'Connected' : 'Disconnected';
         }
