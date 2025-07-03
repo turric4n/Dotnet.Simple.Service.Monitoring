@@ -12,6 +12,24 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
         private readonly List<HealthCheckData> _healthCheckStore = new();
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
+        public async Task<HealthCheckData> GetLatestHealthCheckAsync(string name, string machineName)
+        {
+            try
+            {
+                _lock.EnterReadLock();
+                var latestCheck = _healthCheckStore
+                    .Where(hc => hc.Name == name && hc.MachineName == machineName)
+                    .OrderByDescending(hc => hc.LastUpdated)
+                    .FirstOrDefault();
+
+                return latestCheck;
+            }
+            finally
+            {
+                _lock.ExitReadLock();
+            }
+        }
+
         public Task AddHealthCheckDataAsync(HealthCheckData healthCheckData)
         {
             if (healthCheckData == null)
@@ -20,7 +38,27 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             try
             {
                 _lock.EnterWriteLock();
-                _healthCheckStore.Add(healthCheckData);
+                
+                // Find the latest check for this name and machine
+                var latestCheck = _healthCheckStore
+                    .Where(hc => hc.Name == healthCheckData.Name && hc.MachineName == healthCheckData.MachineName)
+                    .OrderByDescending(hc => hc.LastUpdated)
+                    .FirstOrDefault();
+
+                // If the latest check exists and has the same status, just update LastUpdated
+                if (latestCheck != null && latestCheck.Status == healthCheckData.Status)
+                {
+                    latestCheck.LastUpdated = DateTime.UtcNow;
+                    latestCheck.Duration = healthCheckData.Duration;
+                    latestCheck.Description = healthCheckData.Description;
+                    latestCheck.CheckError = healthCheckData.CheckError;
+                }
+                // Otherwise, add a new record
+                else
+                {
+                    _healthCheckStore.Add(healthCheckData);
+                }
+                
                 return Task.CompletedTask;
             }
             finally
@@ -37,18 +75,39 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             try
             {
                 _lock.EnterWriteLock();
+                
                 foreach (var data in healthChecksData)
                 {
-                    _healthCheckStore.Add(data);
+                    // Find the latest check for this name and machine
+                    var latestCheck = _healthCheckStore
+                        .Where(hc => hc.Name == data.Name && hc.MachineName == data.MachineName)
+                        .OrderByDescending(hc => hc.LastUpdated)
+                        .FirstOrDefault();
+
+                    // If the latest check exists and has the same status, just update LastUpdated
+                    if (latestCheck != null && latestCheck.Status == data.Status)
+                    {
+                        latestCheck.LastUpdated = DateTime.UtcNow;
+                        latestCheck.Duration = data.Duration;
+                        latestCheck.Description = data.Description;
+                        latestCheck.CheckError = data.CheckError;
+                    }
+                    // Otherwise, add a new record
+                    else
+                    {
+                        _healthCheckStore.Add(data);
+                    }
                 }
-                return Task.CompletedTask;
             }
             finally
             {
                 _lock.ExitWriteLock();
             }
+
+            return Task.CompletedTask;
         }
 
+        // Other methods remain unchanged...
         public Task<List<HealthCheckData>> GetLatestHealthChecksAsync()
         {
             try

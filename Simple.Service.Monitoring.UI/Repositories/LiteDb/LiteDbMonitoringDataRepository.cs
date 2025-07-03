@@ -1,13 +1,11 @@
-﻿using System;
+﻿using LiteDB;
+using Simple.Service.Monitoring.Library.Models;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using LiteDB;
-using Microsoft.Extensions.Logging;
-using Simple.Service.Monitoring.Library.Models;
 
-namespace Simple.Service.Monitoring.UI.Repositories.Memory
+namespace Simple.Service.Monitoring.UI.Repositories.LiteDb
 {
     public class LiteDbMonitoringDatarepository : IMonitoringDataRepository, IDisposable
     {
@@ -34,17 +32,34 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
                 _collection.EnsureIndex(x => x.MachineName);
                 _collection.EnsureIndex(x => x.LastUpdated);
                 _collection.EnsureIndex(x => new { x.Name, x.MachineName });
-                
-                //_logger.LogInformation("LiteDB repository initialized at {DbPath}", dbPath);
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Failed to initialize LiteDB repository at {DbPath}", dbPath);
                 throw;
             }
         }
 
-        public Task AddHealthCheckDataAsync(HealthCheckData healthCheckData)
+        public Task<HealthCheckData> GetLatestHealthCheckAsync(string name, string machineName)
+        {
+            try
+            {
+                lock (_lock)
+                {
+                    var latestCheck = _collection
+                        .Find(hc => hc.Name == name && hc.MachineName == machineName)
+                        .OrderByDescending(hc => hc.LastUpdated)
+                        .FirstOrDefault();
+
+                    return Task.FromResult(latestCheck);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        public async Task AddHealthCheckDataAsync(HealthCheckData healthCheckData)
         {
             if (healthCheckData == null)
                 throw new ArgumentNullException(nameof(healthCheckData));
@@ -58,21 +73,39 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
                     {
                         healthCheckData.CreationDate = DateTime.UtcNow;
                     }
-                    
-                    // Insert the document
-                    _collection.Insert(healthCheckData);
+
+                    // Find the latest check for this name and machine
+                    var latestCheck = _collection
+                        .Find(hc => hc.Name == healthCheckData.Name && hc.MachineName == healthCheckData.MachineName)
+                        .OrderByDescending(hc => hc.LastUpdated)
+                        .FirstOrDefault();
+
+                    // If the latest check exists and has the same status, just update LastUpdated
+                    if (latestCheck != null && latestCheck.Status == healthCheckData.Status)
+                    {
+                        latestCheck.LastUpdated = DateTime.UtcNow;
+                        latestCheck.Duration = healthCheckData.Duration;
+                        latestCheck.Description = healthCheckData.Description;
+                        latestCheck.CheckError = healthCheckData.CheckError;
+                        
+                        _collection.Update(latestCheck);
+                    }
+                    // Otherwise, insert a new record
+                    else
+                    {
+                        _collection.Insert(healthCheckData);
+                    }
                 }
                 
-                return Task.CompletedTask;
+                return;
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error adding health check data for {Name}", healthCheckData.Name);
                 throw;
             }
         }
 
-        public Task AddHealthChecksDataAsync(IEnumerable<HealthCheckData> healthChecksData)
+        public async Task AddHealthChecksDataAsync(IEnumerable<HealthCheckData> healthChecksData)
         {
             if (healthChecksData == null)
                 throw new ArgumentNullException(nameof(healthChecksData));
@@ -89,20 +122,43 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
                     {
                         data.CreationDate = DateTime.UtcNow;
                     }
-                    
-                    // Insert all documents
-                    _collection.InsertBulk(dataList);
+
+                    // Process each item individually to check status changes
+                    foreach (var data in dataList)
+                    {
+                        // Find the latest check for this name and machine
+                        var latestCheck = _collection
+                            .Find(hc => hc.Name == data.Name && hc.MachineName == data.MachineName)
+                            .OrderByDescending(hc => hc.LastUpdated)
+                            .FirstOrDefault();
+
+                        // If the latest check exists and has the same status, just update LastUpdated
+                        if (latestCheck != null && latestCheck.Status == data.Status)
+                        {
+                            latestCheck.LastUpdated = DateTime.UtcNow;
+                            latestCheck.Duration = data.Duration;
+                            latestCheck.Description = data.Description;
+                            latestCheck.CheckError = data.CheckError;
+                            
+                            _collection.Update(latestCheck);
+                        }
+                        // Otherwise, insert a new record
+                        else
+                        {
+                            _collection.Insert(data);
+                        }
+                    }
                 }
                 
-                return Task.CompletedTask;
+                return;
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error adding health checks data in bulk");
                 throw;
             }
         }
 
+        // Other methods remain unchanged...
         public Task<List<HealthCheckData>> GetLatestHealthChecksAsync()
         {
             try
@@ -123,7 +179,6 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error retrieving latest health checks");
                 throw;
             }
         }
@@ -147,7 +202,6 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error retrieving health checks by date range: {From} to {To}", from, to);
                 throw;
             }
         }
@@ -169,7 +223,6 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error retrieving grouped health checks");
                 throw;
             }
         }
@@ -190,7 +243,6 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error retrieving health checks in time window: {Start} to {End}", startTime, endTime);
                 throw;
             }
         }
@@ -203,7 +255,7 @@ namespace Simple.Service.Monitoring.UI.Repositories.Memory
             }
             catch (Exception ex)
             {
-                //_logger.LogError(ex, "Error disposing LiteDB database");
+                // Log error if needed
             }
         }
     }

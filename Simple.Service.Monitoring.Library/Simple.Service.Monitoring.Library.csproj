@@ -46,7 +46,7 @@
 
 	<ItemGroup>
 		<Folder Include="Application\Services\Data\" />
-		<Folder Include="Infrastructure\Repositories\" />
+		<Folder Include="Infrastructure\" />
 		<Folder Include="Monitoring\Implementations\Publishers\Email\Templates\Engine\" />
 		<Folder Include="Monitoring\Implementations\Publishers\SignalRPublisher\" />
 		<Folder Include="Transport\" />

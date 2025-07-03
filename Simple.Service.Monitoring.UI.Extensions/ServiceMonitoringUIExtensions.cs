@@ -13,6 +13,9 @@ using Simple.Service.Monitoring.UI.Repositories;
 using Simple.Service.Monitoring.UI.Options;
 using Simple.Service.Monitoring.Library.Options;
 using Microsoft.Extensions.Configuration;
+using Simple.Service.Monitoring.UI.Repositories.LiteDb;
+using Simple.Service.Monitoring.UI.Repositories.Memory;
+using Simple.Service.Monitoring.UI.Repositories.SQL;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -26,10 +29,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(monitoringConfigurationService), "ServiceMonitoringConfigurationService cannot be null");
             }
 
-            // Add SignalR services
             services.AddSignalR();
 
-            // Register data service for sharing health reports
             services.AddSingleton<IMonitoringDataService, MonitoringDataService>();
 
             var monitoringSection = configuration.GetSection("MonitoringUi");
@@ -41,13 +42,14 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddSingleton<IMonitoringDataRepositoryLocator, MonitoringDataRepositoryLocator>();
 
-            // Register TagHelpers from the UI assembly
             services.AddRazorPages()
                 .AddApplicationPart(typeof(IndexModel).Assembly);
-            
-            // Tag helpers will be auto-discovered from the assembly
 
-            // Register the observer that will capture health reports
+            services.AddKeyedSingleton<IMonitoringDataRepository, SqlMonitoringDataRepository>("Sql");
+
+            services.AddKeyedSingleton<IMonitoringDataRepository, LiteDbMonitoringDatarepository>("LiteDb");
+
+            services.AddKeyedSingleton<IMonitoringDataRepository, InMemoryMonitoringDataRepository>("InMemory");
 
             return monitoringConfigurationService;
         }

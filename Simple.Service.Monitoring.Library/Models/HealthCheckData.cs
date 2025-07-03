@@ -15,7 +15,7 @@ namespace Simple.Service.Monitoring.Library.Models
             LastUpdated = DateTime.UtcNow;
             Duration = healthReportEntry.Duration.Milliseconds.ToString();
             Description = healthReportEntry.Description ?? "No description provided";
-            CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : "None";
+            CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : Description;
 
             ServiceType = healthReportEntry
                 .Tags
