@@ -154,7 +154,7 @@ export class Dashboard {
                     <td><span class="badge bg-${this.getStatusColor(status)}">${this.escapeHtml(status)}</span></td>                    
                     <td>${this.escapeHtml(checkError)}</td>
                     <td>${check.duration} ms</td>
-                    <td>${lastUpdated} UTC</td>
+                    <td>${lastUpdated}</td>
                 `;
 
                 fragment.appendChild(row);
@@ -195,7 +195,7 @@ export class Dashboard {
             const lastUpdated = report.lastUpdated
                 ? new Date(report.lastUpdated).toISOString().replace('T', ' ').substring(0, 19)
                 : new Date().toISOString().replace('T', ' ').substring(0, 19);
-            this.lastUpdatedElement.textContent = `Last Updated: ${lastUpdated} UTC`;
+            this.lastUpdatedElement.textContent = `Last Updated: ${lastUpdated}`;
         }
 
         // Request timeline data (only if we don't receive it automatically)

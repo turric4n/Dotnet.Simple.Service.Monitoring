@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Simple.Service.Monitoring.UI.Options;
+using HealthStatus = Simple.Service.Monitoring.Library.Models.HealthStatus;
 
 namespace Simple.Service.Monitoring.UI.Models
 {
@@ -28,7 +29,7 @@ namespace Simple.Service.Monitoring.UI.Models
         // Convenience properties for the view
         public IEnumerable<HealthCheckData> HealthChecks => Report?.HealthChecks ?? [];
         public string OverallStatus => Report?.Status ?? "Unknown";
-        public string LastUpdated => Report?.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC") ?? "";
+        public string LastUpdated => Report?.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss") ?? "";
 
         public string TotalDuration => Report?.TotalDuration.ToString() ?? "0 ms";
 
@@ -60,7 +61,7 @@ namespace Simple.Service.Monitoring.UI.Models
                 Report = new HealthReport
                 {
                     Status = "Error",
-                    LastUpdated = DateTime.UtcNow,
+                    LastUpdated = DateTime.Now,
                     HealthChecks = new List<HealthCheckData>()
                 };
             }

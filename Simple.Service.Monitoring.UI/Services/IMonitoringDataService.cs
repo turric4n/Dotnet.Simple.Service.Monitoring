@@ -3,6 +3,7 @@ using Simple.Service.Monitoring.Library.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using HealthStatus = Simple.Service.Monitoring.Library.Models.HealthStatus;
 
 namespace Simple.Service.Monitoring.UI.Services
 {

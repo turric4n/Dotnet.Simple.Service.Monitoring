@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.UI.Hubs;
@@ -8,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HealthStatus = Simple.Service.Monitoring.Library.Models.HealthStatus;
 
 namespace Simple.Service.Monitoring.UI.Services
 {
@@ -37,7 +37,7 @@ namespace Simple.Service.Monitoring.UI.Services
             return new Models.HealthReport
             {
                 Status = (await GetOverallStatus()).ToString(),
-                LastUpdated = latestChecks.Any() ? latestChecks.Max(hc => hc.LastUpdated) : DateTime.UtcNow,
+                LastUpdated = latestChecks.Any() ? latestChecks.Max(hc => hc.LastUpdated) : DateTime.Now,
                 HealthChecks = latestChecks
             };
         }
@@ -58,7 +58,7 @@ namespace Simple.Service.Monitoring.UI.Services
             return new Models.HealthReport
             {
                 Status = status.ToString(),
-                LastUpdated = checksInRange.Any() ? checksInRange.Max(hc => hc.LastUpdated) : DateTime.UtcNow,
+                LastUpdated = checksInRange.Any() ? checksInRange.Max(hc => hc.LastUpdated) : DateTime.Now,
                 HealthChecks = checksInRange
             };
         }
@@ -68,7 +68,7 @@ namespace Simple.Service.Monitoring.UI.Services
         /// </summary>
         public async Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimeline(int hours = 24)
         {
-            var endTime = DateTime.UtcNow;
+            var endTime = DateTime.Now;
             var startTime = endTime.AddHours(-hours);
 
             var result = new Dictionary<string, List<HealthCheckTimelineSegment>>();
@@ -172,14 +172,146 @@ namespace Simple.Service.Monitoring.UI.Services
             return result;
         }
 
+        public async Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimelineFromRanges(int hours = 24)
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.AddHours(-hours);
+            
+            // Define threshold after which health status is considered stale
+            var staleThreshold = TimeSpan.FromMinutes(1);
+
+            // Get time ranges directly from repository
+            var timeRanges = await _repository.GetGroupedHealthCheckTimeRangesAsync(startTime, endTime);
+            var result = new Dictionary<string, List<HealthCheckTimelineSegment>>();
+
+            foreach (var kvp in timeRanges)
+            {
+                string serviceKey = kvp.Key;
+                var ranges = kvp.Value.OrderBy(r => r.StartTime).ToList();
+                var segments = new List<HealthCheckTimelineSegment>();
+
+                if (!ranges.Any())
+                {
+                    // If no data, add "Unknown" segment for the whole period
+                    segments.Add(new HealthCheckTimelineSegment
+                    {
+                        StartTime = startTime,
+                        EndTime = endTime,
+                        Status = "Unknown",
+                        UptimePercentage = 0
+                    });
+
+                    result[serviceKey] = segments;
+                    continue;
+                }
+
+                // Handle gap at the beginning if needed
+                if (ranges.First().StartTime > startTime)
+                {
+                    segments.Add(new HealthCheckTimelineSegment
+                    {
+                        StartTime = startTime,
+                        EndTime = ranges.First().StartTime,
+                        Status = "Unknown"
+                    });
+                }
+
+                // Convert each time range to a segment
+                foreach (var range in ranges)
+                {
+                    // Check if this is a current range that might be stale
+                    if (range.EndTime == null)
+                    {
+                        // Use the IsStale method which checks against UpdateTime
+                        if (range.IsStale(staleThreshold))
+                        {
+                            // For stale ranges, we show the status up to the last update time plus threshold
+                            var staleStart = range.UpdateTime.Add(staleThreshold);
+                            
+                            // Add a segment with the known status up to the stale point
+                            segments.Add(new HealthCheckTimelineSegment
+                            {
+                                StartTime = range.StartTime,
+                                EndTime = staleStart,
+                                Status = range.Status.ToString()
+                            });
+                            
+                            // Add another segment with "Unknown" status after the stale point
+                            segments.Add(new HealthCheckTimelineSegment
+                            {
+                                StartTime = staleStart,
+                                EndTime = endTime,
+                                Status = "Unknown"
+                            });
+                        }
+                        else
+                        {
+                            // Not stale yet, use as is up to current time
+                            segments.Add(new HealthCheckTimelineSegment
+                            {
+                                StartTime = range.StartTime,
+                                EndTime = endTime,
+                                Status = range.Status.ToString()
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Closed range, use as is
+                        segments.Add(new HealthCheckTimelineSegment
+                        {
+                            StartTime = range.StartTime,
+                            EndTime = range.EndTime.Value,
+                            Status = range.Status.ToString()
+                        });
+                    }
+                }
+
+                // Handle gaps between segments if any
+                for (int i = 0; i < segments.Count - 1; i++)
+                {
+                    if (segments[i].EndTime < segments[i + 1].StartTime)
+                    {
+                        segments.Insert(i + 1, new HealthCheckTimelineSegment
+                        {
+                            StartTime = segments[i].EndTime,
+                            EndTime = segments[i + 1].StartTime,
+                            Status = "Unknown"
+                        });
+                        i++; // Skip the newly inserted segment
+                    }
+                }
+
+                // Calculate uptime percentage
+                var totalDuration = (endTime - startTime).TotalSeconds;
+                var healthyDuration = segments
+                    .Where(s => s.Status == "Healthy")
+                    .Sum(s => ((s.EndTime == default ? DateTime.Now : s.EndTime) - s.StartTime).TotalSeconds);
+
+                var uptimePercentage = totalDuration > 0
+                    ? Math.Round((healthyDuration / totalDuration) * 100, 2)
+                    : 0;
+
+                // Add uptime percentage to first segment
+                if (segments.Any())
+                {
+                    segments[0].UptimePercentage = uptimePercentage;
+                }
+
+                result[serviceKey] = segments;
+            }
+
+            return result;
+        }
+
         public async Task SendHealthCheckTimeline(int hours = 24)
         {
             if (_hubContext != null)
             {
-                var timeline = await GetHealthCheckTimeline(hours);
+                var timeline = await GetHealthCheckTimelineFromRanges(hours);
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksTimeline", timeline);
             }
-        }
+        }   
 
         public async Task AddHealthReport(Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport report)
         {
@@ -190,6 +322,22 @@ namespace Simple.Service.Monitoring.UI.Services
             {
                 var healthCheckData = new HealthCheckData(entry.Value, entry.Key);
                 healthChecksToAdd.Add(healthCheckData);
+
+                // Check for status changes
+                var latestCheck = await _repository.GetLatestHealthCheckAsync(
+                    healthCheckData.Name, healthCheckData.MachineName);
+
+                if (latestCheck == null || latestCheck.Status != healthCheckData.Status)
+                {
+                    // Status changed or first check, add a new status change
+                    await _repository.AddHealthCheckStatusChangeAsync(
+                        healthCheckData.Name,
+                        healthCheckData.MachineName,
+                        healthCheckData.LastUpdated,
+                        healthCheckData.Status,
+                        healthCheckData.Description
+                    );
+                }
             }
 
             await _repository.AddHealthChecksDataAsync(healthChecksToAdd);
@@ -209,7 +357,27 @@ namespace Simple.Service.Monitoring.UI.Services
         {
             var previousStatus = await GetOverallStatus();
 
+            // Get the current status for this service
+            var latestCheck = await _repository.GetLatestHealthCheckAsync(
+                healthCheckData.Name, healthCheckData.MachineName);
+
+            // Add to regular health checks
             await _repository.AddHealthCheckDataAsync(healthCheckData);
+
+            // The repository now handles UpdateTime - we only need to add a status change
+            // if the status actually changed or there's no existing check
+            if (latestCheck == null || latestCheck.Status != healthCheckData.Status)
+            {
+                // Status changed or first check, add a new status change
+                await _repository.AddHealthCheckStatusChangeAsync(
+                    healthCheckData.Name,
+                    healthCheckData.MachineName,
+                    healthCheckData.LastUpdated,
+                    healthCheckData.Status,
+                    healthCheckData.Description
+                );
+            }
+            // No need to update if same status - the repository will handle updating UpdateTime
 
             var currentStatus = await GetOverallStatus();
 
@@ -230,6 +398,26 @@ namespace Simple.Service.Monitoring.UI.Services
 
             var previousStatus = await GetOverallStatus();
 
+            // Process each health check separately to track status changes
+            foreach (var healthCheckData in healthChecksData)
+            {
+                var latestCheck = await _repository.GetLatestHealthCheckAsync(
+                    healthCheckData.Name, healthCheckData.MachineName);
+
+                if (latestCheck == null || latestCheck.Status != healthCheckData.Status)
+                {
+                    // Status changed or first check, add a new status change
+                    await _repository.AddHealthCheckStatusChangeAsync(
+                        healthCheckData.Name,
+                        healthCheckData.MachineName,
+                        healthCheckData.LastUpdated,
+                        (HealthStatus)healthCheckData.Status,
+                        healthCheckData.Description
+                    );
+                }
+            }
+
+            // Add to regular health checks
             await _repository.AddHealthChecksDataAsync(healthChecksData);
 
             var currentStatus = await GetOverallStatus();
@@ -281,8 +469,16 @@ namespace Simple.Service.Monitoring.UI.Services
                 {
                     PreviousStatus = previousStatus.ToString(),
                     CurrentStatus = currentStatus.ToString(),
-                    LastUpdated = DateTime.UtcNow.ToString("o")
+                    LastUpdated = DateTime.Now.ToString("o") // Use ISO 8601 format with local time
                 });
+        }
+
+        private async Task<string> DetermineInitialStatus(string serviceKey, DateTime startTime)
+        {
+            // Implement logic to find the last status before startTime
+            // This might require an additional repository method
+            // For now returning "Unknown" as default
+            return "Unknown";
         }
 
         public void Dispose()

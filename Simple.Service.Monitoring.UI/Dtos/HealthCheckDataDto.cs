@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Simple.Service.Monitoring.Library.Models;
 
 namespace Simple.Service.Monitoring.UI.Dtos
 {
@@ -12,7 +13,7 @@ namespace Simple.Service.Monitoring.UI.Dtos
         public string Name { get; set; }
         public string MachineName { get; set; }
         public string ServiceType { get; set; }
-        public int Status { get; set; }
+        public HealthStatus Status { get; set; }
         public string Duration { get; set; }
         public string Description { get; set; }
         public string CheckError { get; set; }

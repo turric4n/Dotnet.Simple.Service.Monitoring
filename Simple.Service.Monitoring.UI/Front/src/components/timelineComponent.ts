@@ -194,14 +194,18 @@ export class TimelineComponent {
                 
                 // Add or update timeline items for each segment
                 segments.forEach(segment => {
+                    // Parse dates from UTC to local timezone
+                    const startDate = new Date(segment.startTime);
+                    const endDate = new Date(segment.endTime);
+                    
                     const item = {
                         id: itemId,
                         group: name,
-                        start: new Date(segment.startTime),
-                        end: new Date(segment.endTime),
+                        start: startDate,
+                        end: endDate,
                         content: '',
                         className: `status-${segment.status.toLowerCase()}`,
-                        title: `${name}: ${segment.status}<br>${new Date(segment.startTime).toLocaleString()} to ${new Date(segment.endTime).toLocaleString()}`
+                        title: `${name}: ${segment.status}<br>${startDate.toLocaleString()} to ${endDate.toLocaleString()}`
                     };
                     
                     newItemIds.push(itemId);
@@ -274,14 +278,18 @@ export class TimelineComponent {
             
             // Add timeline items for each segment
             segments.forEach(segment => {
+                // Parse dates from UTC to local timezone
+                const startDate = new Date(segment.startTime);
+                const endDate = new Date(segment.endTime);
+                
                 this.items?.add({
                     id: itemId++,
                     group: name,
-                    start: new Date(segment.startTime),
-                    end: new Date(segment.endTime),
+                    start: startDate,
+                    end: endDate,
                     content: '',
                     className: `status-${segment.status.toLowerCase()}`,
-                    title: `${name}: ${segment.status}<br>${new Date(segment.startTime).toLocaleString()} to ${new Date(segment.endTime).toLocaleString()}`
+                    title: `${name}: ${segment.status}<br>${startDate.toLocaleString()} to ${endDate.toLocaleString()}`
                 });
             });
         });

@@ -6,6 +6,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {

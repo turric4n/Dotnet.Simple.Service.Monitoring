@@ -5,6 +5,7 @@ using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System;
+using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {

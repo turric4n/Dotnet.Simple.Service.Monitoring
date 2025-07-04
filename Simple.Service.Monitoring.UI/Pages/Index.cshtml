@@ -32,7 +32,7 @@
                                 <th>Check Type</th>
                                 <th>Machine Name</th>
                                 <th>Status</th>
-                                <th>Failure Information</th>
+                                <th>Information</th>
                                 <th>Duration</th>
                                 <th>Last Updated</th>
                             </tr>
@@ -47,7 +47,7 @@
                                     <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
                                     <td>@check.CheckError</td>
                                     <td>@check.Duration ms</td>
-                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss UTC")</td>
+                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</td>
                                 </tr>
                             }
                         </tbody>

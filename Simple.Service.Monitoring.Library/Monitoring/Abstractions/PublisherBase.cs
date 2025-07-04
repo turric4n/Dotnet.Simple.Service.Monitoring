@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using RabbitMQ.Client.Events;
 using TimeZoneConverter;
+using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 {
@@ -97,10 +97,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             // Last status of the check always start with healthy value
             alertBehaviour.LastStatus =
                 (alertBehaviour.LastCheck == DateTime.MinValue) 
-                    ? HealthStatus.Healthy : alertBehaviour.LastStatus;
+                    ? (Models.HealthStatus)HealthStatus.Healthy : alertBehaviour.LastStatus;
 
             var failed = HealthFailed(status);
-            var lastFailed = HealthFailed(alertBehaviour.LastStatus);
+            var lastFailed = HealthFailed((HealthStatus)alertBehaviour.LastStatus);
 
             alertBehaviour.FailedCount = failed ? 
                 alertBehaviour.FailedCount += 1 : 0;
@@ -155,7 +155,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
             var alert = this.ProcessOwnedAlertRules(entry.Value.Status, behaviour);
 
-            behaviour.LastStatus = entry.Value.Status;
+            behaviour.LastStatus = (Models.HealthStatus)entry.Value.Status;
 
             behaviour.LastCheck = DateTime.Now;
 

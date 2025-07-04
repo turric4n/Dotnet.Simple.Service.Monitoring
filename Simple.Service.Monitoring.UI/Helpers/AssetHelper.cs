@@ -83,7 +83,7 @@ namespace Simple.Service.Monitoring.UI.Helpers
 
         private static void LoadManifestIfNeeded()
         {
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
 
             // Skip cache check if caching is disabled
             if (EnableCaching && ManifestData != null && (now - LastManifestCheck) < ManifestCacheTime)

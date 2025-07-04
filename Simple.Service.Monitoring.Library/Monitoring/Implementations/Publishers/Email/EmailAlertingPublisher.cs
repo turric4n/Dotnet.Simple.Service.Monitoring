@@ -14,6 +14,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Em
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Templates;
+using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email
 {

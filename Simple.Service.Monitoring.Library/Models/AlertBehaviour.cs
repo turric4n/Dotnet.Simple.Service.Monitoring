@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System;
+﻿using System;
 
 namespace Simple.Service.Monitoring.Library.Models
 {

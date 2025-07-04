@@ -9,10 +9,10 @@ namespace Simple.Service.Monitoring.Library.Models
     {
         public HealthCheckData(HealthReportEntry healthReportEntry, string name)
         {
-            CreationDate = DateTime.UtcNow;
-            Status = healthReportEntry.Status;
+            CreationDate = DateTime.Now;
+            Status = (HealthStatus)healthReportEntry.Status;
             Name = name;
-            LastUpdated = DateTime.UtcNow;
+            LastUpdated = DateTime.Now;
             Duration = healthReportEntry.Duration.Milliseconds.ToString();
             Description = healthReportEntry.Description ?? "No description provided";
             CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : Description;
@@ -26,6 +26,8 @@ namespace Simple.Service.Monitoring.Library.Models
 
         // Default constructor for serialization
         public HealthCheckData() { }
+
+        public string Id { get; set; }
 
         // Changed from fields to properties
         public DateTime CreationDate { get; set; }

@@ -55,7 +55,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             );
 
             // Add the report with current timestamp
-            reportsByTime.AddOrUpdate(DateTime.UtcNow, report, (time, oldReport) => report);
+            reportsByTime.AddOrUpdate(DateTime.Now, report, (time, oldReport) => report);
 
             // Optional: Cleanup old entries to prevent memory leaks
             CleanupOldEntries(reportsByTime);
@@ -64,7 +64,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         private void CleanupOldEntries(ConcurrentDictionary<DateTime, HealthReport> reports)
         {
             // Remove entries older than 24 hours to prevent unlimited growth
-            var cutoffTime = DateTime.UtcNow.AddHours(-24);
+            var cutoffTime = DateTime.Now.AddHours(-24);
 
             foreach (var key in reports.Keys)
             {

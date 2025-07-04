@@ -115,7 +115,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 // Serialize the health check entry to JSON
                 var serializedReport = System.Text.Json.JsonSerializer.Serialize(new
                 {
-                    TimeStamp = DateTime.UtcNow,
+                    TimeStamp = DateTime.Now,
                     ServiceName = entry.Key,
                     ServiceType = _healthCheck.ServiceType.ToString(),
                     Status = entry.Value.Status.ToString(),
