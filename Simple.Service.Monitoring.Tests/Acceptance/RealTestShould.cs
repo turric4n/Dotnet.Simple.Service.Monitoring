@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Options;
+using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Tests.Acceptance
 {
@@ -168,7 +169,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance
             await Task.Delay(5000);
 
             // Assert
-            report.Status.Should().Be(HealthStatus.Unhealthy);
+            report.Status.Should().Be((HealthStatus)HealthStatus.Unhealthy);
             report.Entries.Should().HaveCount(4);
             report.Entries.Should().ContainKeys("test_healthy", "test_degraded", "test_unhealthy", "MyHttpHealthCheck");
 
