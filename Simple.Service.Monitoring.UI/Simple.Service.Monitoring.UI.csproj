@@ -9,9 +9,9 @@
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.11</Version>
-		<AssemblyVersion>1.0.11</AssemblyVersion>
-		<FileVersion>1.0.11</FileVersion>
+		<Version>1.0.13</Version>
+		<AssemblyVersion>1.0.13</AssemblyVersion>
+		<FileVersion>1.0.13</FileVersion>
 		<Authors>Turrican aka Enrique Fuentes</Authors>
 		<Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
@@ -25,9 +25,9 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<EmbeddedResource Include="wwwroot\**\*" />
-	</ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\**\*" />
+  </ItemGroup>
 
 	<ItemGroup>
 	  <Compile Remove="Handlers\**" />
@@ -41,17 +41,27 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="package-lock.json" />
+	  <Content Remove="package.json" />
+	  <Content Remove="tsconfig.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\Simple.Service.Monitoring.Library\Simple.Service.Monitoring.Library.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Folder Include="Front\src\services\" />
 		<Folder Include="Helpers\" />
-		<Folder Include="wwwroot\" />
+		<None Include="package-lock.json" />
+		<None Include="package.json">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
     <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <None Include="tsconfig.json" />
 	</ItemGroup>
 
 	<ItemGroup>
