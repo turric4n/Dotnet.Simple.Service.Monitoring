@@ -7,7 +7,6 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -18,7 +17,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
     public class TelegramAlertingPublisher : PublisherBase
     {
         private readonly TelegramTransportSettings _telegramTransportSettings;
-
         private readonly TelegramBotClient _telegramBot;
 
         public TelegramAlertingPublisher(IHealthChecksBuilder healthChecksBuilder,
@@ -33,58 +31,83 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
             var ownedEntry = this.GetOwnedEntry(report);
-
             var interceptedEntries = this.GetInterceptedEntries(report);
-
             var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
 
             if (ownedAlerting)
             {
-                await SendTelegramMessage(ownedEntry, cancellationToken);
+                await SendTelegramMessage(new HealthCheckData(ownedEntry.Value, ownedEntry.Key), cancellationToken);
             }
 
             foreach (var interceptedEntry in interceptedEntries)
             {
                 if (this.IsOkToAlert(interceptedEntry, true))
                 {
-                    await SendTelegramMessage(ownedEntry, cancellationToken);
+                    // Convert health entries to HealthCheckData objects
+                    await SendTelegramMessage(new HealthCheckData(interceptedEntry.Value, interceptedEntry.Key), cancellationToken);
                 }
             }
         }
 
-        private async Task SendTelegramMessage(KeyValuePair<string, HealthReportEntry> entry, CancellationToken cancellationToken)
+        private async Task SendTelegramMessage(HealthCheckData healthCheckData, CancellationToken cancellationToken)
         {
-            var currentStatus = "[Undefined]";
-
-            switch (entry.Value.Status)
+            // Format status with emoji for better visibility
+            var statusEmoji = healthCheckData.Status switch
             {
-                case HealthStatus.Unhealthy:
-                    currentStatus = "[Unhealthy]";
-                    break;
-                case HealthStatus.Degraded:
-                    currentStatus = "[Degraded]";
-                    break;
-                case HealthStatus.Healthy:
-                    currentStatus = "[Healthy]";
-                    break;
+                (Models.HealthStatus)HealthStatus.Unhealthy => "❌",
+                (Models.HealthStatus)HealthStatus.Degraded => "⚠️",
+                (Models.HealthStatus)HealthStatus.Healthy => "✅",
+                _ => "❓"
+            };
+
+            var currentStatus = $"{statusEmoji} [{healthCheckData.Status}]";
+            
+            // Create a detailed and well-formatted message
+            var body = $"{currentStatus} *{healthCheckData.Name}*{Environment.NewLine}{Environment.NewLine}" +
+                       $"🕒 *Triggered On:* {DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}" +
+                       $"💻 *Machine:* {healthCheckData.MachineName}{Environment.NewLine}" +
+                       $"🔧 *Service Type:* {healthCheckData.ServiceType}{Environment.NewLine}" +
+                       $"🔗 *Endpoint:* {healthCheckData.Tags.GetValueOrDefault("Endpoint", healthCheckData.Tags.GetValueOrDefault("Host", "Not specified"))}{Environment.NewLine}" +
+                       $"⏱ *Duration:* {healthCheckData.Duration} ms{Environment.NewLine}" +
+                       $"📊 *Status:* {healthCheckData.Status}{Environment.NewLine}";
+
+            // Add detailed error information
+            if (healthCheckData.Status == (Models.HealthStatus)HealthStatus.Unhealthy ||
+                healthCheckData.Status == (Models.HealthStatus)HealthStatus.Degraded)
+            {
+                var errorDetails = string.IsNullOrEmpty(healthCheckData.CheckError) || healthCheckData.CheckError == "None" 
+                    ? healthCheckData.Description 
+                    : healthCheckData.CheckError;
+                
+                body += $"❗ *Error Details:* {errorDetails}{Environment.NewLine}{Environment.NewLine}";
+            }
+            else
+            {
+                body += $"📝 *Details:* {healthCheckData.Description}{Environment.NewLine}{Environment.NewLine}";
             }
 
-            var body = $"{currentStatus} - Alert Triggered : {_healthCheck.Name} {Environment.NewLine}" +
-                       $"Triggered On    : {DateTime.Now} {Environment.NewLine}" +
-                       $"Service Type    : {_healthCheck.ServiceType} {Environment.NewLine}" +
-                       $"Alert Endpoint  : {_healthCheck.EndpointOrHost} {Environment.NewLine}" +
-                       $"Alert Status    : {entry.Value.Status} {Environment.NewLine}" +
-                       $"Alert Details   : {(string.IsNullOrEmpty(entry.Value.Description) ? entry.Value.Exception?.Message : entry.Value.Description) } {Environment.NewLine}";
-
-            foreach (var extraData in entry.Value.Data)
+            // Add additional tags if available
+            if (healthCheckData.Tags.Count > 0)
             {
-                body += $"Alert Tags    : {extraData.Key} - {extraData.Value} {Environment.NewLine}";
+                body += $"📋 *Additional Information:*{Environment.NewLine}";
+                
+                foreach (var tag in healthCheckData.Tags)
+                {
+                    // Skip endpoint as it's already displayed above
+                    if (tag.Key != "Endpoint" && tag.Key != "Host")
+                    {
+                        body += $"- {tag.Key}: {tag.Value}{Environment.NewLine}";
+                    }
+                }
             }
+            
+            // Add timestamp footer
+            body += $"{Environment.NewLine}🔄 Last updated: {healthCheckData.LastUpdated:yyyy-MM-dd HH:mm:ss}";
 
             await _telegramBot.SendMessage(_telegramTransportSettings.ChatId, body, cancellationToken: cancellationToken);
         }
 
-    protected internal override void Validate()
+        protected internal override void Validate()
         {
             Condition.WithExceptionOnFailure<TelegramAlertingValidationError>()
                 .Requires(_telegramTransportSettings.BotApiToken)

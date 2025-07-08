@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -9,6 +10,15 @@ namespace Simple.Service.Monitoring.Library.Models
     {
         public HealthCheckData(HealthReportEntry healthReportEntry, string name)
         {
+            foreach (var tag in healthReportEntry.Tags)
+            {
+                var currentTag = tag.Split(",");
+                if (currentTag.Length > 1)
+                {
+                    Tags.Add(currentTag[0], currentTag[1]);
+                }
+            }
+
             CreationDate = DateTime.Now;
             Status = (HealthStatus)healthReportEntry.Status;
             Name = name;
@@ -26,9 +36,7 @@ namespace Simple.Service.Monitoring.Library.Models
 
         // Default constructor for serialization
         public HealthCheckData() { }
-
         public string Id { get; set; }
-
         // Changed from fields to properties
         public DateTime CreationDate { get; set; }
         public string Name { get; set; }
@@ -40,5 +48,6 @@ namespace Simple.Service.Monitoring.Library.Models
         public string CheckError { get; set; }
         public string ServiceType { get; set; }
         public string MachineName { get; set; }
+        public Dictionary<string, string> Tags { get; set; } = new Dictionary<string, string>();
     }
 }
