@@ -44,7 +44,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 if (this.IsOkToAlert(interceptedEntry, true))
                 {
                     // Convert health entries to HealthCheckData objects
-                    await SendTelegramMessage(new HealthCheckData(interceptedEntry.Value, interceptedEntry.Key), cancellationToken);
+                    try
+                    {
+                        await SendTelegramMessage(new HealthCheckData(interceptedEntry.Value, interceptedEntry.Key), cancellationToken);
+                    }
+                    catch (Exception e)
+                    {
+                        // Do something with the exception, e.g., log it
+                    }
                 }
             }
         }
