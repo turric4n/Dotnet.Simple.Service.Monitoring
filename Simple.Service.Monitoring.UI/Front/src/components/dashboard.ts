@@ -144,7 +144,7 @@ export class Dashboard {
                 const name = check.name || '';
                 const checkError = check.checkError || '';
                 const lastUpdated = check.lastUpdated
-                    ? new Date(check.lastUpdated).toISOString().replace('T', ' ').substring(0, 19)
+                    ? new Date(check.lastUpdated).toLocaleTimeString(undefined, { hour12: false })
                     : '';
 
                 row.innerHTML = `
@@ -193,10 +193,11 @@ export class Dashboard {
 
         if (this.lastUpdatedElement) {
             const lastUpdated = report.lastUpdated
-                ? new Date(report.lastUpdated).toISOString().replace('T', ' ').substring(0, 19)
-                : new Date().toISOString().replace('T', ' ').substring(0, 19);
+                ? new Date(report.lastUpdated).toLocaleTimeString(undefined, { hour12: false })
+                : new Date().toLocaleTimeString(undefined, { hour12: false });
             this.lastUpdatedElement.textContent = `Last Updated: ${lastUpdated}`;
         }
+
 
         // Request timeline data (only if we don't receive it automatically)
         // this.monitoringService.requestTimelineData(24);

@@ -296,12 +296,17 @@ export class TimelineComponent {
     }
     
     private createTimelineOptions(serviceNames: string[], minTime: number, maxTime: number): TimelineOptions {
+        // Calculate height with a minimum to ensure proper display
+        const calculatedHeight = serviceNames.length * 40 + 40;
+        const minHeight = 150; // Minimum height for proper timeline display
+        const finalHeight = Math.max(calculatedHeight, minHeight);
+        
         return {
             stack: false,
             horizontalScroll: true,
             zoomKey: 'ctrlKey',
             orientation: 'top',
-            height: serviceNames.length * 40 + 40, // Height based on number of services
+            height: finalHeight, // Height with minimum guarantee
             min: new Date(minTime),  // Set min time based on our range
             max: new Date(maxTime),  // Set max time to now
             start: new Date(minTime), // Initialize view at our min time
