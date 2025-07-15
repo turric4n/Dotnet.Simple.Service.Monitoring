@@ -137,12 +137,12 @@ export class TimelineComponent {
             this.populateItemsAndGroups(timelineData, uptimePercentages);
             
             // Create timeline options
-            const options: TimelineOptions = this.createTimelineOptions(serviceNames, minTime, maxTime);
+            const options: TimelineOptions = this.createTimelineOptions(minTime, maxTime);
             
             // Create the timeline if we have valid data
             if (serviceNames.length > 0 && timelineElement) {
                 this.timeline = new Timeline(timelineElement, this.items, this.groups, options);
-                
+                               
                 // Add event listener for range changes
                 this.setupRangeChangeListener();
             } else {
@@ -295,27 +295,18 @@ export class TimelineComponent {
         });
     }
     
-    private createTimelineOptions(serviceNames: string[], minTime: number, maxTime: number): TimelineOptions {
-        // Calculate height with a minimum to ensure proper display
-        const calculatedHeight = serviceNames.length * 40 + 40;
-        const minHeight = 150; // Minimum height for proper timeline display
-        const finalHeight = Math.max(calculatedHeight, minHeight);
-        
+    private createTimelineOptions(minTime: number, maxTime: number): TimelineOptions {        
         return {
             stack: false,
             horizontalScroll: true,
+            align: 'center',            
             zoomKey: 'ctrlKey',
-            orientation: 'top',
-            height: finalHeight, // Height with minimum guarantee
+            orientation: 'top',            
+            autoResize: true,
             min: new Date(minTime),  // Set min time based on our range
             max: new Date(maxTime),  // Set max time to now
             start: new Date(minTime), // Initialize view at our min time
-            end: new Date(maxTime),   // End view at max time
-            margin: {
-                item: {
-                    vertical: 10
-                }
-            }
+            end: new Date(maxTime)   // End view at max time
         };
     }
     
