@@ -1,0 +1,317 @@
+Logging:
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+
+AllowedHosts: "*"
+
+ConnectionStrings:
+  DefaultConnection: "Server=(localdb)\\mssqllocaldb;Database=HealthChecksDb;Trusted_Connection=true;MultipleActiveResultSets=true"
+
+MonitoringUi:
+  CompanyName: "Your Company Name"
+  HeaderDescription: "Health Monitoring Dashboard"
+  HeaderLogoUrl: "https://example.com/logo.png"
+  DataRepositoryType: "LiteDb" # Options: InMemory, LiteDb, Sql
+
+Monitoring:
+  Settings:
+    ShowUI: true
+    UseGlobalServiceName: "Production Services"
+  
+  HealthChecks:
+    # HTTP Service Monitoring
+    - Name: "HTTP Service Check"
+      ServiceType: Http
+      EndpointOrHost: "https://api.example.com/health"
+      Port: 443
+      MonitoringInterval: "00:01:00"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 5000
+          HttpVerb: Get # Options: Get, Post, Put, Delete
+        ServiceReach: true
+        ServiceConnectionEstablished: true
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Email # Options: Email, Slack, Telegram, Influx, CustomApi, SignalR, Dummy
+          TransportName: "PrimaryEmailTransport"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          StartAlertingOn: "00:00:00"
+          StopAlertingOn: "23:59:59"
+          AlertEvery: "00:05:00"
+          AlertByFailCount: 3
+          PublishAllResults: false
+          IncludeEnvironment: true
+          Timezone: "UTC"
+      AdditionalTags:
+        - "critical"
+        - "external-api"
+      ExcludedInterceptionNames: []
+
+    # SQL Server Database Monitoring
+    - Name: "SQL Server Database Check"
+      ServiceType: MsSql
+      ConnectionString: "Server=localhost;Database=MyApp;Integrated Security=true;"
+      MonitoringInterval: "00:02:00"
+      HealthCheckConditions:
+        SqlBehaviour:
+          Query: "SELECT COUNT(*) FROM Users"
+          ResultExpression: GreaterThan # Options: Equal, NotEqual, GreaterThan, LessThan
+          SqlResultDataType: Int # Options: String, Int, Bool, DateTime
+          ExpectedResult: 0
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Slack
+          TransportName: "DevOpsSlackChannel"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:10:00"
+          AlertByFailCount: 2
+      AdditionalTags:
+        - "database"
+        - "critical"
+
+    # Redis Cache Monitoring
+    - Name: "Redis Cache Check"
+      ServiceType: Redis
+      ConnectionString: "localhost:6379"
+      MonitoringInterval: "00:01:30"
+      HealthCheckConditions:
+        RedisBehaviour:
+          TimeOutMs: 3000
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Telegram
+          TransportName: "DevOpsTelegramBot"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:05:00"
+      AdditionalTags:
+        - "cache"
+        - "performance"
+
+    # Elasticsearch Cluster Monitoring
+    - Name: "Elasticsearch Cluster"
+      ServiceType: ElasticSearch
+      EndpointOrHost: "http://elasticsearch.example.com"
+      Port: 9200
+      MonitoringInterval: "00:03:00"
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: CustomApi
+          TransportName: "CustomNotificationService"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:15:00"
+      AdditionalTags:
+        - "search"
+        - "logging"
+
+    # MySQL Database Monitoring
+    - Name: "MySQL Database"
+      ServiceType: MySql
+      ConnectionString: "Server=localhost;Database=myapp;Uid=user;Pwd=password;"
+      MonitoringInterval: "00:02:00"
+      PublishChecks: true
+      Alert: false
+      AdditionalTags:
+        - "database"
+        - "secondary"
+
+    # Hangfire Background Jobs Monitoring
+    - Name: "Hangfire Background Jobs"
+      ServiceType: Hangfire
+      ConnectionString: "Server=localhost;Database=HangfireDb;Integrated Security=true;"
+      MonitoringInterval: "00:05:00"
+      HealthCheckConditions:
+        HangfireBehaviour:
+          MaximumJobsFailed: 10
+          MinimumAvailableServers: 1
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: SignalR
+          TransportName: "RealtimeNotifications"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:10:00"
+      AdditionalTags:
+        - "background-jobs"
+        - "processing"
+
+    # Network Ping Monitoring
+    - Name: "External Server Ping"
+      ServiceType: Ping
+      EndpointOrHost: "google.com"
+      MonitoringInterval: "00:01:00"
+      HealthCheckConditions:
+        ServiceReach: true
+        ServiceConnectionEstablished: true
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Influx
+          TransportName: "MetricsDatabase"
+          PublishAllResults: true
+      AdditionalTags:
+        - "network"
+        - "connectivity"
+
+    # RabbitMQ Message Queue Monitoring
+    - Name: "RabbitMQ Message Queue"
+      ServiceType: Rmq
+      ConnectionString: "amqp://guest:guest@localhost:5672/"
+      MonitoringInterval: "00:02:00"
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "SecondaryEmailTransport"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:05:00"
+      AdditionalTags:
+        - "messaging"
+        - "queue"
+
+    # Custom Health Check
+    - Name: "Custom Health Check"
+      ServiceType: Custom
+      FullClassName: "MyApp.HealthChecks.CustomBusinessLogicHealthCheck"
+      MonitoringInterval: "00:05:00"
+      PublishChecks: true
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "PrimaryEmailTransport"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:10:00"
+      AdditionalTags:
+        - "business-logic"
+        - "custom"
+
+    # Interceptor Monitoring
+    - Name: "Interceptor Check"
+      ServiceType: Interceptor
+      MonitoringInterval: "00:01:00"
+      PublishChecks: true
+      Alert: false
+      ExcludedInterceptionNames:
+        - "HealthCheck"
+        - "Metrics"
+      AdditionalTags:
+        - "interceptor"
+        - "monitoring"
+
+  # Email Transport Configuration
+  EmailTransportSettings:
+    - Name: "PrimaryEmailTransport"
+      From: "monitoring@company.com"
+      DisplayName: "Health Monitoring System"
+      To: "devops@company.com"
+      SmtpHost: "smtp.company.com"
+      SmtpPort: 587
+      Authentication: true
+      Username: "monitoring@company.com"
+      Password: "secure_password"
+      Template: "Standard"
+    
+    - Name: "SecondaryEmailTransport"
+      From: "alerts@company.com"
+      DisplayName: "System Alerts"
+      To: "admin@company.com"
+      SmtpHost: "smtp.company.com"
+      SmtpPort: 25
+      Authentication: false
+      Username: ""
+      Password: ""
+      Template: "Plain"
+
+  # Slack Transport Configuration
+  SlackTransportSettings:
+    - Name: "DevOpsSlackChannel"
+      Token: "xoxb-your-slack-bot-token"
+      Channel: "#devops-alerts"
+      Username: "Health Monitor Bot"
+    
+    - Name: "CriticalAlertsSlack"
+      Token: "xoxb-another-slack-bot-token"
+      Channel: "#critical-alerts"
+      Username: "Critical Alert Bot"
+
+  # Telegram Transport Configuration
+  TelegramTransportSettings:
+    - Name: "DevOpsTelegramBot"
+      BotApiToken: "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+      ChatId: "-1001234567890"
+    
+    - Name: "AdminTelegramBot"
+      BotApiToken: "987654321:ZYXwvuTSRqponMLKjihGFEdcba"
+      ChatId: "-1009876543210"
+
+  # InfluxDB Transport Configuration
+  InfluxDbTransportSettings:
+    - Name: "MetricsDatabase"
+      Host: "http://influxdb.company.com:8086"
+      Database: "health_checks"
+    
+    - Name: "SecondaryMetrics"
+      Host: "http://localhost:8086"
+      Database: "monitoring_metrics"
+
+  # Custom Notification Transport Configuration
+  CustomNotificationTransportSettings:
+    - Name: "CustomNotificationService"
+      BaseEndpoint: "https://api.company.com/notifications"
+      ApiKey: "your-api-key-here"
+      ProjectName: "HealthMonitoring"
+      Environment: "Production"
+    
+    - Name: "ThirdPartyIntegration"
+      BaseEndpoint: "https://webhooks.thirdparty.com/alerts"
+      ApiKey: "third-party-api-key"
+      ProjectName: "MyApplication"
+      Environment: "Production"
+
+  # SignalR Transport Configuration
+  SignalRTransportSettings:
+    - Name: "RealtimeNotifications"
+      HubUrl: "https://app.company.com/notificationhub"
+      HubMethod: "ReceiveHealthAlert"
+    
+    - Name: "DashboardNotifications"
+      HubUrl: "https://dashboard.company.com/alertshub"
+      HubMethod: "UpdateHealthStatus"
+
+  # Webhook Transport Configuration
+  WebhookTransportSettings:
+    - Name: "GenericWebhook"
+      WebhookUrl: "https://hooks.company.com/health-alerts"
+      HttpBehaviour:
+        HttpExpectedCode: 200
+        HttpTimeoutMs: 10000
+        HttpVerb: Post
+      Headers:
+        Authorization: "Bearer your-webhook-token"
+        Content-Type: "application/json"
+        X-Source: "HealthMonitoring"
+
+  # Redis Transport Configuration
+  RedisTransportSettings:
+    - Name: "RedisNotificationQueue"
+      Host: "redis.company.com"
+      Port: 6379
+      DatabaseNumber: 1
+
+  # Dictionary Transport Configuration
+  DictionaryTransportSettings:
+    - Name: "InMemoryTransport"
