@@ -23,35 +23,12 @@
                 <small>Last Updated: @Model.LastUpdated</small>
             </div>
             <div class="card-body">
-                <h5>Health Checks</h5>
+                <h5>Health Checks</h5>                
                 <div class="table-responsive">
-                    <table id="health-checks-table" class="table table-bordered table-hover" data-datatable="true" data-searchable="true" data-sortable="true" data-per-page="10">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Service</th>
-                                <th>Check Type</th>
-                                <th>Machine Name</th>
-                                <th>Status</th>
-                                <th>Information</th>
-                                <th>Duration</th>
-                                <th>Last Updated</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var check in Model.HealthChecks)
-                            {
-                                <tr class="@GetRowClass(check.Status)">
-                                    <td><strong>@check.Name</strong></td>
-                                    <td>@check.ServiceType</td>
-                                    <td>@check.MachineName</td>
-                                    <td><span class="badge bg-@GetStatusColor(check.Status)">@check.Status</span></td>
-                                    <td>@check.CheckError</td>
-                                    <td>@check.Duration ms</td>
-                                    <td>@check.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                    <!-- Enhanced DataTable Container -->
+                    <div id="health-checks-table-container">
+                        <!-- The Enhanced DataTable component will render the entire table here -->
+                    </div>
                 </div>
 
                 <!-- Visual Timeline Chart -->
@@ -81,18 +58,6 @@
             "Degraded" => "warning",
             "Unhealthy" => "danger",
             _ => "secondary"
-        };
-    }
-
-    private string GetRowClass(object statusObj)
-    {
-        var status = statusObj?.ToString();
-        return status switch
-        {
-            "Healthy" => "table-success",
-            "Degraded" => "table-warning",
-            "Unhealthy" => "table-danger",
-            _ => ""
         };
     }
 }

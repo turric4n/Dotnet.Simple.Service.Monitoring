@@ -2,42 +2,26 @@ import { MonitoringService } from '../services/monitoringService';
 import { HealthReport } from '../models/healthReport';
 import { HealthCheckData } from '../models/healthCheckData';
 import { TimelineComponent, TimelineSegment } from './timelineComponent';
-import { DataTable } from './dataTable';
+import { EnhancedDataTable, DataTableColumn } from './enhancedDataTable';
 import "vis-timeline/styles/vis-timeline-graph2d.css";
 
 export class Dashboard {
     private monitoringService: MonitoringService;
-    private tableElement: HTMLTableElement | null = null;
     private statusBadgeElement: HTMLElement | null = null;
     private lastUpdatedElement: HTMLElement | null = null;
     private timelineComponent: TimelineComponent | null = null;
-    private dataTable: DataTable | null = null;
-
-    constructor() {
+    private dataTable: EnhancedDataTable<HealthCheckData> | null = null;    constructor() {
         this.monitoringService = new MonitoringService();
 
         // Initialize UI references
-        this.tableElement = document.querySelector('table') as HTMLTableElement;
         this.statusBadgeElement = document.querySelector('.card-header .badge') as HTMLElement;
         this.lastUpdatedElement = document.querySelector('.card-header small') as HTMLElement;
         
         // Create timeline component
         this.timelineComponent = new TimelineComponent('timeline-chart');
         
-        // Initialize DataTable if the table exists
-        if (this.tableElement) {
-            // Add necessary attributes if they're not already present
-            if (!this.tableElement.id) {
-                this.tableElement.id = 'health-checks-table';
-            }
-            
-            this.dataTable = new DataTable({
-                tableSelector: `#${this.tableElement.id}`,
-                searchable: true,
-                sortable: true,
-                perPage: 10
-            });
-        }
+        // Initialize the Enhanced DataTable
+        this.initializeDataTable();
 
         // Set up event handlers
         this.monitoringService.onHealthChecksReportReceived = this.updateDashboard.bind(this);
@@ -46,9 +30,87 @@ export class Dashboard {
 
         // Initialize connection
         this.initializeConnection();
-        
-        // Set up timeline view buttons for different time ranges
+          // Set up timeline view buttons for different time ranges
         this.initializeTimelineControls();
+
+    }    private initializeDataTable(): void {
+        // Define columns for the health checks table
+        const columns: DataTableColumn[] = [
+            {
+                key: 'name',
+                label: 'Service Name',
+                sortable: true,
+                width: '20%',
+                render: (value: string) => `<strong>${this.escapeHtml(value || '')}</strong>`
+            },
+            {
+                key: 'serviceType',
+                label: 'Service Type',
+                sortable: true,
+                width: '12%'
+            },
+            {
+                key: 'machineName',
+                label: 'Machine',
+                sortable: true,
+                width: '12%'
+            },
+            {
+                key: 'status',
+                label: 'Status',
+                sortable: true,
+                width: '10%',
+                render: (value: string) => {
+                    const status = value || 'Unknown';
+                    return `<span class="badge bg-${this.getStatusColor(status)}">${this.escapeHtml(status)}</span>`;
+                }
+            },
+            {
+                key: 'checkError',
+                label: 'Error',
+                sortable: true,
+                width: '25%',
+                render: (value: string) => this.escapeHtml(value || '')
+            },
+            {
+                key: 'duration',
+                label: 'Duration',
+                sortable: true,
+                width: '8%',
+                render: (value: number) => `${value || 0} ms`
+            },            {
+                key: 'lastUpdated',
+                label: 'Last Updated',
+                sortable: true,
+                width: '13%',
+                render: (value: string) => {
+                    return value 
+                        ? new Date(value).toLocaleString()
+                        : '';
+                }
+            }
+        ];        // Initialize the Enhanced DataTable
+        this.dataTable = new EnhancedDataTable<HealthCheckData>({
+            containerSelector: '#health-checks-table-container',
+            columns: columns,
+            searchable: true,
+            sortable: true,
+            perPage: 10,
+            emptyMessage: 'No health checks available',
+            groupingFilters: {
+                enabled: true,
+                columns: [
+                    { columnKey: 'status', label: 'Status', filterType: 'dropdown' },
+                    { columnKey: 'serviceType', label: 'Service Type', filterType: 'dropdown' },
+                    { columnKey: 'machineName', label: 'Machine', filterType: 'dropdown' }
+                ]
+            },
+            customFilters: {
+                enabled: true,
+                showActiveOnly: true,
+                activeThresholdMinutes: 30
+            }
+        });
     }
 
     private initializeTimelineControls(): void {
@@ -117,71 +179,16 @@ export class Dashboard {
         } catch (error) {
             console.error('Error rendering timeline:', error);
         }
-    }
-
-    private renderHealthChecks(healthChecks: HealthCheckData[]): void {
-        if (!this.tableElement) return;
-
-        // Get the table body element
-        const tbody = this.tableElement.querySelector('tbody');
-        if (!tbody) {
-            console.error('Table body not found');
-            return;
-        }
-
-        // Clear existing rows
-        tbody.innerHTML = '';
-
-        const fragment = document.createDocumentFragment();
-        healthChecks.forEach(check => {
-            if (!check) return;
-
-            try {
-                const row = document.createElement('tr');
-                const status = check.status || 'Unknown';
-                row.className = this.getRowClass(status);
-
-                const name = check.name || '';
-                const checkError = check.checkError || '';
-                const lastUpdated = check.lastUpdated
-                    ? new Date(check.lastUpdated).toLocaleTimeString(undefined, { hour12: false })
-                    : '';
-
-                row.innerHTML = `
-                    <td><strong>${this.escapeHtml(name)}</strong></td>
-                    <td>${check.serviceType || ''}</td>
-                    <td>${check.machineName || ''}</td>
-                    <td><span class="badge bg-${this.getStatusColor(status)}">${this.escapeHtml(status)}</span></td>                    
-                    <td>${this.escapeHtml(checkError)}</td>
-                    <td>${check.duration} ms</td>
-                    <td>${lastUpdated}</td>
-                `;
-
-                fragment.appendChild(row);
-            } catch (error) {
-                console.error('Error rendering health check row:', error, check);
-            }
-        });
-
-        tbody.appendChild(fragment);
-
-        // Update the DataTable after content changes
-        if (this.dataTable) {
-            // Use setTimeout to ensure DOM is updated before refreshing the DataTable
-            setTimeout(() => {
-                this.dataTable?.refresh();
-            }, 0);
-        }
-    }
-
+    }    
+    
     private updateDashboard(report: HealthReport): void {
         if (!report) return;
 
         const healthChecks = report.healthChecks || [];
 
-        // Update the table
-        if (this.tableElement) {
-            this.renderHealthChecks(healthChecks);
+        // Update the data table with new health checks data
+        if (this.dataTable) {
+            this.dataTable.setData(healthChecks);
         }
 
         // Update status badge and last updated
@@ -197,7 +204,6 @@ export class Dashboard {
                 : new Date().toLocaleTimeString(undefined, { hour12: false });
             this.lastUpdatedElement.textContent = `Last Updated: ${lastUpdated}`;
         }
-
 
         // Request timeline data (only if we don't receive it automatically)
         // this.monitoringService.requestTimelineData(24);
@@ -221,23 +227,12 @@ export class Dashboard {
             statusElement.style.color = isConnected ? 'var(--bs-success)' : 'var(--bs-danger)';
             statusElement.textContent = isConnected ? 'Connected' : 'Disconnected';
         }
-    }
-
-    private getStatusColor(status: string): string {
+    }    private getStatusColor(status: string): string {
         switch (status) {
             case 'Healthy': return 'success';
             case 'Degraded': return 'warning';
             case 'Unhealthy': return 'danger';
             default: return 'secondary';
-        }
-    }
-
-    private getRowClass(status: string): string {
-        switch (status) {
-            case 'Healthy': return 'table-success';
-            case 'Degraded': return 'table-warning';
-            case 'Unhealthy': return 'table-danger';
-            default: return '';
         }
     }
 

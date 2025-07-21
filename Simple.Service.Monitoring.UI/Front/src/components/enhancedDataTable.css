@@ -183,3 +183,71 @@ th.sorting-active-desc .sort-indicator::after {
     border-color: #666666;
 }
 
+/* Fix table-responsive horizontal scrollbar issue */
+.enhanced-datatable-container .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.enhanced-datatable-container .table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 0;
+    table-layout: auto;
+}
+
+/* Ensure table cells don't force horizontal scroll */
+.enhanced-datatable-container .table th,
+.enhanced-datatable-container .table td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 0;
+    min-width: 0;
+}
+
+/* Allow specific columns to wrap if needed */
+.enhanced-datatable-container .table th:first-child,
+.enhanced-datatable-container .table td:first-child {
+    min-width: 120px;
+    max-width: 200px;
+    white-space: normal;
+}
+
+/* Error column should be allowed to wrap */
+.enhanced-datatable-container .table th:nth-child(5),
+.enhanced-datatable-container .table td:nth-child(5) {
+    max-width: 250px;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* Responsive table improvements */
+@media (max-width: 992px) {
+    .enhanced-datatable-container .table-responsive {
+        border: none;
+    }
+    
+    .enhanced-datatable-container .table th,
+    .enhanced-datatable-container .table td {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .enhanced-datatable-container .table th,
+    .enhanced-datatable-container .table td {
+        padding: 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Hide less important columns on mobile */
+    .enhanced-datatable-container .table th:nth-child(6),
+    .enhanced-datatable-container .table td:nth-child(6),
+    .enhanced-datatable-container .table th:nth-child(7),
+    .enhanced-datatable-container .table td:nth-child(7) {
+        display: none;
+    }
+}
+

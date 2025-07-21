@@ -161,3 +161,60 @@
 .dark-mode .card .card-body {
     background-color: #383838;
 }
+
+/* Text muted styling for dark mode */
+.dark-mode .text-muted {
+    color: #adb5bd !important;
+}
+
+.dark-mode .form-label.text-muted {
+    color: #ced4da !important;
+}
+
+/* Form select styling for dark mode */
+.dark-mode .form-select,
+.dark-mode .form-select-sm {
+    background-color: #404040 !important;
+    border-color: #6c757d !important;
+    color: #f0f0f0 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23adb5bd' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e") !important;
+}
+
+.dark-mode .form-select:focus,
+.dark-mode .form-select-sm:focus {
+    background-color: #404040 !important;
+    border-color: #8eb4ff !important;
+    color: #f0f0f0 !important;
+    box-shadow: 0 0 0 0.25rem rgba(142, 180, 255, 0.25) !important;
+}
+
+.dark-mode .form-select option,
+.dark-mode .form-select-sm option {
+    background-color: #404040 !important;
+    color: #f0f0f0 !important;
+}
+
+/* Form control styling for dark mode */
+.dark-mode .form-control {
+    background-color: #404040 !important;
+    border-color: #6c757d !important;
+    color: #f0f0f0 !important;
+}
+
+.dark-mode .form-control:focus {
+    background-color: #404040 !important;
+    border-color: #8eb4ff !important;
+    color: #f0f0f0 !important;
+    box-shadow: 0 0 0 0.25rem rgba(142, 180, 255, 0.25) !important;
+}
+
+.dark-mode .form-control::placeholder {
+    color: #adb5bd !important;
+}
+
+/* Input group styling */
+.dark-mode .input-group-text {
+    background-color: #404040 !important;
+    border-color: #6c757d !important;
+    color: #f0f0f0 !important;
+}
