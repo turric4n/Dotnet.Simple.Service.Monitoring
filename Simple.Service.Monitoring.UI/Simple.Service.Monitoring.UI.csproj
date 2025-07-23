@@ -9,9 +9,9 @@
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.16</Version>
-		<AssemblyVersion>1.0.16</AssemblyVersion>
-		<FileVersion>1.0.16</FileVersion>
+		<Version>1.0.18</Version>
+		<AssemblyVersion>1.0.18</AssemblyVersion>
+		<FileVersion>1.0.18</FileVersion>
 		<Authors>Turrican aka Enrique Fuentes</Authors>
 		<Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
@@ -76,4 +76,22 @@
 	    <PackagePath>\</PackagePath>
 	  </None>
 	</ItemGroup>
+
+	<!-- Auto-run webpack based on build configuration -->
+	<Target Name="WebpackDevelopment" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+		<Message Text="Running webpack in development mode..." Importance="high" />
+		<Exec Command="npm run build:dev" ContinueOnError="false" />
+	</Target>
+
+	<Target Name="WebpackProduction" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
+		<Message Text="Running webpack in production mode with minification..." Importance="high" />
+		<Exec Command="npm run build" ContinueOnError="false" />
+	</Target>
+
+	<!-- Clean webpack output when cleaning project -->
+	<Target Name="WebpackClean" BeforeTargets="Clean">
+		<Message Text="Cleaning webpack output..." Importance="high" />
+		<Exec Command="npm run clean" ContinueOnError="true" />
+	</Target>
+
 </Project>

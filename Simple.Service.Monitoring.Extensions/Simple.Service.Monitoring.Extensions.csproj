@@ -9,9 +9,9 @@
 		<Copyright>Turrican Software</Copyright>
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.14</Version>
-    <AssemblyVersion>1.0.14</AssemblyVersion>
-    <FileVersion>1.0.14</FileVersion>
+    <Version>1.0.18</Version>
+    <AssemblyVersion>1.0.18</AssemblyVersion>
+    <FileVersion>1.0.18</FileVersion>
     <Authors>Turrican aka Enrique Fuentes</Authors>
     <Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
@@ -26,7 +26,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Routing" Version="2.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Routing.Abstractions" Version="2.3.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>
