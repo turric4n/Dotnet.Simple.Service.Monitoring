@@ -14,6 +14,68 @@
     transition: background-color 0.3s ease;
 }
 
+/* Timeline Filters Styles */
+.timeline-filters {
+    background: var(--bs-gray-50);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+[data-bs-theme="dark"] .timeline-filters {
+    background: var(--bs-gray-800);
+}
+
+.timeline-filters .form-select {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+    color: var(--bs-body-color);
+}
+
+.timeline-filters .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    background-color: var(--bs-body-bg);
+}
+
+.timeline-filters .form-select-sm {
+    background-color: var(--bs-body-bg) !important;
+    border-color: var(--bs-border-color) !important;
+    color: var(--bs-body-color) !important;
+}
+
+.timeline-filters .form-check-input {
+    background-color: var(--bs-body-bg);
+    border-color: var(--bs-border-color);
+}
+
+.timeline-filters .form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.timeline-filters .form-label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+/* Grouped timeline items */
+.timeline-group-name.grouped {
+    font-size: 0.9em;
+    color: var(--bs-secondary);
+}
+
+.timeline-filters .datatable-filters {
+    border-top: 1px solid var(--bs-border-color);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+[data-bs-theme="dark"] .timeline-filters .datatable-filters {
+    border-top-color: var(--bs-gray-600);
+}
+
 /* Status colors */
 .status-healthy {
     background-color: #28a745 !important;
@@ -162,16 +224,16 @@
     border-color: #8eb4ff;
 }
 
-    .dark-mode .btn-group .btn-outline-primary:hover {
-        background-color: #3a5a9a;
-        color: white;
-    }
+.dark-mode .btn-group .btn-outline-primary:hover {
+    background-color: #3a5a9a;
+    color: white;
+}
 
-    .dark-mode .btn-group .btn-outline-primary.active {
-        background-color: #3a5a9a !important;
-        color: white !important;
-        border-color: #8eb4ff !important;
-    }
+.dark-mode .btn-group .btn-outline-primary.active {
+    background-color: #3a5a9a !important;
+    color: white !important;
+    border-color: #8eb4ff !important;
+}
 
 /* Force contrast for timeline text */
 .dark-mode .vis-timeline,

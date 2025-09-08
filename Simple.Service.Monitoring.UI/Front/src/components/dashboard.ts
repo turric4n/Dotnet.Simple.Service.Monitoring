@@ -16,9 +16,21 @@ export class Dashboard {
         // Initialize UI references
         this.statusBadgeElement = document.querySelector('.card-header .badge') as HTMLElement;
         this.lastUpdatedElement = document.querySelector('.card-header small') as HTMLElement;
-        
-        // Create timeline component
+          // Create timeline component with filters and grouping enabled
         this.timelineComponent = new TimelineComponent('timeline-chart');
+        
+        // Enable filters for the timeline
+        this.timelineComponent.enableFilters({
+            enabled: true,
+            showActiveOnly: false,
+            activeThresholdMinutes: 30
+        });
+        
+        // Enable grouping for the timeline
+        this.timelineComponent.enableGrouping({
+            enabled: true,
+            groupBy: 'none' // Start with no grouping, user can change via UI
+        });
         
         // Initialize the Enhanced DataTable
         this.initializeDataTable();

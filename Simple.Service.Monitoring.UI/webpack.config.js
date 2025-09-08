@@ -69,7 +69,7 @@ module.exports = {
             name: 'monitoring-vendors'
         }
     },
-    watch: true,
+    watch: false,
     watchOptions: {
         aggregateTimeout: 300,
         poll: 1000,

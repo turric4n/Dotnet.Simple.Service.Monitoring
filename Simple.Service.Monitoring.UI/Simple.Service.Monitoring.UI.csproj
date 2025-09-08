@@ -30,17 +30,6 @@
   </ItemGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Handlers\**" />
-	  <Compile Remove="Repositories\NewFolder\**" />
-	  <Content Remove="Handlers\**" />
-	  <Content Remove="Repositories\NewFolder\**" />
-	  <EmbeddedResource Remove="Handlers\**" />
-	  <EmbeddedResource Remove="Repositories\NewFolder\**" />
-	  <None Remove="Handlers\**" />
-	  <None Remove="Repositories\NewFolder\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Content Remove="package-lock.json" />
 	  <Content Remove="package.json" />
 	  <Content Remove="tsconfig.json" />
@@ -77,7 +66,6 @@
 	  </None>
 	</ItemGroup>
 
-	<!-- Auto-run webpack based on build configuration -->
 	<Target Name="WebpackDevelopment" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
 		<Message Text="Running webpack in development mode..." Importance="high" />
 		<Exec Command="npm run build:dev" ContinueOnError="false" />
@@ -88,7 +76,6 @@
 		<Exec Command="npm run build" ContinueOnError="false" />
 	</Target>
 
-	<!-- Clean webpack output when cleaning project -->
 	<Target Name="WebpackClean" BeforeTargets="Clean">
 		<Message Text="Cleaning webpack output..." Importance="high" />
 		<Exec Command="npm run clean" ContinueOnError="true" />

@@ -106,9 +106,7 @@ namespace Simple.Service.Monitoring.UI.Services
                 // Get checks within our time window
                 var checksInWindow = serviceChecks
                     .Where(c => c.LastUpdated >= startTime && c.LastUpdated <= endTime)
-                    .ToList();
-
-                // If no checks in window, just add one segment with initial status
+                    .ToList();                // If no checks in window, just add one segment with initial status
                 if (!checksInWindow.Any())
                 {
                     segments.Add(new HealthCheckTimelineSegment
@@ -116,14 +114,14 @@ namespace Simple.Service.Monitoring.UI.Services
                         StartTime = startTime,
                         EndTime = endTime,
                         Status = initialStatus,
-                        UptimePercentage = initialStatus == "Healthy" ? 100 : 0
+                        UptimePercentage = initialStatus == "Healthy" ? 100 : 0,
+                        ServiceName = serviceName,
+                        ServiceType = DetermineServiceType(serviceName)
                     });
 
                     result[compositeKey] = segments;
                     continue;
-                }
-
-                // Create segments for each status change
+                }// Create segments for each status change
                 foreach (var check in checksInWindow)
                 {
                     var currentStatus = check.Status.ToString() ?? "Unknown";
@@ -134,20 +132,22 @@ namespace Simple.Service.Monitoring.UI.Services
                         {
                             StartTime = lastTimestamp,
                             EndTime = check.LastUpdated,
-                            Status = lastStatus
+                            Status = lastStatus,
+                            ServiceName = serviceName,
+                            ServiceType = DetermineServiceType(serviceName)
                         });
 
                         lastStatus = currentStatus;
                         lastTimestamp = check.LastUpdated;
                     }
-                }
-
-                // Add final segment
+                }                // Add final segment
                 segments.Add(new HealthCheckTimelineSegment
                 {
                     StartTime = lastTimestamp,
                     EndTime = endTime,
-                    Status = lastStatus
+                    Status = lastStatus,
+                    ServiceName = serviceName,
+                    ServiceType = DetermineServiceType(serviceName)
                 });
 
                 // Calculate uptime percentage
@@ -471,9 +471,7 @@ namespace Simple.Service.Monitoring.UI.Services
                     CurrentStatus = currentStatus.ToString(),
                     LastUpdated = DateTime.Now.ToString("o") // Use ISO 8601 format with local time
                 });
-        }
-
-        private async Task<string> DetermineInitialStatus(string serviceKey, DateTime startTime)
+        }        private string DetermineInitialStatus(string serviceKey, DateTime startTime)
         {
             // Implement logic to find the last status before startTime
             // This might require an additional repository method
@@ -481,17 +479,47 @@ namespace Simple.Service.Monitoring.UI.Services
             return "Unknown";
         }
 
+        private string DetermineServiceType(string serviceName)
+        {
+            if (string.IsNullOrEmpty(serviceName))
+                return "Unknown";
+
+            var lowerServiceName = serviceName.ToLowerInvariant();
+            
+            // Determine service type based on common patterns in service names
+            if (lowerServiceName.Contains("gateway") || lowerServiceName.Contains("proxy"))
+                return "Gateway";
+            else if (lowerServiceName.Contains("api") || lowerServiceName.Contains("service") || lowerServiceName.Contains("microservice"))
+                return "API/Service";
+            else if (lowerServiceName.Contains("database") || lowerServiceName.Contains("db") || lowerServiceName.Contains("sql") || lowerServiceName.Contains("redis") || lowerServiceName.Contains("mongo"))
+                return "Database";
+            else if (lowerServiceName.Contains("queue") || lowerServiceName.Contains("message") || lowerServiceName.Contains("kafka") || lowerServiceName.Contains("rabbit"))
+                return "Messaging";
+            else if (lowerServiceName.Contains("cache") || lowerServiceName.Contains("memory"))
+                return "Cache";
+            else if (lowerServiceName.Contains("auth") || lowerServiceName.Contains("identity") || lowerServiceName.Contains("login"))
+                return "Authentication";
+            else if (lowerServiceName.Contains("notification") || lowerServiceName.Contains("email") || lowerServiceName.Contains("sms"))
+                return "Notification";
+            else if (lowerServiceName.Contains("file") || lowerServiceName.Contains("storage") || lowerServiceName.Contains("blob"))
+                return "Storage";
+            else if (lowerServiceName.Contains("web") || lowerServiceName.Contains("ui") || lowerServiceName.Contains("frontend"))
+                return "Web/UI";
+            else
+                return "Service";
+        }
+
         public void Dispose()
         {
             // Dispose resources if needed
         }
-    }
-
-    public class HealthCheckTimelineSegment
+    }public class HealthCheckTimelineSegment
     {
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public string Status { get; set; }
         public double UptimePercentage { get; set; }
+        public string ServiceName { get; set; }
+        public string ServiceType { get; set; }
     }
 }

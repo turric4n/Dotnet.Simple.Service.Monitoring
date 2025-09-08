@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simple.Service.Monitoring.UI", "Simple.Service.Monitoring.UI.csproj", "{707EBF78-7D2A-06EC-90E9-684EEF7CF935}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{707EBF78-7D2A-06EC-90E9-684EEF7CF935}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{707EBF78-7D2A-06EC-90E9-684EEF7CF935}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{707EBF78-7D2A-06EC-90E9-684EEF7CF935}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{707EBF78-7D2A-06EC-90E9-684EEF7CF935}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0E79EB54-8A71-4391-BACE-DCA8D7E5E030}
+	EndGlobalSection
+EndGlobal

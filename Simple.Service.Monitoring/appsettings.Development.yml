@@ -30,6 +30,72 @@ Monitoring:
       StopAlertingOn:
       AlertEvery: 00:00:05
       AlertOn:
+  - Name: Test Google
+    ServiceType: Http
+    EndpointOrHost: https://www.google.com/
+    Port: 443
+    HealthCheckConditions:
+      HttpBehaviour:
+        HttpExpectedResponseTimeMs: 300
+        HttpExpectedCode: 200
+        HttpVerb: Get
+      ServiceReach: true
+      ServiceConnectionEstablished: true
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:      
+  - Name: Another Google
+    ServiceType: Http
+    EndpointOrHost: https://www.google.com/
+    Port: 443
+    HealthCheckConditions:
+      HttpBehaviour:
+        HttpExpectedResponseTimeMs: 300
+        HttpExpectedCode: 200
+        HttpVerb: Get
+      ServiceReach: true
+      ServiceConnectionEstablished: true
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:          
+  - Name: Another Caca
+    ServiceType: Http
+    EndpointOrHost: https://www.caca.com/
+    Port: 443
+    HealthCheckConditions:
+      HttpBehaviour:
+        HttpExpectedResponseTimeMs: 300
+        HttpExpectedCode: 200
+        HttpVerb: Get
+      ServiceReach: true
+      ServiceConnectionEstablished: true
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:               
   - Name: Rmqtest
     ServiceType: Rmq
     EndpointOrHost: "amqp://user:test@localhost:5672/"
@@ -44,6 +110,20 @@ Monitoring:
       StopAlertingOn:
       AlertEvery: 00:00:05
       AlertOn:
+  - Name: Another Rmqtest
+    ServiceType: Rmq
+    EndpointOrHost: "amqp://user:test@localhost:5672/"
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:      
   - Name: ElasticTest
     ServiceType: ElasticSearch
     EndpointOrHost: http://test:9200/
@@ -58,7 +138,21 @@ Monitoring:
       StopAlertingOn:
       AlertEvery: 00:00:05
       AlertOn:
-  - Name: TurriCustom
+  - Name: Other ElasticTest
+    ServiceType: ElasticSearch
+    EndpointOrHost: http://test:9200/
+    PublishChecks: true
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn:
+      StopAlertingOn:
+      AlertEvery: 00:00:05
+      AlertOn:            
+  - Name: Other TurriCustom
     ServiceType: Custom
     FullClassName: Simple.Service.Monitoring.HealthCheck
     PublishChecks: true    
@@ -71,7 +165,63 @@ Monitoring:
       StartAlertingOn: 
       StopAlertingOn: 
       AlertEvery: 00:00:05
-      AlertOn:
+      AlertOn:      
+  - Name: 2 TurriCustom
+    ServiceType: Custom
+    FullClassName: Simple.Service.Monitoring.HealthCheck
+    PublishChecks: true    
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: 
+      StopAlertingOn: 
+      AlertEvery: 00:00:05
+      AlertOn:    
+  - Name: 3 TurriCustom
+    ServiceType: Custom
+    FullClassName: Simple.Service.Monitoring.HealthCheck
+    PublishChecks: true    
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: 
+      StopAlertingOn: 
+      AlertEvery: 00:00:05
+      AlertOn:    
+  - Name: 4 TurriCustom
+    ServiceType: Custom
+    FullClassName: Simple.Service.Monitoring.HealthCheck
+    PublishChecks: true    
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: 
+      StopAlertingOn: 
+      AlertEvery: 00:00:05
+      AlertOn:       
+  - Name: 5 TurriCustom
+    ServiceType: Custom
+    FullClassName: Simple.Service.Monitoring.HealthCheck
+    PublishChecks: true    
+    Alert: true
+    AlertBehaviour:
+    - TransportMethod: Email
+      TransportName: StandardEmailTransport
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: 
+      StopAlertingOn: 
+      AlertEvery: 00:00:05
+      AlertOn:                        
   CustomNotificationTransportSettings:
   EmailTransportSettings:
   - Name: StandardEmailTransport
