@@ -41,7 +41,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 {
                     var uri = new Uri(endpoint);
                     var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs);
-                    options.UseTimeout(TimeSpan.FromMilliseconds(20000));
+                    options.UseTimeout(timeout);
                     options.AddUri(uri, uriOptions =>
                     {
                         uriOptions.AddCustomHeader("User-Agent", "HealthChecks");
@@ -68,6 +68,5 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             }, HealthCheck.Name, null, GetTags());
         }
-
     }
 }
