@@ -33,6 +33,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             {
                 sqlOptions.ConnectionString = this.HealthCheck.ConnectionString;
                 sqlOptions.HealthCheckResultBuilder = GetHealth;
+                sqlOptions.CommandText = this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query;
 
                 HealthChecksBuilder.AddMySql(sqlOptions, HealthCheck.Name);
             }
