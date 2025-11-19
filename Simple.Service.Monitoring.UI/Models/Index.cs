@@ -60,7 +60,7 @@ namespace Simple.Service.Monitoring.UI.Models
                 // You might want to set a default/empty report here
                 Report = new HealthReport
                 {
-                    Status = "Error",
+                    Status = $"Error : {ex.Message}",
                     LastUpdated = DateTime.Now,
                     HealthChecks = new List<HealthCheckData>()
                 };

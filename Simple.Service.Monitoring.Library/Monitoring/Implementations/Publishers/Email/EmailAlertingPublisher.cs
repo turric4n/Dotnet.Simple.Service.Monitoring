@@ -61,7 +61,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 var healthCheckName = entry.Key;
                 var healthCheckEntry = entry.Value;
 
-                GetReportLastCheck(healthCheckEntry.Status);
+                GetReportLastCheck();
 
                 var currentStatus = healthCheckEntry.Status switch
                 {

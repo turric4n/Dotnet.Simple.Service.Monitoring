@@ -37,6 +37,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             if (ownedAlerting)
             {
                 await SendTelegramMessage(new HealthCheckData(ownedEntry.Value, ownedEntry.Key), cancellationToken);
+                // Notify observers after successful send
+                AlertObservers(ownedEntry);
             }
 
             foreach (var interceptedEntry in interceptedEntries)
@@ -47,6 +49,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     try
                     {
                         await SendTelegramMessage(new HealthCheckData(interceptedEntry.Value, interceptedEntry.Key), cancellationToken);
+                        // Notify observers after successful send
+                        AlertObservers(interceptedEntry);
                     }
                     catch (Exception e)
                     {

@@ -31,7 +31,7 @@ namespace Simple.Service.Monitoring.UI.Repositories.SQL
 
             _logger = logger;
 
-            _logger.LogInformation("SQL repository initialized using {DatabaseType}");
+            _logger.LogInformation("SQL repository initialized.");
         }
 
         private async Task EnsureDatabaseInitializedAsync()

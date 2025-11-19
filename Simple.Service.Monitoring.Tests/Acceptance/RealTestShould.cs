@@ -155,7 +155,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance
         }
 
         [Test]
-        [Explicit]
         [Category("Acceptance")]
         public async Task ExecuteHealthChecks_AndPublishResults()
         {

@@ -117,6 +117,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                     summary.AppendLine($"  Alert Once: {alertBehavior.AlertOnce}");
                     summary.AppendLine($"  Alert on Recovery: {alertBehavior.AlertOnServiceRecovered}");
                     summary.AppendLine($"  Alert Frequency: Every {alertBehavior.AlertEvery}");
+                    summary.AppendLine($"  Periodic/Schedule alerting enabled : {alertBehavior.UsePeriodicAlerting}");
                     summary.AppendLine($"  Schedule: {alertBehavior.StartAlertingOn} to {alertBehavior.StopAlertingOn}");
                     summary.AppendLine($"  Timezone: {alertBehavior.Timezone ?? "Default"}");
                     summary.AppendLine($"  Alert after: {alertBehavior.AlertByFailCount} consecutive failures");

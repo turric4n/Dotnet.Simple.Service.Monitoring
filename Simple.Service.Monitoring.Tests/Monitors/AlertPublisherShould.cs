@@ -70,9 +70,29 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         }
 
         [Test]
+        [Category("MidnightRollover")]
+        [TestCase("23:55:00", "00:10:00", "00:03:00", ExpectedResult = false, Description = "Midnight rollover - 8 minutes passed, need 10")]
+        [TestCase("23:55:00", "00:10:00", "00:05:00", ExpectedResult = true, Description = "Midnight rollover - exact 10 minutes")]
+        [TestCase("23:50:00", "00:15:00", "00:04:00", ExpectedResult = false, Description = "Midnight rollover - only 14 minutes")]
+        [TestCase("23:50:00", "00:15:00", "00:05:00", ExpectedResult = true, Description = "Midnight rollover - exactly 15 minutes")]
+        public bool TimeBetweenIsOkToAlert_MidnightRollover_Tests(TimeSpan lastAlert, TimeSpan cooldown, TimeSpan current)
+        {
+            // Arrange
+            var last = lastAlert;
+            var delta = cooldown;
+            var currentT = current;
+            
+            // Act
+            var hasToAlert = alertPublisher.TimeBetweenIsOkToAlert(last, delta, currentT);
+            
+            //Assert
+            return hasToAlert;
+        }
+
+        [Test]
         [TestCase("22:05:00", "00:05:00", "22:10:00")]
-        [TestCase("05:00", "05:00", "10:00")]
-        [TestCase("10", "1", "11")]
+        [TestCase("05:00:00", "05:00:00", "10:00:00")]
+        [TestCase("10:00:00", "01:00:00", "11:00:00")]
         public void Given_Timespan_Respect_Cooldown_Time_Between_Alerts(TimeSpan lastAlertTime, TimeSpan alertEvery,
             TimeSpan currentTime)
         {
@@ -88,8 +108,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                                                 
         [Test]
         [TestCase("22:05:00", "00:05:00", "22:04:00")]
-        [TestCase("05:00", "05:00", "01:00")]
-        [TestCase("10", "1", "08")]
+        [TestCase("05:00:00", "05:00:00", "09:59:59")]
+        [TestCase("10:00:00", "01:00:00", "10:59:59")]
         public void Given_Timespan_Does_Not_Respect_Cooldown_Time_Between_Alerts(TimeSpan lastAlertTime,
             TimeSpan alertEvery, TimeSpan currentTime)
         {
@@ -113,6 +133,23 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var hasToAlert = alertPublisher.TimeBetweenScheduler(from, to, current);
             //Assert
             hasToAlert.Should().BeTrue();
+        }
+
+        [Test]
+        [Category("MidnightCrossingWindows")]
+        [TestCase("22:00:00", "02:00:00", "23:00:00", ExpectedResult = true, Description = "Night window - before midnight")]
+        [TestCase("22:00:00", "02:00:00", "00:30:00", ExpectedResult = true, Description = "Night window - after midnight")]
+        [TestCase("22:00:00", "02:00:00", "03:00:00", ExpectedResult = false, Description = "Night window - outside window")]
+        [TestCase("20:00:00", "06:00:00", "23:00:00", ExpectedResult = true, Description = "Long night window - evening")]
+        [TestCase("20:00:00", "06:00:00", "03:00:00", ExpectedResult = true, Description = "Long night window - early morning")]
+        [TestCase("20:00:00", "06:00:00", "12:00:00", ExpectedResult = false, Description = "Long night window - midday")]
+        public bool TimeBetweenScheduler_MidnightCrossing_Tests(TimeSpan from, TimeSpan to, TimeSpan current)
+        {
+            // Arrange & Act
+            var hasToAlert = alertPublisher.TimeBetweenScheduler(from, to, current);
+            
+            //Assert
+            return hasToAlert;
         }
 
         [Test]
@@ -217,10 +254,10 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         }
 
         [Test]
-        public void Given_Healthy_Check_And_Then_Unhealthy_Should_Not_Alert_During_Cooldown()
+        public void Given_Healthy_Check_And_Then_Unhealthy_Should_Alert_On_Status_Change()
         {
             // Arrange
-            var ok = true;
+            var ok = false; // Start with false since we expect one alert
 
             var httpendpointhealthcheck = new ServiceHealthCheck()
             {
@@ -271,8 +308,8 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             //Act
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
-            //Assert
-            ok.Should().BeTrue();
+            //Assert - Healthy status should not trigger alert
+            ok.Should().BeFalse();
 
             Thread.Sleep(2000);
 
@@ -282,6 +319,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
             alertPublisher2.PublishAsync(healthReportMock, new CancellationToken());
 
+            //Assert - Status change from Healthy to Unhealthy should always alert
             ok.Should().BeTrue();
         }
 

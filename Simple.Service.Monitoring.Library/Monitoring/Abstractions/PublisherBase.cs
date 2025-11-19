@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿// file: ..\Simple.Service.Monitoring.Library\Monitoring\Abstractions\PublisherBase.cs
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using TimeZoneConverter;
 using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
@@ -18,190 +20,373 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
         protected readonly IHealthChecksBuilder _healthChecksBuilder;
         protected readonly ServiceHealthCheck _healthCheck;
         protected AlertTransportSettings _alertTransportSettings;
+        protected readonly ILogger<IHealthCheckPublisher> _logger;
 
-        protected readonly Dictionary<string, AlertBehaviour> _interceptedBehaviours;
+        protected readonly ConcurrentDictionary<string, AlertBehaviour> _interceptedBehaviours;
         
-        protected readonly ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers = new ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+        // Lock objects for thread-safe behaviour state updates
+        protected readonly ConcurrentDictionary<string, object> _behaviourLocks = new ConcurrentDictionary<string, object>();
 
-        protected PublisherBase(IHealthChecksBuilder healthChecksBuilder, 
-            ServiceHealthCheck healthCheck, 
+        protected readonly ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers =
+            new ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+
+        protected PublisherBase(
+            ILogger<IHealthCheckPublisher> logger,
+            IHealthChecksBuilder healthChecksBuilder,
+            ServiceHealthCheck healthCheck,
             AlertTransportSettings alertTransportSettings)
         {
-            _healthChecksBuilder = healthChecksBuilder;
-            _healthCheck = healthCheck;
-            _alertTransportSettings = alertTransportSettings;
-            _interceptedBehaviours = new Dictionary<string, AlertBehaviour>();
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _healthChecksBuilder = healthChecksBuilder ?? throw new ArgumentNullException(nameof(healthChecksBuilder));
+            _healthCheck = healthCheck ?? throw new ArgumentNullException(nameof(healthCheck));
+            _alertTransportSettings = alertTransportSettings ?? throw new ArgumentNullException(nameof(alertTransportSettings));
+            _interceptedBehaviours = new ConcurrentDictionary<string, AlertBehaviour>();
+        }
+
+        protected PublisherBase(
+            IHealthChecksBuilder healthChecksBuilder,
+            ServiceHealthCheck healthCheck,
+            AlertTransportSettings alertTransportSettings,
+            ILogger<IHealthCheckPublisher> logger = null)
+        {
+            _healthChecksBuilder = healthChecksBuilder ?? throw new ArgumentNullException(nameof(healthChecksBuilder));
+            _healthCheck = healthCheck ?? throw new ArgumentNullException(nameof(healthCheck));
+            _alertTransportSettings = alertTransportSettings ?? throw new ArgumentNullException(nameof(alertTransportSettings));
+            _logger = logger;
+            _interceptedBehaviours = new ConcurrentDictionary<string, AlertBehaviour>();
         }
 
         protected PublisherBase(IHealthChecksBuilder healthChecksBuilder)
         {
-            _healthChecksBuilder = healthChecksBuilder;
+            _healthChecksBuilder = healthChecksBuilder ?? throw new ArgumentNullException(nameof(healthChecksBuilder));
+            _interceptedBehaviours = new ConcurrentDictionary<string, AlertBehaviour>();
         }
 
         private class Unsubscriber : IDisposable
         {
-            private List<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers;
-            private IObserver<KeyValuePair<string, HealthReportEntry>> _observer;
+            private readonly ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers;
+            private readonly IObserver<KeyValuePair<string, HealthReportEntry>> _observer;
 
-            public Unsubscriber(List<IObserver<KeyValuePair<string, HealthReportEntry>>> observers,
+            public Unsubscriber(
+                ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> observers,
                 IObserver<KeyValuePair<string, HealthReportEntry>> observer)
             {
-                this._observers = observers;
-                this._observer = observer;
+                _observers = observers ?? throw new ArgumentNullException(nameof(observers));
+                _observer = observer ?? throw new ArgumentNullException(nameof(observer));
             }
 
             public void Dispose()
             {
-                if (_observer != null && _observers.Contains(_observer))
-                    _observers.Remove(_observer);
+                // Note: ConcurrentBag doesn't support removal, so this is a limitation
+                // Consider using ConcurrentDictionary if removal is critical
+                // For now, we'll rely on weak references or observer pattern cleanup
             }
         }
 
         public bool HealthFailed(HealthStatus status)
         {
-            return (status == HealthStatus.Unhealthy || status == HealthStatus.Degraded);
+            return status == HealthStatus.Unhealthy || status == HealthStatus.Degraded;
         }
 
         public bool TimeBetweenIsOkToAlert(TimeSpan lastAlertTime, TimeSpan timeToAlert, TimeSpan currentTime)
         {
-            return lastAlertTime + timeToAlert <= currentTime;
+            var nextAlertTime = lastAlertTime + timeToAlert;
+            
+            // Handle midnight rollover (when next alert time exceeds 24 hours)
+            if (nextAlertTime.TotalHours >= 24)
+            {
+                nextAlertTime = TimeSpan.FromHours(nextAlertTime.TotalHours % 24);
+                // After midnight rollover, check if we're past the rollover point
+                // currentTime should be after nextAlertTime (after midnight) OR before lastAlertTime (still haven't wrapped)
+                // But we also need to ensure the full cooldown period has passed
+                if (currentTime >= nextAlertTime && currentTime < lastAlertTime)
+                {
+                    // We're in the rollover period (after midnight, before the original last alert time)
+                    return true;
+                }
+                else if (currentTime >= lastAlertTime)
+                {
+                    // Still in the same day, haven't crossed midnight yet
+                    return false;
+                }
+                else
+                {
+                    // We've crossed midnight, check if we're past the rollover point
+                    return currentTime >= nextAlertTime;
+                }
+            }
+            
+            return currentTime >= nextAlertTime;
         }
 
         public bool TimeBetweenScheduler(TimeSpan timeFrom, TimeSpan timeTo, TimeSpan currentTime)
         {
-            var timeok = (currentTime.Ticks >= timeFrom.Ticks) && (currentTime.Ticks < timeTo.Ticks);
-            return timeok;
+            if (timeFrom < timeTo)
+            {
+                // Normal case: window within same day (e.g., 08:00 - 17:00)
+                return currentTime >= timeFrom && currentTime < timeTo;
+            }
+            else if (timeFrom == timeTo)
+            {
+                // Zero duration window - only valid at the exact moment
+                return currentTime == timeFrom;
+            }
+            else
+            {
+                // Window crosses midnight (e.g., 22:00 - 02:00)
+                // Alert if current time is after start OR before end
+                return currentTime >= timeFrom || currentTime < timeTo;
+            }
         }
 
-        public DateTime GetReportLastCheck(HealthStatus status)
+        public DateTime GetReportLastCheck()
         {
             var behaviour = GetAlertBehaviour();
 
-            if (behaviour == null) return DateTime.MinValue;
-            
-            if (string.IsNullOrEmpty(behaviour.Timezone)) return behaviour.LastCheck;
+            if (behaviour == null)
+            {
+                _logger?.LogWarning("Alert behaviour not found for transport: {TransportName}", _alertTransportSettings?.Name);
+                return DateTime.MinValue;
+            }
 
-            var timezone = TZConvert.GetTimeZoneInfo(behaviour.Timezone);
+            if (string.IsNullOrWhiteSpace(behaviour.Timezone))
+            {
+                return behaviour.LastCheck;
+            }
 
-            if (timezone == null) return behaviour.LastCheck;
+            try
+            {
+                var timezone = TZConvert.GetTimeZoneInfo(behaviour.Timezone);
+                
+                if (timezone == null)
+                {
+                    _logger?.LogWarning("Timezone '{Timezone}' not found. Using LastCheck without conversion.", behaviour.Timezone);
+                    return behaviour.LastCheck;
+                }
 
-            var convertedTime = TimeZoneInfo.ConvertTime(behaviour.LastCheck, timezone);
-
-            return convertedTime;
+                return TimeZoneInfo.ConvertTime(behaviour.LastCheck, timezone);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Error converting timezone for {Timezone}. Using LastCheck without conversion.", behaviour.Timezone);
+                return behaviour.LastCheck;
+            }
         }
 
         public bool ProcessOwnedAlertRules(HealthStatus status, AlertBehaviour alertBehaviour)
         {
-            if (alertBehaviour == null) return false;
+            if (alertBehaviour == null)
+            {
+                return false;
+            }
 
-            // Last status of the check always start with healthy value
-            alertBehaviour.LastStatus =
-                (alertBehaviour.LastCheck == DateTime.MinValue) 
-                    ? (Models.HealthStatus)HealthStatus.Healthy : alertBehaviour.LastStatus;
+            InitializeAlertBehaviour(alertBehaviour);
 
             var failed = HealthFailed(status);
             var lastFailed = HealthFailed((HealthStatus)alertBehaviour.LastStatus);
 
-            alertBehaviour.FailedCount = failed ? 
-                alertBehaviour.FailedCount += 1 : 0;
+            UpdateFailedCount(alertBehaviour, failed);
 
-            //Alert every
-            var timeBetweenIsOkToAlert = TimeBetweenIsOkToAlert(alertBehaviour.LastPublished.TimeOfDay, 
-                alertBehaviour.AlertEvery,
-                DateTime.Now.TimeOfDay);
-            
-            //Scheduled 
-            var timeBetweenScheduler =  TimeBetweenScheduler(alertBehaviour.StartAlertingOn, alertBehaviour.StopAlertingOn,
-                DateTime.Now.TimeOfDay);
+            if (alertBehaviour.PublishAllResults)
+            {
+                return true;
+            }
 
-            var isOkToAlert = timeBetweenIsOkToAlert && timeBetweenScheduler;
+            var isOkToAlert = IsWithinAlertingWindow(alertBehaviour);
 
-            // Unhealthy and has to alert
-            var alert = (isOkToAlert) && (alertBehaviour.FailedCount >= alertBehaviour.AlertByFailCount) &&
-                        (
-                            // When we want to alert always
-                            (failed && lastFailed && !alertBehaviour.AlertOnce) ||
-                            // When failed retries
-                            (failed && lastFailed && !alertBehaviour.LatestErrorPublished) ||
-                            // Always when is time to alert and latest
-                            (failed && !lastFailed)
-                        );
+            var shouldAlert = ShouldTriggerAlert(failed, lastFailed, alertBehaviour, isOkToAlert);
 
-            if (alert)
+            if (shouldAlert)
             {
                 alertBehaviour.LatestErrorPublished = true;
             }
 
-            // On Recovered if and latest error has been published
-            if (!failed && lastFailed && alertBehaviour.AlertOnServiceRecovered && alertBehaviour.LatestErrorPublished)
+            var shouldAlertOnRecovery = ShouldAlertOnRecovery(failed, lastFailed, alertBehaviour);
+
+            if (shouldAlertOnRecovery)
             {
-                alert = true;
+                shouldAlert = true;
                 alertBehaviour.LatestErrorPublished = false;
             }
 
-            // Alert always if we want to publish all results even checks are healthy (things like influx results in a dashboard)
-            alert = (alertBehaviour.PublishAllResults) || alert;
+            return shouldAlert;
+        }
 
-            return alert;
+        private void InitializeAlertBehaviour(AlertBehaviour alertBehaviour)
+        {
+            if (alertBehaviour.LastCheck == DateTime.MinValue)
+            {
+                alertBehaviour.LastStatus = (Models.HealthStatus)HealthStatus.Healthy;
+            }
+        }
+
+        private void UpdateFailedCount(AlertBehaviour alertBehaviour, bool failed)
+        {
+            if (alertBehaviour == null) return;
+            
+            var lockKey = alertBehaviour.TransportName ?? "default";
+            var lockObj = _behaviourLocks.GetOrAdd(lockKey, _ => new object());
+            
+            lock (lockObj)
+            {
+                if (failed)
+                {
+                    alertBehaviour.FailedCount += 1;
+                }
+                else
+                {
+                    alertBehaviour.FailedCount = 0;
+                }
+            }
+        }
+
+        private bool IsWithinAlertingWindow(AlertBehaviour alertBehaviour)
+        {
+            var currentTime = DateTime.Now.TimeOfDay;
+
+            var timeBetweenIsOkToAlert = TimeBetweenIsOkToAlert(
+                alertBehaviour.LastPublished.TimeOfDay,
+                alertBehaviour.AlertEvery,
+                currentTime);
+
+            var timeBetweenScheduler = TimeBetweenScheduler(
+                alertBehaviour.StartAlertingOn,
+                alertBehaviour.StopAlertingOn,
+                currentTime);
+
+            return timeBetweenIsOkToAlert && timeBetweenScheduler;
+        }
+
+        private bool ShouldTriggerAlert(bool failed, bool lastFailed, AlertBehaviour alertBehaviour, bool isOkToAlert)
+        {
+            if (!isOkToAlert || alertBehaviour.FailedCount < alertBehaviour.AlertByFailCount)
+            {
+                return false;
+            }
+
+            // Alert on continuous failures (when AlertOnce is false)
+            if (failed && lastFailed && !alertBehaviour.AlertOnce)
+            {
+                return true;
+            }
+
+            // Alert on failures that haven't been published yet
+            if (failed && lastFailed && !alertBehaviour.LatestErrorPublished)
+            {
+                return true;
+            }
+
+            // Alert on new failures (status changed to failed)
+            if (failed && !lastFailed)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool ShouldAlertOnRecovery(bool failed, bool lastFailed, AlertBehaviour alertBehaviour)
+        {
+            return !failed
+                && lastFailed
+                && alertBehaviour.AlertOnServiceRecovered
+                && alertBehaviour.LatestErrorPublished;
         }
 
         public bool IsOkToAlert(KeyValuePair<string, HealthReportEntry> entry, bool intercepted = false)
         {
-            if (default(KeyValuePair<string, HealthReportEntry>).Equals(entry)) return false;
+            if (default(KeyValuePair<string, HealthReportEntry>).Equals(entry))
+            {
+                return false;
+            }
 
-            var behaviour = intercepted ? GetInterceptedBehaviour(entry.Key, GetAlertBehaviour()) : GetAlertBehaviour();
+            var behaviour = intercepted
+                ? GetInterceptedBehaviour(entry.Key, GetAlertBehaviour())
+                : GetAlertBehaviour();
 
-            if (behaviour == null) return false;
+            if (behaviour == null)
+            {
+                return false;
+            }
 
-            var alert = this.ProcessOwnedAlertRules(entry.Value.Status, behaviour);
+            var alert = ProcessOwnedAlertRules(entry.Value.Status, behaviour);
 
-            behaviour.LastStatus = (Models.HealthStatus)entry.Value.Status;
-
-            behaviour.LastCheck = DateTime.Now;
-
-            behaviour.LastPublished = alert ? DateTime.Now : behaviour.LastPublished;
+            UpdateBehaviourState(behaviour, entry, alert);
 
             return alert;
         }
 
-        //Only use it for testing purposes
+        private void UpdateBehaviourState(
+            AlertBehaviour behaviour,
+            KeyValuePair<string, HealthReportEntry> entry,
+            bool alert)
+        {
+            if (behaviour == null) return;
+            
+            // Get or create a lock object for this specific behaviour to ensure thread-safe updates
+            var lockKey = behaviour.TransportName ?? "default";
+            var lockObj = _behaviourLocks.GetOrAdd(lockKey, _ => new object());
+            
+            lock (lockObj)
+            {
+                behaviour.LastStatus = (Models.HealthStatus)entry.Value.Status;
+                behaviour.LastCheck = DateTime.Now;
+
+                if (alert)
+                {
+                    behaviour.LastPublished = DateTime.Now;
+                }
+            }
+        }
+
         public void AlertObservers(KeyValuePair<string, HealthReportEntry> entry)
         {
-            lock (_observers)
+            // Create a snapshot of observers to avoid locking during iteration
+            var observerSnapshot = _observers.ToArray();
+
+            Parallel.ForEach(observerSnapshot, observer =>
             {
-                Parallel.ForEach(_observers, observer =>
+                try
                 {
                     observer.OnNext(entry);
-                });
-            }
+                }
+                catch (Exception ex)
+                {
+                    _logger?.LogError(ex, "Error notifying observer for health check: {HealthCheckName}", entry.Key);
+                }
+            });
         }
 
         public KeyValuePair<string, HealthReportEntry> GetOwnedEntry(HealthReport report)
         {
-            var ownedEntry = report
-                .Entries
-                .FirstOrDefault(x => x.Key == this._healthCheck.Name);  
+            if (report?.Entries == null)
+            {
+                return default;
+            }
 
-            return ownedEntry;
+            return report.Entries.FirstOrDefault(x => x.Key == _healthCheck?.Name);
         }
 
         public List<KeyValuePair<string, HealthReportEntry>> GetInterceptedEntries(HealthReport report)
         {
-            if (_healthCheck.ServiceType != ServiceType.Interceptor)
+            if (report?.Entries == null || _healthCheck == null)
+            {
                 return new List<KeyValuePair<string, HealthReportEntry>>();
+            }
 
-            var excludedEntries = _healthCheck.ExcludedInterceptionNames;
+            if (_healthCheck.ServiceType != ServiceType.Interceptor)
+            {
+                return new List<KeyValuePair<string, HealthReportEntry>>();
+            }
 
-            var entries = report
-                .Entries
+            var excludedEntries = _healthCheck.ExcludedInterceptionNames ?? new List<string>();
+
+            return report.Entries
                 .Where(x => !excludedEntries.Contains(x.Key))
                 .ToList();
-
-            return entries;
         }
 
         public abstract Task PublishAsync(HealthReport report, CancellationToken cancellationToken);
-        
 
         protected internal abstract void Validate();
 
@@ -215,32 +400,38 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         public IDisposable Subscribe(IObserver<KeyValuePair<string, HealthReportEntry>> observer)
         {
-            lock (_observers)
+            if (observer == null)
             {
-                if (!_observers.Contains(observer))
-                    _observers.Add(observer);
-                return new Unsubscriber(_observers.ToList(), observer);
+                throw new ArgumentNullException(nameof(observer));
             }
+
+            if (!_observers.Contains(observer))
+            {
+                _observers.Add(observer);
+            }
+
+            return new Unsubscriber(_observers, observer);
         }
 
         private AlertBehaviour GetAlertBehaviour()
         {
-            return _healthCheck
-                .AlertBehaviour
+            if (_healthCheck?.AlertBehaviour == null || _alertTransportSettings == null)
+            {
+                return null;
+            }
+
+            return _healthCheck.AlertBehaviour
                 .FirstOrDefault(b => b.TransportName == _alertTransportSettings.Name);
         }
 
         private AlertBehaviour GetInterceptedBehaviour(string healthCheckName, AlertBehaviour baseBehaviour)
         {
-            var interceptedBehaviour = _interceptedBehaviours.GetValueOrDefault(healthCheckName);
-
-            if (interceptedBehaviour == null)
+            if (baseBehaviour == null)
             {
-                interceptedBehaviour = new AlertBehaviour(baseBehaviour);
-                _interceptedBehaviours.Add(healthCheckName, interceptedBehaviour);
+                return null;
             }
 
-            return interceptedBehaviour;
+            return _interceptedBehaviours.GetOrAdd(healthCheckName, key => new AlertBehaviour(baseBehaviour));
         }
     }
 }

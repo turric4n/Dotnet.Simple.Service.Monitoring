@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
-using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.Library.Models;
+using System;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {

@@ -28,6 +28,7 @@ namespace Simple.Service.Monitoring.Library.Models
         public bool AlertOnce { get; set; }
         public bool AlertOnServiceRecovered { get; set; }
         public TimeSpan AlertEvery { get; set; }
+        public bool UsePeriodicAlerting { get; set; } = false;
         public TimeSpan StartAlertingOn { get; set; } = TimeSpan.Parse("00:00:00");
         public TimeSpan StopAlertingOn { get; set; } = TimeSpan.Parse("23:59:59");
         public int AlertByFailCount { get; set; }
