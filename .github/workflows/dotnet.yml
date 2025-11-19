@@ -12,18 +12,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+    
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 5.0.x
-    - name: ls     
-      run: ls -ltra
-    - name: pwd     
-      run: pwd     
+        dotnet-version: 8.0.x
+        
+    - name: Display workspace structure
+      run: |
+        echo "Current directory:"
+        pwd
+        echo "Directory contents:"
+        ls -ltra
+        
     - name: Restore dependencies
-      run: dotnet restore Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.csproj
-    - name: Build
-      run: dotnet build --no-restore Dotnet.Simple.Service.Monitoring/Dotnet.Simple.Service.Monitoring.csproj
-    - name: Test
-      run: dotnet test --no-build --verbosity normal Dotnet.Simple.Service.Monitoring.Tests/Dotnet.Simple.Service.Monitoring.Tests.csproj
+      run: dotnet restore Simple.Service.Monitoring/Simple.Service.Monitoring.csproj
+      
+    - name: Build Solution
+      run: dotnet build --no-restore Simple.Service.Monitoring/Simple.Service.Monitoring.csproj --configuration Release
+      
+    - name: Run Tests
+      run: |
+        dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj \
+          --no-build \
+          --configuration Release \
+          --verbosity normal \
+          --filter "Category!=RealAPI" \
+          --logger "trx;LogFileName=test-results.trx" \
+          --logger "console;verbosity=detailed"
+      
+    - name: Test Summary
+      uses: test-summary/action@v2
+      with:
+        paths: "**/test-results.trx"
+      if: always()
