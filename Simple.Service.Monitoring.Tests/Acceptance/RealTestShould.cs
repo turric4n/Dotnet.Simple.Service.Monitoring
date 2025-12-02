@@ -7,15 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using NUnit.Framework;
-using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Options;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Tests.Acceptance
@@ -184,6 +181,139 @@ namespace Simple.Service.Monitoring.Tests.Acceptance
             _configuration.Should().NotBeNull();
             _configuration["Monitoring:ServiceName"].Should().Be("TestService");
             _configuration["Monitoring:Environment"].Should().Be("Test");
+        }
+
+        [Test]
+        [Category("Integration")]
+        [Explicit("Needs a real RMQ server instance")]
+
+        public async Task MonitorRabbitMQ_WhenConfigured()
+        {
+            // Arrange
+            var configValues = new Dictionary<string, string>
+            {
+                {"Monitoring:ServiceName", "TestService"},
+                {"Monitoring:Environment", "Test"}
+            };
+
+            var hostBuilder = new HostBuilder()
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    config.AddInMemoryCollection(configValues);
+                })
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices((hostContext, services) =>
+                        {
+                            var monitorOptions = new MonitorOptions()
+                            {
+                                HealthChecks = new List<ServiceHealthCheck>()
+                                {
+                                    new ServiceHealthCheck()
+                                    {
+                                        ServiceType = ServiceType.Rmq,
+                                        EndpointOrHost = "amqp://rmq:rmq@localhost:5672/",
+                                        Name = "RabbitMQHealthCheck",
+                                        Alert = false
+                                    }
+                                }
+                            };
+
+                            services.AddServiceMonitoring(hostContext.Configuration)
+                                .WithRuntimeSettings(monitorOptions);
+
+                            services.AddControllers();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseRouting();
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapHealthChecks("/health");
+                                endpoints.MapControllers();
+                            });
+                        });
+                });
+
+            using var testHost = hostBuilder.Start();
+            var healthCheckService = testHost.Services.GetRequiredService<HealthCheckService>();
+
+            // Act
+            var report = await healthCheckService.CheckHealthAsync();
+
+            // Assert
+            report.Should().NotBeNull();
+            report.Entries.Should().ContainKey("RabbitMQHealthCheck");
+            report.Entries["RabbitMQHealthCheck"].Status.Should().Be(HealthStatus.Healthy,
+                "RabbitMQ should be healthy when server is running");
+        }
+
+        [Test]
+        [Category("Integration")]
+        public async Task MonitorRabbitMQ_ReturnsUnhealthy_WhenServerUnavailable()
+        {
+            // Arrange
+            var configValues = new Dictionary<string, string>
+            {
+                {"Monitoring:ServiceName", "TestService"},
+                {"Monitoring:Environment", "Test"}
+            };
+
+            var hostBuilder = new HostBuilder()
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    config.AddInMemoryCollection(configValues);
+                })
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices((hostContext, services) =>
+                        {
+                            var monitorOptions = new MonitorOptions()
+                            {
+                                HealthChecks = new List<ServiceHealthCheck>()
+                                {
+                                    new ServiceHealthCheck()
+                                    {
+                                        ServiceType = ServiceType.Rmq,
+                                        EndpointOrHost = "amqp://guest:guest@nonexistent-rabbitmq-server:5672/",
+                                        Name = "RabbitMQUnhealthyCheck",
+                                        Alert = false
+                                    }
+                                }
+                            };
+
+                            services.AddServiceMonitoring(hostContext.Configuration)
+                                .WithRuntimeSettings(monitorOptions);
+
+                            services.AddControllers();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseRouting();
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapHealthChecks("/health");
+                                endpoints.MapControllers();
+                            });
+                        });
+                });
+
+            using var testHost = hostBuilder.Start();
+            var healthCheckService = testHost.Services.GetRequiredService<HealthCheckService>();
+
+            // Act
+            var report = await healthCheckService.CheckHealthAsync();
+
+            // Assert
+            report.Should().NotBeNull();
+            report.Entries.Should().ContainKey("RabbitMQUnhealthyCheck");
+            report.Entries["RabbitMQUnhealthyCheck"].Status.Should().Be(HealthStatus.Unhealthy,
+                "RabbitMQ should be unhealthy when server is unavailable");
+            report.Entries["RabbitMQUnhealthyCheck"].Exception.Should().NotBeNull();
         }
     }
 }
