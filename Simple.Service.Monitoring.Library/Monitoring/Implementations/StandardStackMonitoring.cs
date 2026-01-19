@@ -61,6 +61,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 case ServiceType.MySql:
                     mymonitor = new MySqlServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
+                case ServiceType.PostgreSql:
+                    mymonitor = new PostgreSqlServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
                 case ServiceType.Interceptor:
                     mymonitor = new InterceptionMonitoring(_healthChecksBuilder, monitor);
                     break;

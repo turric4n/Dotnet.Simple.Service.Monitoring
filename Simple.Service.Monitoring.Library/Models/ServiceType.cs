@@ -11,6 +11,7 @@
         Ping,
         Redis,
         MySql,
+        PostgreSql,
         Interceptor
     }
 }
