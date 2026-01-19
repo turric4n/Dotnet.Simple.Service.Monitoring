@@ -4,7 +4,7 @@
 
 ## Overview
 
-Dotnet.Simple.Service.Monitoring is a comprehensive health monitoring solution that simplifies the implementation of health checks in .NET applications. Built on top of the robust .NET HealthChecks framework and the [AspNetCore.Diagnostics.HealthChecks](https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks) library by Xabaril, it provides enterprise-grade monitoring capabilities with minimal configuration.
+Dotnet.Simple.Service.Monitoring is a comprehensive health monitoring solution that simplifies the implementation of health checks in .NET applications. Built on top of the robust .NET HealthChecks framework with custom health check implementations, it provides enterprise-grade monitoring capabilities with minimal configuration.
 
 The system offers real-time monitoring, intelligent alerting, and a beautiful web-based dashboard to keep track of your application's health across multiple environments.
 
@@ -795,7 +795,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built on top of [AspNetCore.Diagnostics.HealthChecks](https://github.com/xabaril/AspNetCore.Diagnostics.HealthChecks) by Xabaril
+- Built on top of Microsoft.Extensions.Diagnostics.HealthChecks framework
 - Inspired by enterprise monitoring needs
 - Community contributions and feedback
 
