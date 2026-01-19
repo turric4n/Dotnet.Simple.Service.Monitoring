@@ -12,7 +12,7 @@ The system offers real-time monitoring, intelligent alerting, and a beautiful we
 
 ### **Comprehensive Service Monitoring**
 
-- **10+ Service Types**: HTTP/HTTPS, SQL Server, MySQL, Redis, ElasticSearch, RabbitMQ, Hangfire, Ping/ICMP, Custom implementations, and Request Interceptors
+- **11+ Service Types**: HTTP/HTTPS, SQL Server, MySQL, PostgreSQL, Redis, ElasticSearch, RabbitMQ, Hangfire, Ping/ICMP, Custom implementations, and Request Interceptors
 - **Advanced Health Conditions**: Custom queries, response time thresholds, connection validation, and business logic checks
 - **Flexible Scheduling**: Configurable monitoring intervals per service
 - **Smart Tagging**: Organize services with custom tags for better management
@@ -149,6 +149,7 @@ The monitoring system supports both JSON and YAML configuration formats. Below a
 | `Http` | HTTP/HTTPS endpoint monitoring | Web APIs, websites, microservices |
 | `MsSql` | SQL Server database monitoring | Database connectivity and custom queries |
 | `MySql` | MySQL database monitoring | MySQL database health checks |
+| `PostgreSql` | PostgreSQL database monitoring | PostgreSQL database health checks |
 | `Redis` | Redis cache monitoring | Cache availability and performance |
 | `ElasticSearch` | Elasticsearch cluster monitoring | Search and logging infrastructure |
 | `Rmq` | RabbitMQ message queue monitoring | Message broker health |
@@ -315,6 +316,24 @@ Monitoring:
         - TransportMethod: Slack
           TransportName: "DevOpsSlack"
           AlertEvery: "00:10:00"
+      
+    - Name: "PostgreSQL Database"
+      ServiceType: PostgreSql
+      ConnectionString: "Host=localhost;Port=5432;Database=myapp;Username=postgres;Password=secret"
+      MonitoringInterval: "00:02:00"
+      HealthCheckConditions:
+        SqlBehaviour:
+          Query: "SELECT COUNT(*) FROM users WHERE active = true"
+          ResultExpression: GreaterThan
+          SqlResultDataType: Int
+          ExpectedResult: 0
+      Alert: true
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "DevOpsEmail"
+      AdditionalTags:
+        - "database"
+        - "postgresql"
       
     - Name: "Redis Cache"
       ServiceType: Redis
@@ -580,6 +599,8 @@ HealthChecks:
 
 Monitor database health with business logic validation:
 
+#### SQL Server Example
+
 ```yaml
 HealthChecks:
   - Name: "Order Processing Health"
@@ -599,6 +620,58 @@ HealthChecks:
     AlertBehaviour:
       - TransportMethod: Telegram
         TransportName: "BusinessAlerts"
+```
+
+#### PostgreSQL Example
+
+```yaml
+HealthChecks:
+  - Name: "PostgreSQL User Activity"
+    ServiceType: PostgreSql
+    ConnectionString: "Host=postgres.company.com;Port=5432;Database=app;Username=monitor;Password=secret;SSL Mode=Require"
+    MonitoringInterval: "00:02:00"
+    HealthCheckConditions:
+      SqlBehaviour:
+        Query: |
+          SELECT COUNT(*) 
+          FROM active_sessions 
+          WHERE last_activity > NOW() - INTERVAL '5 minutes'
+        ResultExpression: GreaterThan
+        SqlResultDataType: Int
+        ExpectedResult: 0
+    Alert: true
+    AlertBehaviour:
+      - TransportMethod: Email
+        TransportName: "DevOpsEmail"
+    AdditionalTags:
+      - "database"
+      - "postgresql"
+```
+
+**PostgreSQL Connection String Options:**
+- `Host` - Server hostname or IP
+- `Port` - Server port (default: 5432)
+- `Database` - Database name
+- `Username` - Database user
+- `Password` - User password
+- `SSL Mode` - SSL connection mode (Disable, Allow, Prefer, Require)
+- `Timeout` - Connection timeout in seconds
+- `Pooling` - Enable/disable connection pooling (default: true)
+
+#### MySQL Example
+
+```yaml
+HealthChecks:
+  - Name: "MySQL Replication Lag"
+    ServiceType: MySql
+    ConnectionString: "Server=mysql.company.com;Database=app;Uid=monitor;Pwd=secret;"
+    HealthCheckConditions:
+      SqlBehaviour:
+        Query: "SHOW SLAVE STATUS"
+        ResultExpression: Equal
+        SqlResultDataType: Int
+        ExpectedResult: 0
+    Alert: true
 ```
 
 ### Environment-Specific Configuration
