@@ -1,10 +1,16 @@
 ﻿using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+using IHealthChecksBuilder = Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -34,39 +40,98 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
+            var endpoints = HealthCheck.EndpointOrHost.Split(',').Select(e => new Uri(e.Trim())).ToList();
+            var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs);
+            var expectedCode = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode;
+            var httpVerb = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb;
 
-            this.HealthChecksBuilder.AddUrlGroup((options) =>
+            HealthChecksBuilder.AddCheck(
+                HealthCheck.Name,
+                new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb),
+                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                GetTags());
+        }
+    }
+
+    /// <summary>
+    /// Custom HTTP/URI health check implementation
+    /// </summary>
+    internal class HttpHealthCheck : IHealthCheck
+    {
+        private readonly List<Uri> _endpoints;
+        private readonly TimeSpan _timeout;
+        private readonly int _expectedStatusCode;
+        private readonly HttpVerb _httpVerb;
+        private static readonly HttpClient _httpClient = new HttpClient();
+
+        public HttpHealthCheck(List<Uri> endpoints, TimeSpan timeout, int expectedStatusCode, HttpVerb httpVerb)
+        {
+            _endpoints = endpoints ?? throw new ArgumentNullException(nameof(endpoints));
+            _timeout = timeout;
+            _expectedStatusCode = expectedStatusCode;
+            _httpVerb = httpVerb;
+        }
+
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            var failures = new List<string>();
+            var successes = new List<string>();
+
+            foreach (var endpoint in _endpoints)
             {
-                foreach (var endpoint in HealthCheck.EndpointOrHost.Split(','))
+                try
                 {
-                    var uri = new Uri(endpoint);
-                    var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs);
-                    options.UseTimeout(timeout);
-                    options.AddUri(uri, uriOptions =>
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    cts.CancelAfter(_timeout);
+
+                    using var request = new HttpRequestMessage(GetHttpMethod(_httpVerb), endpoint);
+                    request.Headers.Add("User-Agent", "HealthChecks");
+
+                    var response = await _httpClient.SendAsync(request, cts.Token);
+                    var statusCode = (int)response.StatusCode;
+
+                    if (statusCode == _expectedStatusCode)
                     {
-                        uriOptions.AddCustomHeader("User-Agent", "HealthChecks");
-                    });
-                    options.ExpectHttpCode(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode);
-                    switch (HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb)
+                        successes.Add($"{endpoint} returned expected status code {statusCode}");
+                    }
+                    else
                     {
-                        case HttpVerb.Get:
-                            options.UseGet();
-                            break;
-                        case HttpVerb.Post:
-                            options.UsePost();
-                            break;
-                        case HttpVerb.Put:
-                            options.UseHttpMethod(HttpMethod.Put);
-                            break;
-                        case HttpVerb.Delete:
-                            options.UseHttpMethod(HttpMethod.Delete);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
+                        failures.Add($"{endpoint} returned {statusCode}, expected {_expectedStatusCode}");
                     }
                 }
+                catch (TaskCanceledException)
+                {
+                    failures.Add($"{endpoint} timed out after {_timeout.TotalMilliseconds}ms");
+                }
+                catch (Exception ex)
+                {
+                    failures.Add($"{endpoint} failed: {ex.Message}");
+                }
+            }
 
-            }, HealthCheck.Name, null, GetTags());
+            if (failures.Any())
+            {
+                var data = new Dictionary<string, object>
+                {
+                    { "Failures", failures },
+                    { "Successes", successes }
+                };
+                return HealthCheckResult.Unhealthy($"HTTP health check failed for {failures.Count} of {_endpoints.Count} endpoints", null, data);
+            }
+
+            return HealthCheckResult.Healthy($"All {_endpoints.Count} endpoints returned expected status code {_expectedStatusCode}");
+        }
+
+        private static HttpMethod GetHttpMethod(HttpVerb verb)
+        {
+            return verb switch
+            {
+                HttpVerb.Get => HttpMethod.Get,
+                HttpVerb.Post => HttpMethod.Post,
+                HttpVerb.Put => HttpMethod.Put,
+                HttpVerb.Delete => HttpMethod.Delete,
+                _ => throw new ArgumentOutOfRangeException(nameof(verb))
+            };
         }
     }
 }

@@ -24,22 +24,20 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AspNetCore.HealthChecks.Elasticsearch" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.Hangfire" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.MySql.TurricansFork" Version="7.0.1-tns" />
-		<PackageReference Include="AspNetCore.HealthChecks.Network" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.Sqlite" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
-		<PackageReference Include="AspNetCore.HealthChecks.Uris" Version="9.0.0" />
 		<PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
+		<PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.17.0" />
+		<PackageReference Include="Hangfire.Core" Version="1.8.19" />
 		<PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.18" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
+		<PackageReference Include="MySqlConnector" Version="2.4.2" />
+		<PackageReference Include="Npgsql" Version="8.0.5" />
 		<PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.22" />
 		<PackageReference Include="Telegram.Bot" Version="22.7.5" />
 		<PackageReference Include="TimeZoneConverter" Version="7.2.0" />
 	</ItemGroup>
