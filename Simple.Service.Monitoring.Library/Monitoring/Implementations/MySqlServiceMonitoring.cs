@@ -21,17 +21,27 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void Validate()
         {
-            var csbuilder = new DbConnectionStringBuilder();
+            var hasEndpointOrHost = !string.IsNullOrEmpty(this.HealthCheck.EndpointOrHost);
+            var hasConnectionString = !string.IsNullOrEmpty(this.HealthCheck.ConnectionString);
+
             Condition
                 .WithExceptionOnFailure<InvalidConnectionStringException>()
-                .Requires(this.HealthCheck.ConnectionString)
-                .IsNotNull();
+                .Requires(hasEndpointOrHost || hasConnectionString)
+                .IsTrue("Either EndpointOrHost or ConnectionString must be provided");
+
+            var csbuilder = new DbConnectionStringBuilder();
+            var connectionString = hasConnectionString ? this.HealthCheck.ConnectionString : this.HealthCheck.EndpointOrHost;
+            
             Condition
-                .Ensures(csbuilder.ConnectionString = this.HealthCheck.ConnectionString);
+                .Ensures(csbuilder.ConnectionString = connectionString);
         }
 
         protected internal override void SetMonitoring()
         {
+            var connectionString = !string.IsNullOrEmpty(this.HealthCheck.ConnectionString) 
+                ? this.HealthCheck.ConnectionString 
+                : this.HealthCheck.EndpointOrHost;
+
             var hasCustomQuery = !string.IsNullOrEmpty(this.HealthCheck.HealthCheckConditions?.SqlBehaviour?.Query);
             var query = hasCustomQuery ? this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query : DEFAULTSQLQUERY;
             
@@ -43,7 +53,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             HealthChecksBuilder.AddCheck(
                 HealthCheck.Name,
-                new MySqlHealthCheck(this.HealthCheck.ConnectionString, query, resultBuilder),
+                new MySqlHealthCheck(connectionString, query, resultBuilder),
                 Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
                 GetTags());
         }

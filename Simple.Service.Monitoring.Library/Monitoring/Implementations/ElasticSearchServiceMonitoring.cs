@@ -29,9 +29,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
+            var endpoint = !string.IsNullOrEmpty(HealthCheck.ConnectionString) 
+                ? HealthCheck.ConnectionString 
+                : HealthCheck.EndpointOrHost;
+
             HealthChecksBuilder.AddCheck(
                 HealthCheck.Name,
-                new ElasticsearchHealthCheck(HealthCheck.EndpointOrHost),
+                new ElasticsearchHealthCheck(endpoint),
                 Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
                 GetTags());
         }
@@ -43,22 +47,24 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     /// </summary>
     internal class ElasticsearchHealthCheck : IHealthCheck
     {
-        private readonly string _endpoint;
+        private readonly ElasticsearchClient _client;
 
         public ElasticsearchHealthCheck(string endpoint)
         {
-            _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+            if (string.IsNullOrEmpty(endpoint))
+                throw new ArgumentNullException(nameof(endpoint));
+
+            var settings = new ElasticsearchClientSettings(new Uri(endpoint))
+                .RequestTimeout(TimeSpan.FromSeconds(5));
+
+            _client = new ElasticsearchClient(settings);
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             try
             {
-                var settings = new ElasticsearchClientSettings(new Uri(_endpoint))
-                    .RequestTimeout(TimeSpan.FromSeconds(5));
-
-                var client = new ElasticsearchClient(settings);
-                var pingResponse = await client.PingAsync(cancellationToken);
+                var pingResponse = await _client.PingAsync(cancellationToken);
 
                 if (pingResponse.IsValidResponse)
                 {

@@ -2,6 +2,7 @@
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.UI.Hubs;
+using Simple.Service.Monitoring.UI.Models;
 using Simple.Service.Monitoring.UI.Repositories;
 using System;
 using System.Collections.Generic;
@@ -311,6 +312,250 @@ namespace Simple.Service.Monitoring.UI.Services
                 var timeline = await GetHealthCheckTimelineFromRanges(hours);
                 await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksTimeline", timeline);
             }
+        }
+
+        /// <summary>
+        /// Get timeline segments grouped by service name (without machine name), optionally filtering inactive services
+        /// </summary>
+        public async Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60)
+        {
+            var endTime = DateTime.Now;
+            var startTime = endTime.AddHours(-hours);
+            var activeThreshold = TimeSpan.FromMinutes(activeThresholdMinutes);
+            
+            // Define threshold after which health status is considered stale
+            var staleThreshold = TimeSpan.FromMinutes(1);
+
+            // Get time ranges directly from repository
+            var timeRanges = await _repository.GetGroupedHealthCheckTimeRangesAsync(startTime, endTime);
+            var result = new Dictionary<string, List<HealthCheckTimelineSegment>>();
+
+            // Group by service name only (ignoring machine name)
+            var groupedByService = timeRanges
+                .GroupBy(kvp => kvp.Key.Split(" (")[0]) // Extract service name without machine name
+                .ToDictionary(g => g.Key, g => g.SelectMany(kvp => kvp.Value).ToList());
+
+            foreach (var kvp in groupedByService)
+            {
+                string serviceName = kvp.Key;
+                var ranges = kvp.Value.OrderBy(r => r.StartTime).ToList();
+                
+                // If activeOnly is true, filter out services that haven't been updated recently
+                if (activeOnly)
+                {
+                    var hasRecentActivity = ranges.Any(r => 
+                        r.UpdateTime >= endTime.Subtract(activeThreshold) || 
+                        (r.EndTime == null && r.UpdateTime >= endTime.Subtract(activeThreshold)));
+                    
+                    if (!hasRecentActivity)
+                    {
+                        continue; // Skip this service as it's not active
+                    }
+                }
+                
+                var segments = new List<HealthCheckTimelineSegment>();
+
+                if (!ranges.Any())
+                {
+                    // If no data, add "Unknown" segment for the whole period
+                    segments.Add(new HealthCheckTimelineSegment
+                    {
+                        StartTime = startTime,
+                        EndTime = endTime,
+                        Status = "Unknown",
+                        UptimePercentage = 0,
+                        ServiceName = serviceName,
+                        ServiceType = DetermineServiceType(serviceName)
+                    });
+
+                    result[serviceName] = segments;
+                    continue;
+                }
+
+                // Merge overlapping ranges from different machines for the same service
+                var mergedRanges = MergeOverlappingRanges(ranges);
+
+                // Handle gap at the beginning if needed
+                if (mergedRanges.First().StartTime > startTime)
+                {
+                    segments.Add(new HealthCheckTimelineSegment
+                    {
+                        StartTime = startTime,
+                        EndTime = mergedRanges.First().StartTime,
+                        Status = "Unknown",
+                        ServiceName = serviceName,
+                        ServiceType = DetermineServiceType(serviceName)
+                    });
+                }
+
+                // Convert each merged time range to a segment
+                foreach (var range in mergedRanges)
+                {
+                    // Check if this is a current range that might be stale
+                    if (range.EndTime == null)
+                    {
+                        // Use the IsStale method which checks against UpdateTime
+                        if (range.IsStale(staleThreshold))
+                        {
+                            // For stale ranges, we show the status up to the last update time plus threshold
+                            var staleStart = range.UpdateTime.Add(staleThreshold);
+                            
+                            // Add a segment with the known status up to the stale point
+                            segments.Add(new HealthCheckTimelineSegment
+                            {
+                                StartTime = range.StartTime,
+                                EndTime = staleStart,
+                                Status = range.Status.ToString(),
+                                ServiceName = serviceName,
+                                ServiceType = DetermineServiceType(serviceName)
+                            });
+                            
+                            // Add another segment with "Unknown" status after the stale point
+                            segments.Add(new HealthCheckTimelineSegment
+                            {
+                                StartTime = staleStart,
+                                EndTime = endTime,
+                                Status = "Unknown",
+                                ServiceName = serviceName,
+                                ServiceType = DetermineServiceType(serviceName)
+                            });
+                        }
+                        else
+                        {
+                            // Not stale yet, use as is up to current time
+                            segments.Add(new HealthCheckTimelineSegment
+                            {
+                                StartTime = range.StartTime,
+                                EndTime = endTime,
+                                Status = range.Status.ToString(),
+                                ServiceName = serviceName,
+                                ServiceType = DetermineServiceType(serviceName)
+                            });
+                        }
+                    }
+                    else
+                    {
+                        // Closed range, use as is
+                        segments.Add(new HealthCheckTimelineSegment
+                        {
+                            StartTime = range.StartTime,
+                            EndTime = range.EndTime.Value,
+                            Status = range.Status.ToString(),
+                            ServiceName = serviceName,
+                            ServiceType = DetermineServiceType(serviceName)
+                        });
+                    }
+                }
+
+                // Handle gaps between segments if any
+                for (int i = 0; i < segments.Count - 1; i++)
+                {
+                    if (segments[i].EndTime < segments[i + 1].StartTime)
+                    {
+                        segments.Insert(i + 1, new HealthCheckTimelineSegment
+                        {
+                            StartTime = segments[i].EndTime,
+                            EndTime = segments[i + 1].StartTime,
+                            Status = "Unknown",
+                            ServiceName = serviceName,
+                            ServiceType = DetermineServiceType(serviceName)
+                        });
+                        i++; // Skip the newly inserted segment
+                    }
+                }
+
+                // Calculate uptime percentage for the service across all machines
+                var totalDuration = (endTime - startTime).TotalSeconds;
+                var healthyDuration = segments
+                    .Where(s => s.Status == "Healthy")
+                    .Sum(s => (s.EndTime - s.StartTime).TotalSeconds);
+                var uptimePercentage = totalDuration > 0
+                    ? Math.Round((healthyDuration / totalDuration) * 100, 2)
+                    : 0;
+
+                // Add uptime percentage to first segment
+                if (segments.Any())
+                {
+                    segments[0].UptimePercentage = uptimePercentage;
+                }
+
+                result[serviceName] = segments;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Send timeline segments grouped by service name via SignalR
+        /// </summary>
+        public async Task SendHealthCheckTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60)
+        {
+            if (_hubContext != null)
+            {
+                var timeline = await GetHealthCheckTimelineGroupedByService(hours, activeOnly, activeThresholdMinutes);
+                await _hubContext.Clients.All.SendAsync("ReceiveHealthChecksTimelineGrouped", timeline);
+            }
+        }
+
+        /// <summary>
+        /// Merge overlapping time ranges for the same service across different machines
+        /// This creates a unified timeline showing the best status among all machines running the service
+        /// </summary>
+        private List<HealthCheckTimeRange> MergeOverlappingRanges(List<HealthCheckTimeRange> ranges)
+        {
+            if (!ranges.Any()) return ranges;
+
+            var sortedRanges = ranges.OrderBy(r => r.StartTime).ToList();
+            var merged = new List<HealthCheckTimeRange>();
+            var current = sortedRanges[0];
+
+            for (int i = 1; i < sortedRanges.Count; i++)
+            {
+                var next = sortedRanges[i];
+                
+                // Check if ranges overlap or are adjacent
+                if (next.StartTime <= (current.EndTime ?? DateTime.MaxValue))
+                {
+                    // Merge ranges, prioritizing better health status
+                    var mergedStatus = GetBetterStatus(current.Status, next.Status);
+                    var mergedEndTime = current.EndTime == null || next.EndTime == null ? 
+                        null : 
+                        (current.EndTime > next.EndTime ? current.EndTime : next.EndTime);
+                    
+                    current = new HealthCheckTimeRange
+                    {
+                        Id = current.Id, // Keep the first ID
+                        Name = current.Name,
+                        MachineName = "Multiple", // Indicate this spans multiple machines
+                        StartTime = current.StartTime,
+                        EndTime = mergedEndTime,
+                        UpdateTime = current.UpdateTime > next.UpdateTime ? current.UpdateTime : next.UpdateTime,
+                        Status = mergedStatus,
+                        StatusReason = $"Merged: {current.StatusReason}; {next.StatusReason}"
+                    };
+                }
+                else
+                {
+                    // No overlap, add current to merged list and move to next
+                    merged.Add(current);
+                    current = next;
+                }
+            }
+            
+            merged.Add(current); // Add the last range
+            return merged;
+        }
+
+        /// <summary>
+        /// Determine which health status is better (Healthy > Degraded > Unhealthy)
+        /// </summary>
+        private HealthStatus GetBetterStatus(HealthStatus status1, HealthStatus status2)
+        {
+            // Priority: Healthy (2) > Degraded (1) > Unhealthy (0)
+            var priority1 = status1 == HealthStatus.Healthy ? 2 : status1 == HealthStatus.Degraded ? 1 : 0;
+            var priority2 = status2 == HealthStatus.Healthy ? 2 : status2 == HealthStatus.Degraded ? 1 : 0;
+            
+            return priority1 >= priority2 ? status1 : status2;
         }   
 
         public async Task AddHealthReport(Microsoft.Extensions.Diagnostics.HealthChecks.HealthReport report)

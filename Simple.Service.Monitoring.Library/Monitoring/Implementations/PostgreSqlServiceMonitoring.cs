@@ -32,6 +32,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
+            var connectionString = !string.IsNullOrEmpty(this.HealthCheck.ConnectionString) 
+                ? this.HealthCheck.ConnectionString 
+                : this.HealthCheck.EndpointOrHost;
+
             var hasCustomQuery = !string.IsNullOrEmpty(this.HealthCheck.HealthCheckConditions?.SqlBehaviour?.Query);
             var query = hasCustomQuery ? this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query : DEFAULTSQLQUERY;
             
@@ -43,7 +47,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             HealthChecksBuilder.AddCheck(
                 HealthCheck.Name,
-                new PostgreSqlHealthCheck(this.HealthCheck.ConnectionString, query, resultBuilder),
+                new PostgreSqlHealthCheck(connectionString, query, resultBuilder),
                 Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
                 GetTags());
         }

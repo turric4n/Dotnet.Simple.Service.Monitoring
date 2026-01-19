@@ -29,11 +29,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
+            var connectionString = !string.IsNullOrEmpty(HealthCheck.ConnectionString) 
+                ? HealthCheck.ConnectionString 
+                : HealthCheck.EndpointOrHost;
+
             var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.RedisBehaviour.TimeOutMs);
 
             HealthChecksBuilder.AddCheck(
                 HealthCheck.Name,
-                new RedisHealthCheck(HealthCheck.ConnectionString, timeout),
+                new RedisHealthCheck(connectionString, timeout),
                 Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
                 GetTags());
         }

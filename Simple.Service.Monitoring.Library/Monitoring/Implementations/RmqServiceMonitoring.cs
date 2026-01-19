@@ -20,17 +20,28 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void Validate()
         {
-            Condition.Requires(HealthCheck.EndpointOrHost)
-                .IsNotNull();
+            var hasEndpointOrHost = !string.IsNullOrEmpty(HealthCheck.EndpointOrHost);
+            var hasConnectionString = !string.IsNullOrEmpty(HealthCheck.ConnectionString);
+
+            Condition
+                .WithExceptionOnFailure<InvalidConnectionStringException>()
+                .Requires(hasEndpointOrHost || hasConnectionString)
+                .IsTrue("Either EndpointOrHost or ConnectionString must be provided");
+
+            var connectionString = hasConnectionString ? HealthCheck.ConnectionString : HealthCheck.EndpointOrHost;
 
             Condition
                 .WithExceptionOnFailure<MalformedUriException>()
-                .Requires(Uri.IsWellFormedUriString(HealthCheck.EndpointOrHost, UriKind.Absolute))
+                .Requires(Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
                 .IsTrue();
         }
 
         protected internal override void SetMonitoring()
         {
+            var connectionString = !string.IsNullOrEmpty(HealthCheck.ConnectionString) 
+                ? HealthCheck.ConnectionString 
+                : HealthCheck.EndpointOrHost;
+
             // Create a custom health check that GUARANTEES connection disposal
             HealthChecksBuilder.AddCheck<RabbitMqConnectionHealthCheck>(
                 HealthCheck.Name,
@@ -39,7 +50,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             // Register the health check with the connection string
             HealthChecksBuilder.Services.AddSingleton(sp => 
-                new RabbitMqConnectionHealthCheck(HealthCheck.EndpointOrHost));
+                new RabbitMqConnectionHealthCheck(connectionString));
         }
     }
 

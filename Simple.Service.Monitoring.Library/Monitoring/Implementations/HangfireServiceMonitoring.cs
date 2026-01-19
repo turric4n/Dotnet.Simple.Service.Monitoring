@@ -23,13 +23,22 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void Validate()
         {
-            var csbuilder = new DbConnectionStringBuilder();
             Condition.Requires(this.HealthCheck.HealthCheckConditions)
                 .IsNotNull();
-            Condition.Requires(this.HealthCheck.ConnectionString)
-                .IsNotNull();
+
+            var hasEndpointOrHost = !string.IsNullOrEmpty(this.HealthCheck.EndpointOrHost);
+            var hasConnectionString = !string.IsNullOrEmpty(this.HealthCheck.ConnectionString);
+
             Condition
-                .Ensures(csbuilder.ConnectionString = this.HealthCheck.ConnectionString);
+                .WithExceptionOnFailure<Monitoring.Exceptions.InvalidConnectionStringException>()
+                .Requires(hasEndpointOrHost || hasConnectionString)
+                .IsTrue("Either EndpointOrHost or ConnectionString must be provided");
+
+            var csbuilder = new DbConnectionStringBuilder();
+            var connectionString = hasConnectionString ? this.HealthCheck.ConnectionString : this.HealthCheck.EndpointOrHost;
+            
+            Condition
+                .Ensures(csbuilder.ConnectionString = connectionString);
         }
 
         protected internal override void SetMonitoring()
