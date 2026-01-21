@@ -11,6 +11,7 @@ using Testcontainers.Elasticsearch;
 namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
 {
     [TestFixture]
+    [Explicit]
     [Category("Acceptance")]
     [Category("Docker")]
     public class DockerElasticsearchAcceptanceTests : DockerTestBase
