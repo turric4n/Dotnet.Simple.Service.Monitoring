@@ -18,7 +18,6 @@ namespace Simple.Service.Monitoring.Library.Models
         public List<string> ExcludedInterceptionNames { get; set; } 
         public string EndpointOrHost { get; set; }
         public string ConnectionString { get; set; }
-        public TimeSpan MonitoringInterval { get; set; }
         public HealthCheckConditions HealthCheckConditions { get; set; }
         public bool Alert { get; set; }
         public List<AlertBehaviour> AlertBehaviour { get; set; }

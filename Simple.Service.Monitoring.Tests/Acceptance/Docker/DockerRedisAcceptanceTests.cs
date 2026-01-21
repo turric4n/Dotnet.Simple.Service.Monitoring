@@ -68,7 +68,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "Redis Test",
                 ServiceType = ServiceType.Redis,
                 ConnectionString = _redisContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     RedisBehaviour = new RedisBehaviour
@@ -93,7 +92,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "Redis Timeout Test",
                 ServiceType = ServiceType.Redis,
                 ConnectionString = _redisContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     RedisBehaviour = new RedisBehaviour
@@ -135,7 +133,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "Redis Read/Write Test",
                 ServiceType = ServiceType.Redis,
                 ConnectionString = connectionString,
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     RedisBehaviour = new RedisBehaviour

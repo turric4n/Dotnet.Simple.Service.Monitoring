@@ -74,8 +74,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "SQL Server Test",
                 ServiceType = ServiceType.MsSql,
-                ConnectionString = _sqlContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30)
+                ConnectionString = _sqlContainer.GetConnectionString()
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -93,7 +92,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "SQL Server Query Test",
                 ServiceType = ServiceType.MsSql,
                 ConnectionString = _sqlContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     SqlBehaviour = new SqlBehaviour
@@ -126,7 +124,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "SQL Server Failed Query Test",
                 ServiceType = ServiceType.MsSql,
                 ConnectionString = _sqlContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     SqlBehaviour = new SqlBehaviour

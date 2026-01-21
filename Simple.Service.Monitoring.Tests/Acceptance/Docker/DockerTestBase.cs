@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.Library.Models;
@@ -56,6 +57,13 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                     {
                         services.AddSingleton<IConfiguration>(configuration);
                         
+                        // Add logging services (required for health checks)
+                        services.AddLogging(builder =>
+                        {
+                            builder.AddConsole();
+                            builder.SetMinimumLevel(LogLevel.Debug);
+                        });
+                        
                         // Add service monitoring with runtime configuration
                         services.AddServiceMonitoring(configuration)
                             .WithRuntimeSettings(monitorOptions);
@@ -90,15 +98,45 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         }
 
         /// <summary>
+        /// Gets detailed health check information including status and individual check results.
+        /// </summary>
+        protected async Task<string> GetHealthCheckDetailsAsync()
+        {
+            var response = await GetHealthCheckResponseAsync();
+            var content = await response.Content.ReadAsStringAsync();
+            return $"Status: {response.StatusCode}, Content: {content}";
+        }
+
+        /// <summary>
         /// Verifies that the health check endpoint returns a healthy status.
         /// </summary>
         protected async Task AssertHealthCheckIsHealthyAsync()
         {
             var response = await GetHealthCheckResponseAsync();
-            response.EnsureSuccessStatusCode();
             
+            // Read response content for debugging
             var content = await response.Content.ReadAsStringAsync();
-            Assert.That(content, Does.Contain("Healthy").Or.Contains("\"status\":\"Healthy\""));
+            
+            // Assert that we got a successful response (200 OK)
+            // Note: Health check endpoint returns 200 for Healthy, 503 for Unhealthy
+            Assert.That(response.IsSuccessStatusCode, Is.True, 
+                $"Health check returned {response.StatusCode}. Response: {content}");
+            
+            Assert.That(content, Does.Contain("Healthy").Or.Contains("\"status\":\"Healthy\""),
+                $"Response should indicate healthy status. Actual response: {content}");
+        }
+
+        /// <summary>
+        /// Verifies that the health check endpoint returns the expected status code.
+        /// Useful for testing unhealthy scenarios.
+        /// </summary>
+        protected async Task AssertHealthCheckStatusAsync(System.Net.HttpStatusCode expectedStatusCode)
+        {
+            var response = await GetHealthCheckResponseAsync();
+            var content = await response.Content.ReadAsStringAsync();
+            
+            Assert.That(response.StatusCode, Is.EqualTo(expectedStatusCode),
+                $"Expected status {expectedStatusCode} but got {response.StatusCode}. Response: {content}");
         }
 
         /// <summary>
@@ -132,16 +170,14 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         protected ServiceHealthCheck CreateServiceHealthCheck(
             string name,
             ServiceType serviceType,
-            string connectionStringOrEndpoint = null,
-            TimeSpan? monitoringInterval = null)
+            string connectionStringOrEndpoint = null)
         {
             return new ServiceHealthCheck
             {
                 Name = name,
                 ServiceType = serviceType,
                 ConnectionString = connectionStringOrEndpoint,
-                EndpointOrHost = connectionStringOrEndpoint,
-                MonitoringInterval = monitoringInterval ?? TimeSpan.FromSeconds(30)
+                EndpointOrHost = connectionStringOrEndpoint
             };
         }
     }

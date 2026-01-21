@@ -53,7 +53,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     }
                 },
                 EndpointOrHost = "https://www.google.com",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Http,
                 Alert = true
             };
@@ -101,7 +100,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     }
                 },
                 EndpointOrHost = "https://www.google.com",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Http,
                 Alert = true
             };

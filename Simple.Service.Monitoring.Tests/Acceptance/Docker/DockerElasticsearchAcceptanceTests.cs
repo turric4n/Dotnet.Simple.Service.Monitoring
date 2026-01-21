@@ -20,12 +20,18 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         [OneTimeSetUp]
         public async Task OneTimeSetUp()
         {
-            // Create and start Elasticsearch container
+            // Create and start Elasticsearch container with PLAIN HTTP (no SSL)
             _elasticsearchContainer = new ElasticsearchBuilder()
+                .WithImage("elasticsearch:8.11.0")
+                .WithEnvironment("xpack.security.enabled", "false") // Disable security/SSL
+                .WithEnvironment("discovery.type", "single-node")
                 .WithCleanUp(true)
                 .Build();
 
-            await _elasticsearchContainer.StartAsync();
+            _elasticsearchContainer.StartAsync();
+
+            // Wait for Elasticsearch to be ready
+            await Task.Delay(TimeSpan.FromSeconds(10));
 
             // Initialize test indices
             await InitializeElasticsearchAsync();
@@ -45,10 +51,17 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
 
         private async Task InitializeElasticsearchAsync()
         {
-            var settings = new ElasticsearchClientSettings(new Uri(_elasticsearchContainer.GetConnectionString()))
-                .ServerCertificateValidationCallback(CertificateValidations.AllowAll);
+            // Get connection string (plain HTTP)
+            var connectionString = _elasticsearchContainer.GetConnectionString();
+            
+            // Create client settings for PLAIN HTTP (no SSL validation needed)
+            var settings = new ElasticsearchClientSettings(new Uri(connectionString));
 
             var client = new ElasticsearchClient(settings);
+
+            // Verify connection
+            var pingResponse = await client.PingAsync();
+            pingResponse.IsValidResponse.Should().BeTrue("Elasticsearch should be reachable");
 
             // Create test index
             var indexName = "test-logs";
@@ -81,16 +94,14 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         [Test]
         public async Task Should_Monitor_Elasticsearch_Connection_Successfully()
         {
-            // Arrange
+            // Arrange - Get plain HTTP connection string
             var connectionString = _elasticsearchContainer.GetConnectionString();
-            var uri = new Uri(connectionString);
             
             var healthCheck = new ServiceHealthCheck
             {
                 Name = "Elasticsearch Test",
                 ServiceType = ServiceType.ElasticSearch,
-                EndpointOrHost = $"{uri.Scheme}://{uri.Host}",
-                MonitoringInterval = TimeSpan.FromSeconds(30)
+                EndpointOrHost = connectionString // Use full connection string (plain HTTP)
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -102,9 +113,9 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         [Test]
         public async Task Should_Verify_Elasticsearch_Can_Search_Documents()
         {
-            // Arrange - First verify we can search in Elasticsearch
-            var settings = new ElasticsearchClientSettings(new Uri(_elasticsearchContainer.GetConnectionString()))
-                .ServerCertificateValidationCallback(CertificateValidations.AllowAll);
+            // Arrange - First verify we can search in Elasticsearch (plain HTTP)
+            var connectionString = _elasticsearchContainer.GetConnectionString();
+            var settings = new ElasticsearchClientSettings(new Uri(connectionString));
 
             var client = new ElasticsearchClient(settings);
             
@@ -115,14 +126,11 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             searchResponse.Documents.Count.Should().BeGreaterThan(0);
 
             // Now test the health check
-            var connectionString = _elasticsearchContainer.GetConnectionString();
-            
             var healthCheck = new ServiceHealthCheck
             {
                 Name = "Elasticsearch Search Test",
                 ServiceType = ServiceType.ElasticSearch,
-                EndpointOrHost = connectionString,
-                MonitoringInterval = TimeSpan.FromSeconds(30)
+                EndpointOrHost = connectionString
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -139,22 +147,37 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         [Test]
         public async Task Should_Monitor_Elasticsearch_Cluster_Health()
         {
-            // Arrange
+            // Arrange - Use plain HTTP connection
             var connectionString = _elasticsearchContainer.GetConnectionString();
-            var uri = new Uri(connectionString);
 
             var healthCheck = new ServiceHealthCheck
             {
                 Name = "Elasticsearch Cluster Health Test",
                 ServiceType = ServiceType.ElasticSearch,
-                EndpointOrHost = $"{uri.Scheme}://{uri.Host}",
-                MonitoringInterval = TimeSpan.FromSeconds(30)
+                EndpointOrHost = connectionString
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
 
             // Act & Assert
             await AssertHealthCheckIsHealthyAsync();
+        }
+
+        [Test]
+        public async Task Should_Return_Unhealthy_When_Elasticsearch_Unavailable()
+        {
+            // Arrange - Point to non-existent Elasticsearch instance
+            var healthCheck = new ServiceHealthCheck
+            {
+                Name = "Elasticsearch Unavailable Test",
+                ServiceType = ServiceType.ElasticSearch,
+                EndpointOrHost = "http://localhost:19200" // Non-existent port
+            };
+
+            Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
+
+            // Act & Assert - Expect 503 Service Unavailable
+            await AssertHealthCheckStatusAsync(System.Net.HttpStatusCode.ServiceUnavailable);
         }
 
         [TearDown]

@@ -83,7 +83,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                         $"Invalid class name {HealthCheck.FullClassName} defined in custom test named {Name}");
 
                 var classInstance = ActivatorUtilities.CreateInstance(_serviceProvider, classType) as IHealthCheck;
-                HealthChecksBuilder.AddCheck(Name, classInstance);
+
+                HealthChecksBuilder.AddAsyncCheck(
+                    Name,
+                    async () =>
+                    {
+                        return await classInstance.CheckHealthAsync(new HealthCheckContext(), System.Threading.CancellationToken.None);
+                    });
             }
         }
     }

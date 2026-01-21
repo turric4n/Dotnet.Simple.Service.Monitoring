@@ -42,15 +42,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 ? HealthCheck.ConnectionString 
                 : HealthCheck.EndpointOrHost;
 
-            // Create a custom health check that GUARANTEES connection disposal
-            HealthChecksBuilder.AddCheck<RabbitMqConnectionHealthCheck>(
+            // Create a custom health check that GUARANTEES connection disposal using AddAsyncCheck
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new RabbitMqConnectionHealthCheck(connectionString);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
-
-            // Register the health check with the connection string
-            HealthChecksBuilder.Services.AddSingleton(sp => 
-                new RabbitMqConnectionHealthCheck(connectionString));
         }
     }
 
@@ -64,6 +64,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         public RabbitMqConnectionHealthCheck(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
@@ -99,8 +100,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 {
                     try
                     {
-                        await connection.CloseAsync(cancellationToken: cancellationToken);
-                        
+                        if (connection.IsOpen)
+                        {
+                            await connection.CloseAsync(cancellationToken: cancellationToken);
+                        }
                     }
                     finally
                     {

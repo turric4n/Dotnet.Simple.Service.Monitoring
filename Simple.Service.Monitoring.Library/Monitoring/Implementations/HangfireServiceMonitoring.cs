@@ -49,10 +49,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             var maximumJobsFailed =
                 this.HealthCheck.HealthCheckConditions.HangfireBehaviour?.MaximumJobsFailed;
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new HangfireHealthCheck(minimumAvailableServers, maximumJobsFailed),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new HangfireHealthCheck(minimumAvailableServers, maximumJobsFailed);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
 

@@ -88,8 +88,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "RabbitMQ Test",
                 ServiceType = ServiceType.Rmq,
-                ConnectionString = _rabbitMqContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30)
+                ConnectionString = _rabbitMqContainer.GetConnectionString()
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -122,8 +121,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "RabbitMQ Publish Test",
                 ServiceType = ServiceType.Rmq,
-                ConnectionString = _rabbitMqContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30)
+                ConnectionString = _rabbitMqContainer.GetConnectionString()
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -147,8 +145,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "RabbitMQ Connection String Test",
                 ServiceType = ServiceType.Rmq,
-                ConnectionString = connectionString,
-                MonitoringInterval = System.TimeSpan.FromSeconds(30)
+                ConnectionString = connectionString
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });

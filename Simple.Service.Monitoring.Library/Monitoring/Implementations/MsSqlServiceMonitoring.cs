@@ -55,10 +55,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 resultBuilder = GetHealth;
             }
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new SqlServerHealthCheck(connectionString, query, resultBuilder),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new SqlServerHealthCheck(connectionString, query, resultBuilder);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
     }

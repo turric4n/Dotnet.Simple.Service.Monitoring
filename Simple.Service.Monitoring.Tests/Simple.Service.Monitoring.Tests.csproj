@@ -30,6 +30,12 @@
     <PackageReference Include="NUnit" Version="4.4.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="6.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="Testcontainers.Elasticsearch" Version="4.10.0" />
+    <PackageReference Include="Testcontainers.MsSql" Version="4.10.0" />
+    <PackageReference Include="Testcontainers.MySql" Version="4.10.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.10.0" />
+    <PackageReference Include="Testcontainers.RabbitMq" Version="4.10.0" />
+    <PackageReference Include="Testcontainers.Redis" Version="4.10.0" />
   </ItemGroup>
 
   <ItemGroup>

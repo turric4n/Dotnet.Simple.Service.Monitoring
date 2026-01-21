@@ -35,10 +35,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.RedisBehaviour.TimeOutMs);
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new RedisHealthCheck(connectionString, timeout),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new RedisHealthCheck(connectionString, timeout);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
     }

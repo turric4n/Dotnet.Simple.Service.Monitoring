@@ -5,7 +5,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library;
-using FluentAssertions; // Added for FluentAssertions
+using FluentAssertions;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -32,7 +32,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 Name = "testhealthcheck",
                 AlertBehaviour = null,
                 ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.MySql,
                 HealthCheckConditions = new HealthCheckConditions()
                 {
@@ -54,7 +53,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 Name = "testhealthcheck",
                 AlertBehaviour = null,
                 ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.MySql,
                 HealthCheckConditions = new HealthCheckConditions()
                 {

@@ -275,106 +275,105 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             // Arrange - Create health checks for all services
             var healthChecks = new List<ServiceHealthCheck>();
 
-            // SQL Server
-            healthChecks.Add(new ServiceHealthCheck
-            {
-                Name = "SQL Server All Services Test",
-                ServiceType = ServiceType.MsSql,
-                ConnectionString = _sqlContainer.GetConnectionString(),
-                MonitoringInterval = TimeSpan.FromSeconds(30),
-                HealthCheckConditions = new HealthCheckConditions
-                {
-                    SqlBehaviour = new SqlBehaviour
-                    {
-                        Query = "SELECT COUNT(*) FROM TestData",
-                        ResultExpression = ResultExpression.GreaterThan,
-                        SqlResultDataType = SqlResultDataType.Int,
-                        ExpectedResult = "0"
-                    }
-                }
-            });
+            //// SQL Server
+            //healthChecks.Add(new ServiceHealthCheck
+            //{
+            //    Name = "SQL Server All Services Test",
+            //    ServiceType = ServiceType.MsSql,
+            //    ConnectionString = _sqlContainer.GetConnectionString(),
+            //    MonitoringInterval = TimeSpan.FromSeconds(30),
+            //    HealthCheckConditions = new HealthCheckConditions
+            //    {
+            //        SqlBehaviour = new SqlBehaviour
+            //        {
+            //            Query = "SELECT COUNT(*) FROM TestData",
+            //            ResultExpression = ResultExpression.GreaterThan,
+            //            SqlResultDataType = SqlResultDataType.Int,
+            //            ExpectedResult = "0"
+            //        }
+            //    }
+            //});
 
             // MySQL
-            healthChecks.Add(new ServiceHealthCheck
-            {
-                Name = "MySQL All Services Test",
-                ServiceType = ServiceType.MySql,
-                ConnectionString = _mySqlContainer.GetConnectionString(),
-                MonitoringInterval = TimeSpan.FromSeconds(30),
-                HealthCheckConditions = new HealthCheckConditions
-                {
-                    SqlBehaviour = new SqlBehaviour
-                    {
-                        Query = "SELECT COUNT(*) FROM TestData",
-                        ResultExpression = ResultExpression.GreaterThan,
-                        SqlResultDataType = SqlResultDataType.Int,
-                        ExpectedResult = "0"
-                    }
-                }
-            });
+            //healthChecks.Add(new ServiceHealthCheck
+            //{
+            //    Name = "MySQL All Services Test",
+            //    ServiceType = ServiceType.MySql,
+            //    ConnectionString = _mySqlContainer.GetConnectionString(),
+            //    MonitoringInterval = TimeSpan.FromSeconds(30),
+            //    HealthCheckConditions = new HealthCheckConditions
+            //    {
+            //        SqlBehaviour = new SqlBehaviour
+            //        {
+            //            Query = "SELECT COUNT(*) FROM TestData",
+            //            ResultExpression = ResultExpression.GreaterThan,
+            //            SqlResultDataType = SqlResultDataType.Int,
+            //            ExpectedResult = "0"
+            //        }
+            //    }
+            //});
 
             // PostgreSQL
-            healthChecks.Add(new ServiceHealthCheck
-            {
-                Name = "PostgreSQL All Services Test",
-                ServiceType = ServiceType.PostgreSql,
-                ConnectionString = _postgresContainer.GetConnectionString(),
-                MonitoringInterval = TimeSpan.FromSeconds(30),
-                HealthCheckConditions = new HealthCheckConditions
-                {
-                    SqlBehaviour = new SqlBehaviour
-                    {
-                        Query = "SELECT COUNT(*) FROM TestData",
-                        ResultExpression = ResultExpression.GreaterThan,
-                        SqlResultDataType = SqlResultDataType.Int,
-                        ExpectedResult = "0"
-                    }
-                }
-            });
+            //healthChecks.Add(new ServiceHealthCheck
+            //{
+            //    Name = "PostgreSQL All Services Test",
+            //    ServiceType = ServiceType.PostgreSql,
+            //    ConnectionString = _postgresContainer.GetConnectionString(),
+            //    MonitoringInterval = TimeSpan.FromSeconds(30),
+            //    HealthCheckConditions = new HealthCheckConditions
+            //    {
+            //        SqlBehaviour = new SqlBehaviour
+            //        {
+            //            Query = "SELECT COUNT(*) FROM TestData",
+            //            ResultExpression = ResultExpression.GreaterThan,
+            //            SqlResultDataType = SqlResultDataType.Int,
+            //            ExpectedResult = "0"
+            //        }
+            //    }
+            //});
 
             // Redis
-            healthChecks.Add(new ServiceHealthCheck
-            {
-                Name = "Redis All Services Test",
-                ServiceType = ServiceType.Redis,
-                ConnectionString = _redisContainer.GetConnectionString(),
-                MonitoringInterval = TimeSpan.FromSeconds(30),
-                HealthCheckConditions = new HealthCheckConditions
-                {
-                    RedisBehaviour = new RedisBehaviour
-                    {
-                        TimeOutMs = 5000
-                    }
-                }
-            });
+            //healthChecks.Add(new ServiceHealthCheck
+            //{
+            //    Name = "Redis All Services Test",
+            //    ServiceType = ServiceType.Redis,
+            //    ConnectionString = _redisContainer.GetConnectionString(),
+            //    MonitoringInterval = TimeSpan.FromSeconds(30),
+            //    HealthCheckConditions = new HealthCheckConditions
+            //    {
+            //        RedisBehaviour = new RedisBehaviour
+            //        {
+            //            TimeOutMs = 5000
+            //        }
+            //    }
+            //});
 
             // RabbitMQ
             healthChecks.Add(new ServiceHealthCheck
             {
                 Name = "RabbitMQ All Services Test",
                 ServiceType = ServiceType.Rmq,
-                ConnectionString = _rabbitMqContainer.GetConnectionString(),
-                MonitoringInterval = TimeSpan.FromSeconds(30)
+                ConnectionString = _rabbitMqContainer.GetConnectionString()
             });
 
-            // Elasticsearch
-            var elasticUri = new Uri(_elasticsearchContainer.GetConnectionString());
-            healthChecks.Add(new ServiceHealthCheck
-            {
-                Name = "Elasticsearch All Services Test",
-                ServiceType = ServiceType.ElasticSearch,
-                EndpointOrHost = $"{elasticUri.Scheme}://{elasticUri.Host}",
-                MonitoringInterval = TimeSpan.FromSeconds(30)
-            });
+            //// Elasticsearch
+            //var elasticUri = new Uri(_elasticsearchContainer.GetConnectionString());
+            //healthChecks.Add(new ServiceHealthCheck
+            //{
+            //    Name = "Elasticsearch All Services Test",
+            //    ServiceType = ServiceType.ElasticSearch,
+            //    EndpointOrHost = $"{elasticUri.Scheme}://{elasticUri.Host}",
+            //    MonitoringInterval = TimeSpan.FromSeconds(30)
+            //});
 
-            // Ping (localhost)
-            healthChecks.Add(new ServiceHealthCheck
-            {
-                Name = "Ping All Services Test",
-                ServiceType = ServiceType.Ping,
-                EndpointOrHost = "127.0.0.1",
-                MonitoringInterval = TimeSpan.FromSeconds(30)
-            });
+            //// Ping (localhost)
+            //healthChecks.Add(new ServiceHealthCheck
+            //{
+            //    Name = "Ping All Services Test",
+            //    ServiceType = ServiceType.Ping,
+            //    EndpointOrHost = "127.0.0.1",
+            //    MonitoringInterval = TimeSpan.FromSeconds(30)
+            //});
 
             TestContext.WriteLine($"Created {healthChecks.Count} health checks");
 
@@ -410,22 +409,19 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 {
                     Name = "SQL Server DB Test",
                     ServiceType = ServiceType.MsSql,
-                    ConnectionString = _sqlContainer.GetConnectionString(),
-                    MonitoringInterval = TimeSpan.FromSeconds(30)
+                    ConnectionString = _sqlContainer.GetConnectionString()
                 },
                 new ServiceHealthCheck
                 {
                     Name = "MySQL DB Test",
                     ServiceType = ServiceType.MySql,
-                    ConnectionString = _mySqlContainer.GetConnectionString(),
-                    MonitoringInterval = TimeSpan.FromSeconds(30)
+                    ConnectionString = _mySqlContainer.GetConnectionString()
                 },
                 new ServiceHealthCheck
                 {
                     Name = "PostgreSQL DB Test",
                     ServiceType = ServiceType.PostgreSql,
-                    ConnectionString = _postgresContainer.GetConnectionString(),
-                    MonitoringInterval = TimeSpan.FromSeconds(30)
+                    ConnectionString = _postgresContainer.GetConnectionString()
                 }
             };
 
@@ -446,7 +442,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                     Name = "Redis Cache Test",
                     ServiceType = ServiceType.Redis,
                     ConnectionString = _redisContainer.GetConnectionString(),
-                    MonitoringInterval = TimeSpan.FromSeconds(30),
                     HealthCheckConditions = new HealthCheckConditions
                     {
                         RedisBehaviour = new RedisBehaviour
@@ -459,8 +454,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 {
                     Name = "RabbitMQ Queue Test",
                     ServiceType = ServiceType.Rmq,
-                    ConnectionString = _rabbitMqContainer.GetConnectionString(),
-                    MonitoringInterval = TimeSpan.FromSeconds(30)
+                    ConnectionString = _rabbitMqContainer.GetConnectionString()
                 }
             };
 

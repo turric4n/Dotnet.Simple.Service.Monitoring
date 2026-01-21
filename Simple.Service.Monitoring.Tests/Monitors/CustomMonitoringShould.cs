@@ -25,7 +25,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             var custompointhealthcheck = new ServiceHealthCheck()
             {
                 Name = "testhealthcheck",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Custom
             };
         }

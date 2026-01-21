@@ -33,10 +33,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             var hosts = HealthCheck.EndpointOrHost.Split(',').Select(h => h.Trim()).ToList();
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new PingHealthCheck(hosts),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new PingHealthCheck(hosts);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
 

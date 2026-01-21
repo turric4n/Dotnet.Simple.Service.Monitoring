@@ -56,7 +56,6 @@
 	<ItemGroup>
 		<PackageReference Include="Dapper" Version="2.1.66" />
 		<PackageReference Include="LiteDB" Version="5.0.21" />
-		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.9" />
 	</ItemGroup>
 
 	<ItemGroup>

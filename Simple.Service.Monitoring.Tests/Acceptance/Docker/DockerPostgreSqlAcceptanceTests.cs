@@ -78,8 +78,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "PostgreSQL Test",
                 ServiceType = ServiceType.PostgreSql,
-                ConnectionString = _postgresContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30)
+                ConnectionString = _postgresContainer.GetConnectionString()
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -97,7 +96,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "PostgreSQL Query Test",
                 ServiceType = ServiceType.PostgreSql,
                 ConnectionString = _postgresContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     SqlBehaviour = new SqlBehaviour
@@ -130,7 +128,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "PostgreSQL Aggregate Test",
                 ServiceType = ServiceType.PostgreSql,
                 ConnectionString = _postgresContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     SqlBehaviour = new SqlBehaviour

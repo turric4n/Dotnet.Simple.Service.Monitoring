@@ -31,7 +31,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             {
                 Name = "testhealthcheck",
                 ConnectionString = "Host=localhost;Database=testdb;Username=postgres;Password=secret",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.PostgreSql,
                 HealthCheckConditions = new HealthCheckConditions()
             };
@@ -53,7 +52,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 Name = "testhealthcheck",
                 ConnectionString = "Host=localhost;Database=testdb;Username=postgres;Password=secret",
                 ServiceType = ServiceType.PostgreSql,
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 HealthCheckConditions = new HealthCheckConditions()
                 {
                     SqlBehaviour = new SqlBehaviour()
@@ -82,7 +80,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             {
                 Name = "testhealthcheck",
                 ConnectionString = null,
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.PostgreSql,
                 HealthCheckConditions = new HealthCheckConditions()
             };

@@ -45,10 +45,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             var expectedCode = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode;
             var httpVerb = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb;
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
     }

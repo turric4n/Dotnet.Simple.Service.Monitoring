@@ -39,7 +39,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https://www.google.com",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Http
             };
             //Act
@@ -66,7 +65,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https:/www.google.com",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Http
             };
             //Act
@@ -93,7 +91,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https://www.google.com,https://www.yahoo.com",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Http
             };
             //Act
@@ -119,7 +116,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 },
                 AlertBehaviour = null,
                 EndpointOrHost = "https://www.google.com,http://www.yahoo.com,notanendpoint",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.Http
             };
             //Act

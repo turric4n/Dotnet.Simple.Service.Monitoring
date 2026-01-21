@@ -95,7 +95,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "HTTP Endpoint Test",
                 ServiceType = ServiceType.Http,
                 EndpointOrHost = $"http://localhost:{TestHttpPort}/health",
-                MonitoringInterval = TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     HttpBehaviour = new HttpBehaviour
@@ -122,7 +121,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "HTTP 404 Test",
                 ServiceType = ServiceType.Http,
                 EndpointOrHost = $"http://localhost:{TestHttpPort}/notfound",
-                MonitoringInterval = TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     HttpBehaviour = new HttpBehaviour
@@ -154,7 +152,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "HTTP Timeout Test",
                 ServiceType = ServiceType.Http,
                 EndpointOrHost = $"http://localhost:{TestHttpPort}/slow",
-                MonitoringInterval = TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     HttpBehaviour = new HttpBehaviour
@@ -184,8 +181,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "Ping Localhost Test",
                 ServiceType = ServiceType.Ping,
-                EndpointOrHost = "127.0.0.1",
-                MonitoringInterval = TimeSpan.FromSeconds(30)
+                EndpointOrHost = "127.0.0.1"
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -203,7 +199,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "Ping DNS Server Test",
                 ServiceType = ServiceType.Ping,
                 EndpointOrHost = "8.8.8.8", // Google Public DNS
-                MonitoringInterval = TimeSpan.FromSeconds(30)
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -227,7 +222,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "Ping Invalid Host Test",
                 ServiceType = ServiceType.Ping,
                 EndpointOrHost = "192.0.2.1", // TEST-NET-1 (RFC 5737) - should not be routable
-                MonitoringInterval = TimeSpan.FromSeconds(30)
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });

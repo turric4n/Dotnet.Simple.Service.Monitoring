@@ -77,8 +77,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "MySQL Test",
                 ServiceType = ServiceType.MySql,
-                ConnectionString = _mySqlContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30)
+                ConnectionString = _mySqlContainer.GetConnectionString()
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -96,7 +95,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "MySQL Query Test",
                 ServiceType = ServiceType.MySql,
                 ConnectionString = _mySqlContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     SqlBehaviour = new SqlBehaviour
@@ -133,7 +131,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 Name = "MySQL Decimal Query Test",
                 ServiceType = ServiceType.MySql,
                 ConnectionString = _mySqlContainer.GetConnectionString(),
-                MonitoringInterval = System.TimeSpan.FromSeconds(30),
                 HealthCheckConditions = new HealthCheckConditions
                 {
                     SqlBehaviour = new SqlBehaviour

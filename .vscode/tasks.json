@@ -1,0 +1,75 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/Simple.Service.Monitoring/Simple.Service.Monitoring.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/Simple.Service.Monitoring/Simple.Service.Monitoring.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "${workspaceFolder}/Simple.Service.Monitoring/Simple.Service.Monitoring.csproj"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "webpack-dev",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build:dev"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/Simple.Service.Monitoring.UI"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "webpack-watch",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "watch"],
+            "group": "build",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/Simple.Service.Monitoring.UI"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

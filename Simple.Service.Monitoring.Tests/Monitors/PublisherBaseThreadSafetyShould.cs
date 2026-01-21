@@ -448,7 +448,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     }
                 },
                 EndpointOrHost = "https://example.com",
-                MonitoringInterval = TimeSpan.FromSeconds(30),
                 ServiceType = ServiceType.Http,
                 Alert = true
             };

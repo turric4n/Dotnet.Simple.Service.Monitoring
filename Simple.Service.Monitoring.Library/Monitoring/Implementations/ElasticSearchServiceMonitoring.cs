@@ -33,10 +33,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 ? HealthCheck.ConnectionString 
                 : HealthCheck.EndpointOrHost;
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new ElasticsearchHealthCheck(endpoint),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new ElasticsearchHealthCheck(endpoint);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
 

@@ -1,0 +1,90 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Edge",
+            "request": "launch",
+            "type": "msedge",
+            "url": "https://localhost:7001/monitoring",
+            "webRoot": "${workspaceFolder}/Simple.Service.Monitoring.UI",
+            "sourceMaps": true,
+            "smartStep": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "sourceMapPathOverrides": {
+                "webpack:///./*": "${webRoot}/*",
+                "webpack:///./Front/src/*": "${webRoot}/Front/src/*",
+                "webpack:///*": "*",
+                "*": "${webRoot}/*"
+            },
+            "trace": true,
+            "userDataDir": false,
+            "runtimeArgs": [
+                "--disable-web-security",
+                "--disable-features=VizDisplayCompositor"
+            ]
+        },
+        {
+            "name": "Attach to Edge",
+            "port": 9222,
+            "request": "attach",
+            "type": "msedge",
+            "webRoot": "${workspaceFolder}/Simple.Service.Monitoring.UI",
+            "sourceMaps": true,
+            "sourceMapPathOverrides": {
+                "webpack:///./*": "${webRoot}/*",
+                "webpack:///src/*": "${webRoot}/Front/src/*",
+                "webpack:///*": "*"
+            }
+        },
+        {
+            "name": "Debug with Chrome (Recommended)",
+            "request": "launch",
+            "type": "chrome",
+            "url": "https://localhost:7001/monitoring",
+            "webRoot": "${workspaceFolder}/Simple.Service.Monitoring.UI",
+            "sourceMaps": true,
+            "smartStep": true,
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "sourceMapPathOverrides": {
+                "webpack:///./*": "${webRoot}/*",
+                "webpack:///./Front/src/*": "${webRoot}/Front/src/*",
+                "webpack:///*": "*"
+            },
+            "trace": true
+        },
+        {
+            "name": ".NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/Simple.Service.Monitoring/bin/Debug/net8.0/Simple.Service.Monitoring.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Simple.Service.Monitoring",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch .NET + Edge",
+            "configurations": ["Launch Edge", ".NET Core Launch (web)"]
+        },
+        {
+            "name": "Launch .NET + Chrome",
+            "configurations": ["Debug with Chrome (Recommended)", ".NET Core Launch (web)"]
+        }
+    ]
+}
