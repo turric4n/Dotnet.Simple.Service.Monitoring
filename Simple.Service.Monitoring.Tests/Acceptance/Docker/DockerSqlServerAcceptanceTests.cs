@@ -12,6 +12,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
     [TestFixture]
     [Category("Acceptance")]
     [Category("Docker")]
+    [NonParallelizable]
     public class DockerSqlServerAcceptanceTests : DockerTestBase
     {
         private MsSqlContainer _sqlContainer;

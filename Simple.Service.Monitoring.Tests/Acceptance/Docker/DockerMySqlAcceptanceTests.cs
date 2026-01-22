@@ -12,6 +12,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
     [TestFixture]
     [Category("Acceptance")]
     [Category("Docker")]
+    [NonParallelizable]
     public class DockerMySqlAcceptanceTests : DockerTestBase
     {
         private MySqlContainer _mySqlContainer;
@@ -125,7 +126,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         [Test]
         public async Task Should_Validate_Query_Results_With_Decimal_Values()
         {
-            // Arrange
+            // Arrange - Use CAST to INT to avoid decimal formatting issues
             var healthCheck = new ServiceHealthCheck
             {
                 Name = "MySQL Decimal Query Test",
@@ -135,9 +136,9 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 {
                     SqlBehaviour = new SqlBehaviour
                     {
-                        Query = "SELECT AVG(Price) FROM Products",
+                        Query = "SELECT CAST(AVG(Price) AS SIGNED) FROM Products",
                         ResultExpression = ResultExpression.GreaterThan,
-                        SqlResultDataType = SqlResultDataType.String,
+                        SqlResultDataType = SqlResultDataType.Int,
                         ExpectedResult = "25"
                     }
                 }

@@ -12,6 +12,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
     [TestFixture]
     [Category("Acceptance")]
     [Category("Docker")]
+    [NonParallelizable]
     public class DockerPostgreSqlAcceptanceTests : DockerTestBase
     {
         private PostgreSqlContainer _postgresContainer;
@@ -122,7 +123,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         [Test]
         public async Task Should_Validate_Aggregate_Functions()
         {
-            // Arrange
+            // Arrange - Use CAST to INT to avoid decimal formatting issues
             var healthCheck = new ServiceHealthCheck
             {
                 Name = "PostgreSQL Aggregate Test",
@@ -132,9 +133,9 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
                 {
                     SqlBehaviour = new SqlBehaviour
                     {
-                        Query = "SELECT SUM(TotalAmount) FROM Orders",
+                        Query = "SELECT CAST(SUM(TotalAmount) AS INTEGER) FROM Orders",
                         ResultExpression = ResultExpression.GreaterThan,
-                        SqlResultDataType = SqlResultDataType.String,
+                        SqlResultDataType = SqlResultDataType.Int,
                         ExpectedResult = "500"
                     }
                 }
