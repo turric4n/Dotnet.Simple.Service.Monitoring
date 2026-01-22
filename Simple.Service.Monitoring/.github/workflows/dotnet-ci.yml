@@ -1,0 +1,184 @@
+name: .NET CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  SOLUTION_PATH: 'Simple.Service.Monitoring.sln'
+  PROJECT_PATH: 'Simple.Service.Monitoring.csproj'
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Simple.Service.Monitoring
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+    - name: Run tests
+      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v4
+      if: success()
+      with:
+        directory: ./coverage
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: '**/TestResults/*.trx'
+        check_name: 'Test Results'
+
+  code-quality:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Simple.Service.Monitoring
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+    - name: Run dotnet format check
+      run: dotnet format ${{ env.SOLUTION_PATH }} --verify-no-changes --verbosity diagnostic
+      continue-on-error: true
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Simple.Service.Monitoring
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Run security scan
+      run: |
+        dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive || true
+
+  publish:
+    name: Publish Artifacts
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Simple.Service.Monitoring
+    needs: [build-and-test]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.PROJECT_PATH }}
+
+    - name: Publish application
+      run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --output ./publish --no-restore
+
+    - name: Upload publish artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: published-app
+        path: ./publish
+        retention-days: 30
+
+  docker-build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Simple.Service.Monitoring
+    needs: [build-and-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      if: github.event_name != 'pull_request'
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKER_USERNAME }}/simple-service-monitoring
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
