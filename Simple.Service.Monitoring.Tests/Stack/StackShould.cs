@@ -48,6 +48,7 @@ namespace Simple.Service.Monitoring.Tests.Stack
                 })
                 .ConfigureServices(services =>
                 {
+                    services.AddRouting();
                     services.AddServiceMonitoring(configuration)
                         .WithApplicationSettings()
                         .WithAdditionalPublisherObserver(observermock.Object);

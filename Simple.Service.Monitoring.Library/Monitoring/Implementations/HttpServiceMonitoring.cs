@@ -65,7 +65,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         private readonly TimeSpan _timeout;
         private readonly int _expectedStatusCode;
         private readonly HttpVerb _httpVerb;
-        private static readonly HttpClient _httpClient = new HttpClient();
+        
+        private static readonly HttpClient _httpClient = new HttpClient
+        {
+            Timeout = Timeout.InfiniteTimeSpan // Timeout controlled per-request via CancellationToken
+        };
 
         public HttpHealthCheck(List<Uri> endpoints, TimeSpan timeout, int expectedStatusCode, HttpVerb httpVerb)
         {

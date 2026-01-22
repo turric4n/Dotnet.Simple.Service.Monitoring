@@ -55,36 +55,63 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     }
 
     /// <summary>
-    /// Custom RabbitMQ health check that ensures proper connection disposal
+    /// Custom RabbitMQ health check with connection reuse
     /// </summary>
     internal class RabbitMqConnectionHealthCheck : IHealthCheck
     {
         private readonly string _connectionString;
+        private static readonly object _lock = new object();
+        private static IConnection _sharedConnection;
+        private static string _lastConnectionString;
 
         public RabbitMqConnectionHealthCheck(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        }
+
+        private async Task<IConnection> GetOrCreateConnectionAsync(CancellationToken cancellationToken)
+        {
+            IConnection connection = null;
             
+            lock (_lock)
+            {
+                if (_sharedConnection == null || !_sharedConnection.IsOpen || _lastConnectionString != _connectionString)
+                {
+                    _sharedConnection?.Dispose();
+                    connection = null;
+                }
+                else
+                {
+                    return _sharedConnection;
+                }
+            }
+
+            // Create connection outside lock to avoid blocking
+            var factory = new ConnectionFactory
+            {
+                Uri = new Uri(_connectionString),
+                AutomaticRecoveryEnabled = true,
+                RequestedHeartbeat = TimeSpan.FromSeconds(10),
+                ContinuationTimeout = TimeSpan.FromSeconds(10),
+                HandshakeContinuationTimeout = TimeSpan.FromSeconds(10)
+            };
+
+            connection = await factory.CreateConnectionAsync(cancellationToken);
+
+            lock (_lock)
+            {
+                _sharedConnection = connection;
+                _lastConnectionString = _connectionString;
+                return _sharedConnection;
+            }
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
-            IConnection connection = null;
             try
             {
-                var factory = new ConnectionFactory
-                {
-                    Uri = new Uri(_connectionString),
-                    AutomaticRecoveryEnabled = false, // Not needed for health checks
-                    RequestedHeartbeat = TimeSpan.FromSeconds(10),
-                    ContinuationTimeout = TimeSpan.FromSeconds(10),
-                    HandshakeContinuationTimeout = TimeSpan.FromSeconds(10)
-                };
+                var connection = await GetOrCreateConnectionAsync(cancellationToken);
 
-                // Create connection
-                connection = await factory.CreateConnectionAsync(cancellationToken);
-
-                // Check if connection is open
                 return connection.IsOpen 
                     ? HealthCheckResult.Healthy($"RabbitMQ connection is healthy") 
                     : HealthCheckResult.Unhealthy($"RabbitMQ connection is not open");
@@ -92,24 +119,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             catch (Exception ex)
             {
                 return HealthCheckResult.Unhealthy($"RabbitMQ connection failed: {ex.Message}", ex);
-            }
-            finally
-            {
-                // GUARANTEED disposal - this is the critical part!
-                if (connection != null)
-                {
-                    try
-                    {
-                        if (connection.IsOpen)
-                        {
-                            await connection.CloseAsync(cancellationToken: cancellationToken);
-                        }
-                    }
-                    finally
-                    {
-                        connection.Dispose();
-                    }
-                }
             }
         }
     }

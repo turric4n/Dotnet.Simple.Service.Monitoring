@@ -1,19 +1,17 @@
 using FluentAssertions;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library.Models;
+using Simple.Service.Monitoring.Tests.Acceptance.Docker;
 using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
+namespace Simple.Service.Monitoring.Tests.Acceptance.CustomServers
 {
     [TestFixture]
     [Category("Acceptance")]
-    [Category("Docker")]
-    public class DockerHttpAndPingAcceptanceTests : DockerTestBase
+    public class HttpAndPingAcceptanceTests : DockerTestBase
     {
         private const int TestHttpPort = 8888;
         private HttpListener _httpListener;

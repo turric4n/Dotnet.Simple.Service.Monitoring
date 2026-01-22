@@ -50,24 +50,38 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     /// </summary>
     internal class ElasticsearchHealthCheck : IHealthCheck
     {
-        private readonly ElasticsearchClient _client;
+        private readonly string _endpoint;
+        private static readonly object _lock = new object();
+        private static ElasticsearchClient _sharedClient;
+        private static string _lastEndpoint;
 
         public ElasticsearchHealthCheck(string endpoint)
         {
-            if (string.IsNullOrEmpty(endpoint))
-                throw new ArgumentNullException(nameof(endpoint));
+            _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+        }
 
-            var settings = new ElasticsearchClientSettings(new Uri(endpoint))
-                .RequestTimeout(TimeSpan.FromSeconds(5));
+        private ElasticsearchClient GetOrCreateClient()
+        {
+            lock (_lock)
+            {
+                if (_sharedClient == null || _lastEndpoint != _endpoint)
+                {
+                    var settings = new ElasticsearchClientSettings(new Uri(_endpoint))
+                        .RequestTimeout(TimeSpan.FromSeconds(5));
 
-            _client = new ElasticsearchClient(settings);
+                    _sharedClient = new ElasticsearchClient(settings);
+                    _lastEndpoint = _endpoint;
+                }
+                return _sharedClient;
+            }
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             try
             {
-                var pingResponse = await _client.PingAsync(cancellationToken);
+                var client = GetOrCreateClient();
+                var pingResponse = await client.PingAsync(cancellationToken);
 
                 if (pingResponse.IsValidResponse)
                 {

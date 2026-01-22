@@ -47,12 +47,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     }
 
     /// <summary>
-    /// Custom Redis health check implementation
+    /// Custom Redis health check implementation with connection reuse
     /// </summary>
     internal class RedisHealthCheck : IHealthCheck
     {
         private readonly string _connectionString;
         private readonly TimeSpan _timeout;
+        private static readonly object _lock = new object();
+        private static IConnectionMultiplexer _sharedConnection;
+        private static string _lastConnectionString;
 
         public RedisHealthCheck(string connectionString, TimeSpan timeout)
         {
@@ -60,17 +63,31 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             _timeout = timeout;
         }
 
+        private async Task<IConnectionMultiplexer> GetOrCreateConnectionAsync()
+        {
+            lock (_lock)
+            {
+                if (_sharedConnection == null || !_sharedConnection.IsConnected || _lastConnectionString != _connectionString)
+                {
+                    _sharedConnection?.Dispose();
+
+                    var options = ConfigurationOptions.Parse(_connectionString);
+                    options.ConnectTimeout = (int)_timeout.TotalMilliseconds;
+                    options.SyncTimeout = (int)_timeout.TotalMilliseconds;
+                    options.AbortOnConnectFail = false;
+
+                    _sharedConnection = ConnectionMultiplexer.Connect(options);
+                    _lastConnectionString = _connectionString;
+                }
+                return _sharedConnection;
+            }
+        }
+
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
-            IConnectionMultiplexer connection = null;
             try
             {
-                var options = ConfigurationOptions.Parse(_connectionString);
-                options.ConnectTimeout = (int)_timeout.TotalMilliseconds;
-                options.SyncTimeout = (int)_timeout.TotalMilliseconds;
-                options.AbortOnConnectFail = false;
-
-                connection = await ConnectionMultiplexer.ConnectAsync(options);
+                var connection = await GetOrCreateConnectionAsync();
 
                 if (!connection.IsConnected)
                 {
@@ -85,20 +102,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             catch (Exception ex)
             {
                 return HealthCheckResult.Unhealthy($"Redis connection failed: {ex.Message}", ex);
-            }
-            finally
-            {
-                if (connection != null)
-                {
-                    try
-                    {
-                        await connection.CloseAsync();
-                    }
-                    finally
-                    {
-                        connection.Dispose();
-                    }
-                }
             }
         }
     }
