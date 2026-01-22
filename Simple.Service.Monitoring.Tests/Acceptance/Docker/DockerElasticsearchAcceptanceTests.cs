@@ -1,17 +1,17 @@
 using Elastic.Clients.Elasticsearch;
-using Elastic.Transport;
 using FluentAssertions;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DotNet.Testcontainers.Builders;
 using Testcontainers.Elasticsearch;
 
 namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
 {
     [TestFixture]
-    [Explicit]
+    [NonParallelizable]
     [Category("Acceptance")]
     [Category("Docker")]
     public class DockerElasticsearchAcceptanceTests : DockerTestBase
@@ -23,16 +23,24 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         {
             // Create and start Elasticsearch container with PLAIN HTTP (no SSL)
             _elasticsearchContainer = new ElasticsearchBuilder()
-                .WithImage("elasticsearch:8.11.0")
-                .WithEnvironment("xpack.security.enabled", "false") // Disable security/SSL
+                .WithImage("docker.elastic.co/elasticsearch/elasticsearch:7.17.10")
                 .WithEnvironment("discovery.type", "single-node")
+                .WithEnvironment("xpack.security.enabled", "false")
+                .WithEnvironment("ES_JAVA_OPTS", "-Xms512m -Xmx512m")
+                .WithWaitStrategy(Wait.ForUnixContainer()
+                    .UntilHttpRequestIsSucceeded(r => r
+                        .ForPort(9200)
+                        .ForPath("/_cluster/health")
+                        .ForStatusCode(System.Net.HttpStatusCode.OK)))
+                .WithStartupCallback((container, ct) =>
+                {
+                    System.Diagnostics.Debug.WriteLine("Elasticsearch container starting...");
+                    return Task.CompletedTask;
+                })
                 .WithCleanUp(true)
                 .Build();
 
-            _elasticsearchContainer.StartAsync();
-
-            // Wait for Elasticsearch to be ready
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            await _elasticsearchContainer.StartAsync();
 
             // Initialize test indices
             await InitializeElasticsearchAsync();
@@ -53,7 +61,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         private async Task InitializeElasticsearchAsync()
         {
             // Get connection string (plain HTTP)
-            var connectionString = _elasticsearchContainer.GetConnectionString();
+            var connectionString = _elasticsearchContainer.GetConnectionString().Replace("https", "http");
             
             // Create client settings for PLAIN HTTP (no SSL validation needed)
             var settings = new ElasticsearchClientSettings(new Uri(connectionString));
@@ -96,7 +104,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         public async Task Should_Monitor_Elasticsearch_Connection_Successfully()
         {
             // Arrange - Get plain HTTP connection string
-            var connectionString = _elasticsearchContainer.GetConnectionString();
+            var connectionString = _elasticsearchContainer.GetConnectionString().Replace("https", "http");
             
             var healthCheck = new ServiceHealthCheck
             {
@@ -115,7 +123,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         public async Task Should_Verify_Elasticsearch_Can_Search_Documents()
         {
             // Arrange - First verify we can search in Elasticsearch (plain HTTP)
-            var connectionString = _elasticsearchContainer.GetConnectionString();
+            var connectionString = _elasticsearchContainer.GetConnectionString().Replace("https", "http");
             var settings = new ElasticsearchClientSettings(new Uri(connectionString));
 
             var client = new ElasticsearchClient(settings);
@@ -131,7 +139,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             {
                 Name = "Elasticsearch Search Test",
                 ServiceType = ServiceType.ElasticSearch,
-                EndpointOrHost = connectionString
+                EndpointOrHost = connectionString // Already converted to HTTP above
             };
 
             Server = await CreateTestServerAsync(new List<ServiceHealthCheck> { healthCheck });
@@ -149,7 +157,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
         public async Task Should_Monitor_Elasticsearch_Cluster_Health()
         {
             // Arrange - Use plain HTTP connection
-            var connectionString = _elasticsearchContainer.GetConnectionString();
+            var connectionString = _elasticsearchContainer.GetConnectionString().Replace("https", "http");
 
             var healthCheck = new ServiceHealthCheck
             {
