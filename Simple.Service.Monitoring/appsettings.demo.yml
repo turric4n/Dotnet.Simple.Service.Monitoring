@@ -1,0 +1,473 @@
+# ==============================================================================
+# Simple.Service.Monitoring - Complete Demo Configuration
+# ==============================================================================
+# This is a comprehensive example showcasing all features of the monitoring library
+# including health checks, transports, and UI configuration.
+# ==============================================================================
+
+Logging:
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+
+AllowedHosts: "*"
+
+# ==============================================================================
+# MONITORING CONFIGURATION
+# ==============================================================================
+MonitorOptions:
+  # Global Settings
+  Settings:
+    # Optional: Set a global service name for all health checks
+    UseGlobalServiceName: "MyApplication"
+
+  # ==============================================================================
+  # HEALTH CHECKS
+  # ==============================================================================
+  # Define all your service health checks here
+  HealthChecks:
+    
+    # --------------------------------------------------------------------------
+    # HTTP SERVICE MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor HTTP/HTTPS endpoints
+    - Name: "External API Service"
+      ServiceType: Http  # Options: Http, Ping, MsSql, MySql, PostgreSql, Redis, Rmq, ElasticSearch, Hangfire, Custom, Interceptor
+      EndpointOrHost: "https://api.example.com/health"
+      Alert: true
+      AdditionalTags:
+        - "production"
+        - "critical"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200  # Expected HTTP status code
+          HttpTimeoutMs: 5000    # Request timeout in milliseconds
+          HttpVerb: Get          # Options: Get, Post, Put, Delete
+      AlertBehaviour:
+        - TransportMethod: Email      # Send email alerts
+          TransportName: "PrimaryEmail"
+          AlertOnce: false            # Keep alerting on each failure
+          AlertOnServiceRecovered: true  # Send alert when service recovers
+          AlertEvery: "00:05:00"      # Alert every 5 minutes (TimeSpan format)
+          UsePeriodicAlerting: true   # Enable periodic alerting
+          StartAlertingOn: "08:00:00" # Start alerting at 8 AM
+          StopAlertingOn: "18:00:00"  # Stop alerting at 6 PM
+          AlertByFailCount: 3         # Alert after 3 consecutive failures
+          PublishAllResults: false    # Publish only failures
+          IncludeEnvironment: true    # Include environment info in alerts
+          Timezone: "UTC"
+        - TransportMethod: Slack
+          TransportName: "DevOpsChannel"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # PING SERVICE MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor server availability using ICMP ping
+    - Name: "Production Server Ping"
+      ServiceType: Ping
+      EndpointOrHost: "prod-server-01.example.com"
+      Alert: true
+      AdditionalTags:
+        - "infrastructure"
+      HealthCheckConditions:
+        ServiceReach: true  # Check if service is reachable
+      AlertBehaviour:
+        - TransportMethod: Telegram
+          TransportName: "InfrastructureAlerts"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # SQL SERVER MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor Microsoft SQL Server database connectivity and queries
+    - Name: "Primary Database"
+      ServiceType: MsSql
+      ConnectionString: "Server=localhost;Database=MyDB;User Id=sa;Password=YourPassword;"
+      Alert: true
+      AdditionalTags:
+        - "database"
+        - "critical"
+      HealthCheckConditions:
+        ServiceConnectionEstablished: true  # Check basic connectivity
+        SqlBehaviour:
+          # Optional: Execute custom query and validate result
+          Query: "SELECT COUNT(*) FROM Users WHERE IsActive = 1"
+          SqlResultDataType: Integer  # Options: Integer, String, Boolean, Decimal
+          ResultExpression: GreaterThan  # Options: Equals, NotEquals, GreaterThan, LessThan, Contains
+          ExpectedResult: 0  # Expected count should be greater than 0
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "DatabaseAdmins"
+          AlertByFailCount: 2
+          AlertOnServiceRecovered: true
+        - TransportMethod: Influx
+          TransportName: "MetricsDB"
+          PublishAllResults: true  # Publish all checks to InfluxDB for metrics
+
+    # --------------------------------------------------------------------------
+    # MYSQL MONITORING
+    # --------------------------------------------------------------------------
+    - Name: "MySQL Analytics DB"
+      ServiceType: MySql
+      ConnectionString: "Server=localhost;Database=analytics;Uid=root;Pwd=password;"
+      Alert: true
+      HealthCheckConditions:
+        ServiceConnectionEstablished: true
+        SqlBehaviour:
+          Query: "SELECT VERSION()"
+          SqlResultDataType: String
+          ResultExpression: Contains
+          ExpectedResult: "8.0"
+      AlertBehaviour:
+        - TransportMethod: Slack
+          TransportName: "DatabaseChannel"
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # POSTGRESQL MONITORING
+    # --------------------------------------------------------------------------
+    - Name: "PostgreSQL Main DB"
+      ServiceType: PostgreSql
+      ConnectionString: "Host=localhost;Database=postgres;Username=postgres;Password=password"
+      Alert: true
+      HealthCheckConditions:
+        ServiceConnectionEstablished: true
+        SqlBehaviour:
+          Query: "SELECT pg_database_size(current_database())"
+          SqlResultDataType: Integer
+          ResultExpression: LessThan
+          ExpectedResult: 10737418240  # Alert if DB size exceeds 10GB (in bytes)
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "DatabaseAdmins"
+          AlertOnce: true
+
+    # --------------------------------------------------------------------------
+    # REDIS MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor Redis cache connectivity
+    - Name: "Redis Cache"
+      ServiceType: Redis
+      ConnectionString: "localhost:6379,password=yourpassword,ssl=false,abortConnect=false"
+      Alert: true
+      AdditionalTags:
+        - "cache"
+      HealthCheckConditions:
+        RedisBehaviour: {}  # Basic connectivity check
+      AlertBehaviour:
+        - TransportMethod: Telegram
+          TransportName: "CacheAlerts"
+          AlertByFailCount: 2
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # RABBITMQ MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor RabbitMQ message broker
+    - Name: "RabbitMQ Message Broker"
+      ServiceType: Rmq
+      ConnectionString: "amqp://guest:guest@localhost:5672/"
+      Alert: true
+      AdditionalTags:
+        - "messaging"
+        - "critical"
+      HealthCheckConditions:
+        ServiceConnectionEstablished: true
+      AlertBehaviour:
+        - TransportMethod: SignalR
+          TransportName: "MonitoringHub"
+          PublishAllResults: true
+        - TransportMethod: Email
+          TransportName: "OpsTeam"
+          AlertByFailCount: 3
+
+    # --------------------------------------------------------------------------
+    # ELASTICSEARCH MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor Elasticsearch cluster
+    - Name: "Elasticsearch Cluster"
+      ServiceType: ElasticSearch
+      EndpointOrHost: "http://localhost:9200"
+      Alert: true
+      AdditionalTags:
+        - "search"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 10000
+      AlertBehaviour:
+        - TransportMethod: Slack
+          TransportName: "SearchTeam"
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # HANGFIRE MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor Hangfire background job processing
+    - Name: "Background Jobs"
+      ServiceType: Hangfire
+      ConnectionString: "Server=localhost;Database=Hangfire;User Id=sa;Password=YourPassword;"
+      Alert: true
+      AdditionalTags:
+        - "jobs"
+      HealthCheckConditions:
+        HangfireBehaviour:
+          MaximumJobsFailed: 10      # Alert if failed jobs exceed this count
+          MinimumAvailableServers: 1  # Alert if available servers drop below this
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "JobsTeam"
+          AlertByFailCount: 2
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # CUSTOM HEALTH CHECK
+    # --------------------------------------------------------------------------
+    # Use custom IHealthCheck implementation
+    - Name: "Custom Business Logic Check"
+      ServiceType: Custom
+      Alert: true
+      FullClassName: "MyNamespace.MyCustomHealthCheck, MyAssembly"
+      AdditionalTags:
+        - "custom"
+      AlertBehaviour:
+        - TransportMethod: CustomApi
+          TransportName: "CustomNotificationService"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # INTERCEPTOR MONITORING
+    # --------------------------------------------------------------------------
+    # Monitor intercepted operations (requires interception setup)
+    - Name: "API Performance Monitor"
+      ServiceType: Interceptor
+      Alert: true
+      AdditionalTags:
+        - "performance"
+      ExcludedInterceptionNames:
+        - "HealthCheck"
+        - "Metrics"
+      AlertBehaviour:
+        - TransportMethod: Influx
+          TransportName: "MetricsDB"
+          PublishAllResults: true
+
+  # ==============================================================================
+  # EMAIL TRANSPORT SETTINGS
+  # ==============================================================================
+  # Configure email alert destinations
+  EmailTransportSettings:
+    - Name: "PrimaryEmail"
+      From: "monitoring@example.com"
+      DisplayName: "Service Monitoring"
+      To: "devops@example.com"
+      SmtpHost: "smtp.gmail.com"
+      SmtpPort: 587
+      Authentication: true
+      Username: "monitoring@example.com"
+      Password: "your-app-password"
+    
+    - Name: "DatabaseAdmins"
+      From: "monitoring@example.com"
+      DisplayName: "Database Monitoring"
+      To: "dba-team@example.com"
+      SmtpHost: "smtp.office365.com"
+      SmtpPort: 587
+      Authentication: true
+      Username: "monitoring@example.com"
+      Password: "your-password"
+    
+    - Name: "OpsTeam"
+      From: "alerts@example.com"
+      DisplayName: "Operations Alert"
+      To: "ops-team@example.com"
+      SmtpHost: "smtp.sendgrid.net"
+      SmtpPort: 587
+      Authentication: true
+      Username: "apikey"
+      Password: "SG.your-sendgrid-api-key"
+
+    - Name: "JobsTeam"
+      From: "monitoring@example.com"
+      DisplayName: "Jobs Monitoring"
+      To: "jobs-team@example.com"
+      SmtpHost: "smtp.gmail.com"
+      SmtpPort: 587
+      Authentication: true
+      Username: "monitoring@example.com"
+      Password: "your-app-password"
+
+  # ==============================================================================
+  # SLACK TRANSPORT SETTINGS
+  # ==============================================================================
+  # Configure Slack webhook integrations
+  SlackTransportSettings:
+    - Name: "DevOpsChannel"
+      Token: "xoxb-your-slack-bot-token"
+      Channel: "#devops-alerts"
+      Username: "Monitoring Bot"
+    
+    - Name: "SearchTeam"
+      Token: "xoxb-your-slack-bot-token"
+      Channel: "#search-team"
+      Username: "Search Monitoring"
+    
+    - Name: "DatabaseChannel"
+      Token: "xoxb-your-slack-bot-token"
+      Channel: "#database-alerts"
+      Username: "DB Monitor"
+
+  # ==============================================================================
+  # TELEGRAM TRANSPORT SETTINGS
+  # ==============================================================================
+  # Configure Telegram bot notifications
+  TelegramTransportSettings:
+    - Name: "InfrastructureAlerts"
+      BotApiToken: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+      ChatId: "-1001234567890"
+    
+    - Name: "CacheAlerts"
+      BotApiToken: "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+      ChatId: "-1001234567891"
+
+  # ==============================================================================
+  # INFLUXDB TRANSPORT SETTINGS
+  # ==============================================================================
+  # Configure InfluxDB for storing metrics
+  InfluxDbTransportSettings:
+    - Name: "MetricsDB"
+      Host: "http://localhost:8086"
+      Database: "monitoring"
+
+  # ==============================================================================
+  # SIGNALR TRANSPORT SETTINGS
+  # ==============================================================================
+  # Configure SignalR for real-time dashboard updates
+  SignalRTransportSettings:
+    - Name: "MonitoringHub"
+      HubUrl: "/hubs/monitoring"
+      HubMethod: "ReceiveHealthAlert"  # Default method name
+
+  # ==============================================================================
+  # CUSTOM NOTIFICATION SERVICE SETTINGS
+  # ==============================================================================
+  # Configure custom notification API
+  CustomNotificationTransportSettings:
+    - Name: "CustomNotificationService"
+      BaseEndpoint: "https://notifications.example.com/api"
+      ApiKey: "your-api-key-here"
+      ProjectName: "MyApplication"
+      Environment: "Production"
+
+# ==============================================================================
+# UI CONFIGURATION
+# ==============================================================================
+# Configure the monitoring dashboard UI
+MonitoringUiOptions:
+  # Company branding
+  CompanyName: "My Company"
+  
+  # Optional: Custom logo URL for header
+  HeaderLogoUrl: "https://example.com/logo.png"
+  
+  # Data storage backend for UI
+  # Options: Memory, LiteDb, Sql
+  DataRepositoryType: LiteDb
+  
+  # Required only if DataRepositoryType is Sql
+  # SqlConnectionString: "Server=localhost;Database=MonitoringUI;User Id=sa;Password=YourPassword;"
+
+# ==============================================================================
+# HEALTH CHECK UI ENDPOINT CONFIGURATION (Optional)
+# ==============================================================================
+# If using AspNetCore.HealthChecks.UI separately
+HealthChecksUI:
+  HealthChecks:
+    - Name: "Local Health Checks"
+      Uri: "https://localhost:5001/health"
+  EvaluationTimeInSeconds: 10
+  MinimumSecondsBetweenFailureNotifications: 60
+
+# ==============================================================================
+# ADDITIONAL CONFIGURATION EXAMPLES
+# ==============================================================================
+
+# Connection strings (if needed for other app components)
+ConnectionStrings:
+  DefaultConnection: "Server=localhost;Database=MyAppDB;User Id=sa;Password=YourPassword;"
+  
+# Application-specific settings
+AppSettings:
+  Environment: "Production"
+  EnableDetailedErrors: false
+  MaxRetryAttempts: 3
+
+# ==============================================================================
+# NOTES AND TIPS
+# ==============================================================================
+# 
+# ServiceType Options:
+#   - Custom: Use custom IHealthCheck implementation
+#   - Http: HTTP/HTTPS endpoint monitoring
+#   - ElasticSearch: Elasticsearch cluster monitoring
+#   - MsSql: Microsoft SQL Server monitoring
+#   - Rmq: RabbitMQ message broker monitoring
+#   - Hangfire: Hangfire background job monitoring
+#   - Ping: ICMP ping monitoring
+#   - Redis: Redis cache monitoring
+#   - MySql: MySQL database monitoring
+#   - PostgreSql: PostgreSQL database monitoring
+#   - Interceptor: Intercepted operation monitoring
+#
+# AlertTransportMethod Options:
+#   - Email: Email notifications
+#   - Telegram: Telegram bot notifications
+#   - Influx: InfluxDB metrics storage
+#   - Slack: Slack channel notifications
+#   - CustomApi: Custom notification API
+#   - SignalR: SignalR real-time notifications
+#
+# HttpVerb Options:
+#   - Get, Post, Put, Delete
+#
+# ResultExpression Options:
+#   - Equals: Value must equal expected result
+#   - NotEquals: Value must not equal expected result
+#   - GreaterThan: Value must be greater than expected result
+#   - LessThan: Value must be less than expected result
+#   - Contains: String value must contain expected result
+#
+# SqlResultDataType Options:
+#   - Integer: Numeric integer values
+#   - String: Text values
+#   - Boolean: True/False values
+#   - Decimal: Decimal numeric values
+#
+# DataRepositoryType Options:
+#   - Memory: In-memory storage (lost on restart)
+#   - LiteDb: File-based LiteDB (persistent, no setup required)
+#   - Sql: SQL Server database (requires connection string)
+#
+# TimeSpan Format:
+#   - Use format: "HH:MM:SS" or "D.HH:MM:SS"
+#   - Examples: "00:05:00" (5 minutes), "1.00:00:00" (1 day)
+#
+# Alert Scheduling:
+#   - Set StartAlertingOn and StopAlertingOn to define alert windows
+#   - Use Timezone to specify timezone (e.g., "UTC", "America/New_York")
+#   - Useful for preventing alerts during off-hours
+#
+# Best Practices:
+#   - Use AlertByFailCount to avoid false positives from transient issues
+#   - Set AlertOnServiceRecovered to get notified when issues are resolved
+#   - Use PublishAllResults with InfluxDB for comprehensive metrics
+#   - Configure multiple transport methods for critical services
+#   - Use AdditionalTags to categorize and filter health checks
+#   - Store sensitive data (passwords, tokens) in environment variables or secrets
+#
+# ==============================================================================

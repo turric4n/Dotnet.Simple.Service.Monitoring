@@ -80,7 +80,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync(cancellationToken);
 
-                using var command = connection.CreateCommand();
+                await using var command = connection.CreateCommand();
                 command.CommandText = _query;
                 command.CommandTimeout = 30;
 
