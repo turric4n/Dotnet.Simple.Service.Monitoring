@@ -39,6 +39,11 @@ namespace Simple.Service.Monitoring.UI.Hubs
             await _monitoringDataService.SendHealthCheckTimeline(hours);
         }
 
+        public async Task RequestHealthChecksTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60)
+        {
+            await _monitoringDataService.SendHealthCheckTimelineGroupedByService(hours, activeOnly, activeThresholdMinutes);
+        }
+
         public async Task SendHealthCheck(HealthCheckData healthCheckData)
         {
             await _monitoringDataService.AddHealthCheckData(healthCheckData);

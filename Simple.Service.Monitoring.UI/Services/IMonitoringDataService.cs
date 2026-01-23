@@ -12,7 +12,9 @@ namespace Simple.Service.Monitoring.UI.Services
         Task<Models.HealthReport> GetHealthCheckReport();
         Task<HealthStatus> GetOverallStatus();
         Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimeline(int hours = 24);
+        Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60);
         Task SendHealthCheckTimeline(int hours = 24);
+        Task SendHealthCheckTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60);
         Task<Models.HealthReport> GetHealthReportByDateRange(DateTime from, DateTime to);
         Task AddHealthReport(HealthReport report);
         Task AddHealthCheckData(HealthCheckData healthCheckData);

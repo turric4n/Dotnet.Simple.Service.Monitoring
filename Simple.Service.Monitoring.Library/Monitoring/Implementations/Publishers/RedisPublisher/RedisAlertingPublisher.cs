@@ -110,7 +110,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 var database = connection.GetDatabase(_redisTransportSettings.DatabaseNumber);
 
                 // Create a channel name for publishing health reports
-                var channelName = $"health-check:{entry.Key}";
+                var channelName = RedisChannel.Literal($"health-check:{entry.Key}");
 
                 // Serialize the health check entry to JSON
                 var serializedReport = System.Text.Json.JsonSerializer.Serialize(new

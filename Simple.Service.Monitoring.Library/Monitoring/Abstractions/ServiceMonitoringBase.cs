@@ -51,9 +51,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             if (!string.IsNullOrEmpty(HealthCheck.FullClassName))
                 tagList.Add($"ClassName,{HealthCheck.FullClassName}");
 
-            // Add monitoring interval
-            tagList.Add($"Interval,{HealthCheck.MonitoringInterval.TotalSeconds}s");
-
             // Add alert status
             tagList.Add($"AlertEnabled,{HealthCheck.Alert}");
             
@@ -89,7 +86,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
             // Basic monitor information
             summary.AppendLine($"Monitor: {HealthCheck.Name} (ID: {MonitorId})");
             summary.AppendLine($"Type: {HealthCheck.ServiceType}");
-            summary.AppendLine($"Interval: {HealthCheck.MonitoringInterval}");
 
             // Endpoint/connection information
             if (!string.IsNullOrEmpty(HealthCheck.EndpointOrHost))

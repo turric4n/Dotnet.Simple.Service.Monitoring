@@ -20,59 +20,98 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void Validate()
         {
-            Condition.Requires(HealthCheck.EndpointOrHost)
-                .IsNotNull();
+            var hasEndpointOrHost = !string.IsNullOrEmpty(HealthCheck.EndpointOrHost);
+            var hasConnectionString = !string.IsNullOrEmpty(HealthCheck.ConnectionString);
+
+            Condition
+                .WithExceptionOnFailure<InvalidConnectionStringException>()
+                .Requires(hasEndpointOrHost || hasConnectionString)
+                .IsTrue("Either EndpointOrHost or ConnectionString must be provided");
+
+            var connectionString = hasConnectionString ? HealthCheck.ConnectionString : HealthCheck.EndpointOrHost;
 
             Condition
                 .WithExceptionOnFailure<MalformedUriException>()
-                .Requires(Uri.IsWellFormedUriString(HealthCheck.EndpointOrHost, UriKind.Absolute))
+                .Requires(Uri.IsWellFormedUriString(connectionString, UriKind.Absolute))
                 .IsTrue();
         }
 
         protected internal override void SetMonitoring()
         {
-            // Create a custom health check that GUARANTEES connection disposal
-            HealthChecksBuilder.AddCheck<RabbitMqConnectionHealthCheck>(
-                HealthCheck.Name,
-                HealthStatus.Unhealthy,
-                GetTags());
+            var connectionString = !string.IsNullOrEmpty(HealthCheck.ConnectionString) 
+                ? HealthCheck.ConnectionString 
+                : HealthCheck.EndpointOrHost;
 
-            // Register the health check with the connection string
-            HealthChecksBuilder.Services.AddSingleton(sp => 
-                new RabbitMqConnectionHealthCheck(HealthCheck.EndpointOrHost));
+            // Create a custom health check that GUARANTEES connection disposal using AddAsyncCheck
+            HealthChecksBuilder.AddAsyncCheck(
+                HealthCheck.Name,
+                async () =>
+                {
+                    var healthCheck = new RabbitMqConnectionHealthCheck(connectionString);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
+                GetTags());
         }
     }
 
     /// <summary>
-    /// Custom RabbitMQ health check that ensures proper connection disposal
+    /// Custom RabbitMQ health check with connection reuse
     /// </summary>
     internal class RabbitMqConnectionHealthCheck : IHealthCheck
     {
         private readonly string _connectionString;
+        private static readonly object _lock = new object();
+        private static IConnection _sharedConnection;
+        private static string _lastConnectionString;
 
         public RabbitMqConnectionHealthCheck(string connectionString)
         {
             _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
         }
 
-        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        private async Task<IConnection> GetOrCreateConnectionAsync(CancellationToken cancellationToken)
         {
             IConnection connection = null;
+            
+            lock (_lock)
+            {
+                if (_sharedConnection == null || !_sharedConnection.IsOpen || _lastConnectionString != _connectionString)
+                {
+                    _sharedConnection?.Dispose();
+                    connection = null;
+                }
+                else
+                {
+                    return _sharedConnection;
+                }
+            }
+
+            // Create connection outside lock to avoid blocking
+            var factory = new ConnectionFactory
+            {
+                Uri = new Uri(_connectionString),
+                AutomaticRecoveryEnabled = true,
+                RequestedHeartbeat = TimeSpan.FromSeconds(10),
+                ContinuationTimeout = TimeSpan.FromSeconds(10),
+                HandshakeContinuationTimeout = TimeSpan.FromSeconds(10)
+            };
+
+            connection = await factory.CreateConnectionAsync(cancellationToken);
+
+            lock (_lock)
+            {
+                _sharedConnection = connection;
+                _lastConnectionString = _connectionString;
+                return _sharedConnection;
+            }
+        }
+
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
             try
             {
-                var factory = new ConnectionFactory
-                {
-                    Uri = new Uri(_connectionString),
-                    AutomaticRecoveryEnabled = false, // Not needed for health checks
-                    RequestedHeartbeat = TimeSpan.FromSeconds(10),
-                    ContinuationTimeout = TimeSpan.FromSeconds(10),
-                    HandshakeContinuationTimeout = TimeSpan.FromSeconds(10)
-                };
+                var connection = await GetOrCreateConnectionAsync(cancellationToken);
 
-                // Create connection
-                connection = await factory.CreateConnectionAsync(cancellationToken);
-
-                // Check if connection is open
                 return connection.IsOpen 
                     ? HealthCheckResult.Healthy($"RabbitMQ connection is healthy") 
                     : HealthCheckResult.Unhealthy($"RabbitMQ connection is not open");
@@ -80,22 +119,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             catch (Exception ex)
             {
                 return HealthCheckResult.Unhealthy($"RabbitMQ connection failed: {ex.Message}", ex);
-            }
-            finally
-            {
-                // GUARANTEED disposal - this is the critical part!
-                if (connection != null)
-                {
-                    try
-                    {
-                        await connection.CloseAsync(cancellationToken: cancellationToken);
-                        
-                    }
-                    finally
-                    {
-                        connection.Dispose();
-                    }
-                }
             }
         }
     }

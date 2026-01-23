@@ -4,6 +4,7 @@ using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using System;
 using System.Collections.Generic;
+using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -38,14 +39,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     if (HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.Int ||
                         HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.DateTime)
                     {
-                        result = (long)healthCheckResultData > (long)expectedResult;
+                        result = Convert.ToInt64(healthCheckResultData) > Convert.ToInt64(expectedResult);
                     }
                     break;
                 case ResultExpression.LessThan:
                     if (HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.Int ||
                         HealthCheck.HealthCheckConditions.SqlBehaviour.SqlResultDataType == SqlResultDataType.DateTime)
                     {
-                        result = (long)healthCheckResultData < (long)expectedResult;
+                        result = Convert.ToInt64(healthCheckResultData) < Convert.ToInt64(expectedResult);
                     }
                     break;
                 default:
@@ -62,7 +63,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             return result
                 ? HealthCheckResult.Healthy($"Result match expected result. Expected: {expectedResult}, Actual: {healthCheckResultData}", resultData)
-                : HealthCheckResult.Unhealthy($"Result does not match expected result. Expected: {expectedResult}, Actual: {healthCheckResultData}", new Exception(), resultData);
+                : HealthCheckResult.Unhealthy($"Result does not match expected result. Expected: {expectedResult}, Actual: {healthCheckResultData}", new SqlQueryResultException(), resultData);
         }
 
         internal Type GetTargetType(SqlResultDataType dataType)

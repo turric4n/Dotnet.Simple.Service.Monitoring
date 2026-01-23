@@ -209,7 +209,6 @@ namespace Simple.Service.Monitoring.Tests.Acceptance
         public async Task AlertDuringNightShiftWindow()
         {
             // Arrange - Night shift: 22:00 - 02:00
-            var alertCount = 0;
             var healthCheck = new ServiceHealthCheck()
             {
                 Name = "night_shift_test",

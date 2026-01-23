@@ -45,10 +45,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             var expectedCode = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode;
             var httpVerb = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb;
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
     }
@@ -62,7 +65,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         private readonly TimeSpan _timeout;
         private readonly int _expectedStatusCode;
         private readonly HttpVerb _httpVerb;
-        private static readonly HttpClient _httpClient = new HttpClient();
+        
+        private static readonly HttpClient _httpClient = new HttpClient
+        {
+            Timeout = Timeout.InfiniteTimeSpan // Timeout controlled per-request via CancellationToken
+        };
 
         public HttpHealthCheck(List<Uri> endpoints, TimeSpan timeout, int expectedStatusCode, HttpVerb httpVerb)
         {

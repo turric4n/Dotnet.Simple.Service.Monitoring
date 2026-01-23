@@ -32,6 +32,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
+            var connectionString = !string.IsNullOrEmpty(this.HealthCheck.ConnectionString) 
+                ? this.HealthCheck.ConnectionString 
+                : this.HealthCheck.EndpointOrHost;
+
             var hasCustomQuery = !string.IsNullOrEmpty(this.HealthCheck.HealthCheckConditions?.SqlBehaviour?.Query);
             var query = hasCustomQuery ? this.HealthCheck.HealthCheckConditions.SqlBehaviour.Query : DEFAULTSQLQUERY;
             
@@ -41,10 +45,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 resultBuilder = GetHealth;
             }
 
-            HealthChecksBuilder.AddCheck(
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new PostgreSqlHealthCheck(this.HealthCheck.ConnectionString, query, resultBuilder),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new PostgreSqlHealthCheck(connectionString, query, resultBuilder);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
     }
@@ -73,7 +80,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 connection = new NpgsqlConnection(_connectionString);
                 await connection.OpenAsync(cancellationToken);
 
-                using var command = connection.CreateCommand();
+                await using var command = connection.CreateCommand();
                 command.CommandText = _query;
                 command.CommandTimeout = 30;
 

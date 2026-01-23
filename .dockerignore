@@ -1,0 +1,52 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+
+# VS Code
+.vscode/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NCrunch
+_NCrunch_*/
+*.ncrunch*
+
+# Test results
+TestResults/
+*.trx
+*.coverage
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+wiki/
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/
+.azure/
+azure-pipelines.yml
+
+# Temporary files
+*.tmp
+*.temp
+*.log

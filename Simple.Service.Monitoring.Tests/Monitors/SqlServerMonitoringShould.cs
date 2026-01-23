@@ -35,7 +35,6 @@ namespace Simple.Service.Monitoring.Tests.Monitors
 
                 },
                 ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
-                MonitoringInterval = TimeSpan.FromSeconds(1),
                 ServiceType = ServiceType.MsSql,
                 HealthCheckConditions = new HealthCheckConditions()
                 {

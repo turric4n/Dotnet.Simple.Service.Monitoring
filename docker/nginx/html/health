@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Check</title>
+</head>
+<body>
+    <h1>Health Check OK</h1>
+    <p>Status: Healthy</p>
+</body>
+</html>

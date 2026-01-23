@@ -12,7 +12,7 @@ namespace Simple.Service.Monitoring.Config.Generator.Infrastructure.Json
             _logger = logger;
         }
 
-        public T Deserialize(Stream stream)
+        public T? Deserialize(Stream stream)
         {
             using TextReader tr = new StreamReader(stream);
             var text = tr.ReadToEnd();

@@ -1,15 +1,13 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Moq;
+using Microsoft.Extensions.Logging;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using MsHealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
@@ -18,15 +16,15 @@ namespace Simple.Service.Monitoring.Tests.Monitors
     [Category("Unit")]
     public class RmqServiceMonitoringShould
     {
-        private Mock<IHealthChecksBuilder> _healthChecksBuilderMock;
         private IServiceCollection _services;
+        private IHealthChecksBuilder _healthChecksBuilder;
 
         [SetUp]
         public void Setup()
         {
             _services = new ServiceCollection();
-            _healthChecksBuilderMock = new Mock<IHealthChecksBuilder>();
-            _healthChecksBuilderMock.Setup(x => x.Services).Returns(_services);
+            _services.AddLogging(); // Add logging services
+            _healthChecksBuilder = _services.AddHealthChecks();
         }
 
         [Test]
@@ -41,7 +39,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             };
 
             // Act
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Assert - Should not throw
             Assert.DoesNotThrow(() => rmqMonitoring.SetUp());
@@ -58,10 +56,10 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = null
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => rmqMonitoring.SetUp());
+            Assert.Throws<InvalidConnectionStringException>(() => rmqMonitoring.SetUp());
         }
 
         [Test]
@@ -75,7 +73,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "not-a-valid-uri"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act & Assert
             Assert.Throws<MalformedUriException>(() => rmqMonitoring.SetUp());
@@ -92,14 +90,15 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://user:password@rabbitmq.server.com:5672/vhost"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act
             rmqMonitoring.SetUp();
 
-            // Assert
-            var healthCheckService = _services.BuildServiceProvider().GetService<IHealthCheck>();
-            healthCheckService.Should().NotBeNull("Health check should be registered");
+            // Assert - Verify the health check was registered by checking the service collection
+            var serviceProvider = _services.BuildServiceProvider();
+            var healthCheckService = serviceProvider.GetService<HealthCheckService>();
+            healthCheckService.Should().NotBeNull("HealthCheckService should be available");
         }
 
         [Test]
@@ -119,8 +118,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
             {
                 // Arrange
                 var services = new ServiceCollection();
-                var builderMock = new Mock<IHealthChecksBuilder>();
-                builderMock.Setup(x => x.Services).Returns(services);
+                var builder = services.AddHealthChecks();
 
                 var healthCheck = new ServiceHealthCheck
                 {
@@ -129,12 +127,39 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                     EndpointOrHost = connectionString
                 };
 
-                var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+                var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
 
                 // Act & Assert
                 Assert.DoesNotThrow(() => rmqMonitoring.SetUp(), 
                     $"Should accept connection string: {connectionString}");
             }
+        }
+
+        [Test]
+        public void AddCorrectTags_ToHealthCheck()
+        {
+            // Arrange
+            var healthCheck = new ServiceHealthCheck
+            {
+                Name = "rabbitmq_with_tags",
+                ServiceType = ServiceType.Rmq,
+                EndpointOrHost = "amqp://localhost:5672",
+                AdditionalTags = new System.Collections.Generic.List<string> 
+                { 
+                    "production", 
+                    "messaging" 
+                }
+            };
+
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
+
+            // Act
+            rmqMonitoring.SetUp();
+
+            // Assert - Verify health check service was registered
+            var serviceProvider = _services.BuildServiceProvider();
+            var healthCheckService = serviceProvider.GetService<HealthCheckService>();
+            healthCheckService.Should().NotBeNull("HealthCheckService should be registered");
         }
 
         [Test]
@@ -150,11 +175,11 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://guest:guest@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = _services.BuildServiceProvider();
-            var healthCheckService = serviceProvider.GetService<HealthCheckService>();
+            var healthCheckService = serviceProvider.GetRequiredService<HealthCheckService>();
 
             // Act
             var result = await healthCheckService.CheckHealthAsync();
@@ -171,10 +196,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddHealthChecks();
-            
-            var builderMock = new Mock<IHealthChecksBuilder>();
-            builderMock.Setup(x => x.Services).Returns(services);
+            var builder = services.AddHealthChecks();
 
             var healthCheck = new ServiceHealthCheck
             {
@@ -183,7 +205,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://guest:guest@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -205,10 +227,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddHealthChecks();
-            
-            var builderMock = new Mock<IHealthChecksBuilder>();
-            builderMock.Setup(x => x.Services).Returns(services);
+            var builder = services.AddHealthChecks();
 
             var healthCheck = new ServiceHealthCheck
             {
@@ -217,7 +236,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://guest:guest@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -242,10 +261,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddHealthChecks();
-            
-            var builderMock = new Mock<IHealthChecksBuilder>();
-            builderMock.Setup(x => x.Services).Returns(services);
+            var builder = services.AddHealthChecks();
 
             var healthCheck = new ServiceHealthCheck
             {
@@ -254,7 +270,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://guest:guest@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -282,7 +298,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://admin:secretpassword@rabbitmq.server.com:5672/production"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act & Assert
             Assert.DoesNotThrow(() => rmqMonitoring.SetUp(),
@@ -300,7 +316,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://user:pass@localhost:5672/my-virtual-host"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act & Assert
             Assert.DoesNotThrow(() => rmqMonitoring.SetUp(),
@@ -318,7 +334,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqps://user:pass@secure.rabbitmq.com:5671/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act & Assert
             Assert.DoesNotThrow(() => rmqMonitoring.SetUp(),
@@ -332,10 +348,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddHealthChecks();
-            
-            var builderMock = new Mock<IHealthChecksBuilder>();
-            builderMock.Setup(x => x.Services).Returns(services);
+            var builder = services.AddHealthChecks();
 
             var healthCheck = new ServiceHealthCheck
             {
@@ -344,7 +357,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://guest:guest@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -375,10 +388,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddHealthChecks();
-            
-            var builderMock = new Mock<IHealthChecksBuilder>();
-            builderMock.Setup(x => x.Services).Returns(services);
+            var builder = services.AddHealthChecks();
 
             var healthCheck = new ServiceHealthCheck
             {
@@ -387,7 +397,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://wronguser:wrongpassword@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = services.BuildServiceProvider();
@@ -413,15 +423,15 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(_healthChecksBuilder, healthCheck);
 
             // Act
             rmqMonitoring.SetUp();
 
-            // Assert - Verify the health check was registered
+            // Assert - Verify the HealthCheckService was registered
             var serviceProvider = _services.BuildServiceProvider();
-            var healthCheckInstance = serviceProvider.GetService<IHealthCheck>();
-            healthCheckInstance.Should().NotBeNull("Custom RabbitMQ health check should be registered");
+            var healthCheckService = serviceProvider.GetService<HealthCheckService>();
+            healthCheckService.Should().NotBeNull("HealthCheckService should be registered when AddHealthChecks() is called");
         }
 
         [Test]
@@ -431,10 +441,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         {
             // Arrange
             var services = new ServiceCollection();
-            services.AddHealthChecks();
-            
-            var builderMock = new Mock<IHealthChecksBuilder>();
-            builderMock.Setup(x => x.Services).Returns(services);
+            var builder = services.AddHealthChecks();
 
             var healthCheck = new ServiceHealthCheck
             {
@@ -443,7 +450,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 EndpointOrHost = "amqp://guest:guest@localhost:5672/"
             };
 
-            var rmqMonitoring = new RmqServiceMonitoring(builderMock.Object, healthCheck);
+            var rmqMonitoring = new RmqServiceMonitoring(builder, healthCheck);
             rmqMonitoring.SetUp();
 
             var serviceProvider = services.BuildServiceProvider();

@@ -29,10 +29,17 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         protected internal override void SetMonitoring()
         {
-            HealthChecksBuilder.AddCheck(
+            var endpoint = !string.IsNullOrEmpty(HealthCheck.ConnectionString) 
+                ? HealthCheck.ConnectionString 
+                : HealthCheck.EndpointOrHost;
+
+            HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
-                new ElasticsearchHealthCheck(HealthCheck.EndpointOrHost),
-                Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+                async () =>
+                {
+                    var healthCheck = new ElasticsearchHealthCheck(endpoint);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
                 GetTags());
         }
 
@@ -44,20 +51,36 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     internal class ElasticsearchHealthCheck : IHealthCheck
     {
         private readonly string _endpoint;
+        private static readonly object _lock = new object();
+        private static ElasticsearchClient _sharedClient;
+        private static string _lastEndpoint;
 
         public ElasticsearchHealthCheck(string endpoint)
         {
             _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
         }
 
+        private ElasticsearchClient GetOrCreateClient()
+        {
+            lock (_lock)
+            {
+                if (_sharedClient == null || _lastEndpoint != _endpoint)
+                {
+                    var settings = new ElasticsearchClientSettings(new Uri(_endpoint))
+                        .RequestTimeout(TimeSpan.FromSeconds(5));
+
+                    _sharedClient = new ElasticsearchClient(settings);
+                    _lastEndpoint = _endpoint;
+                }
+                return _sharedClient;
+            }
+        }
+
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             try
             {
-                var settings = new ElasticsearchClientSettings(new Uri(_endpoint))
-                    .RequestTimeout(TimeSpan.FromSeconds(5));
-
-                var client = new ElasticsearchClient(settings);
+                var client = GetOrCreateClient();
                 var pingResponse = await client.PingAsync(cancellationToken);
 
                 if (pingResponse.IsValidResponse)
