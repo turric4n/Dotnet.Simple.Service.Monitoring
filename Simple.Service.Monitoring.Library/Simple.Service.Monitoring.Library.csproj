@@ -9,9 +9,9 @@
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.22</Version>
-    <AssemblyVersion>1.0.22</AssemblyVersion>
-    <FileVersion>1.0.22</FileVersion>
+    <Version>1.0.23</Version>
+    <AssemblyVersion>1.0.23</AssemblyVersion>
+    <FileVersion>1.0.23</FileVersion>
     <Authors>Turrican aka Enrique Fuentes</Authors>
 		<Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
@@ -25,7 +25,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="CuttingEdge.Conditions.NetStandard" Version="1.2.0" />
-		<PackageReference Include="Elastic.Clients.Elasticsearch" Version="9.2.2" />
 		<PackageReference Include="Hangfire.Core" Version="1.8.22" />
 		<PackageReference Include="InfluxDB.Collector" Version="1.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.2" />

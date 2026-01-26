@@ -41,7 +41,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         protected internal override void SetMonitoring()
         {
             var endpoints = HealthCheck.EndpointOrHost.Split(',').Select(e => new Uri(e.Trim())).ToList();
-            var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs);
+            var timeoutMs = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpTimeoutMs;
+            var timeout = timeoutMs > 0 ? TimeSpan.FromMilliseconds(timeoutMs) : TimeSpan.FromSeconds(30);
             var expectedCode = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode;
             var httpVerb = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb;
 
@@ -68,7 +69,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         
         private static readonly HttpClient _httpClient = new HttpClient
         {
-            Timeout = Timeout.InfiniteTimeSpan // Timeout controlled per-request via CancellationToken
+            Timeout = Timeout.InfiniteTimeSpan
         };
 
         public HttpHealthCheck(List<Uri> endpoints, TimeSpan timeout, int expectedStatusCode, HttpVerb httpVerb)
