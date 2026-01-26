@@ -78,8 +78,11 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             // Delete index if it exists
             await client.Indices.DeleteAsync(indexName);
 
-            // Create new index
-            await client.Indices.CreateAsync(indexName);
+            // Create new index with 0 replicas for single-node cluster
+            await client.Indices.CreateAsync(indexName, c => c
+                .Settings(s => s
+                    .NumberOfReplicas(0)
+                    .NumberOfShards(1)));
 
             // Index some test documents
             await client.IndexAsync(new

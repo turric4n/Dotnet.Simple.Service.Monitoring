@@ -1,11 +1,12 @@
 ﻿using CuttingEdge.Conditions;
-using Elastic.Clients.Elasticsearch;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions;
 using System;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using IHealthChecksBuilder = Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder;
@@ -51,44 +52,46 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     internal class ElasticsearchHealthCheck : IHealthCheck
     {
         private readonly string _endpoint;
-        private static readonly object _lock = new object();
-        private static ElasticsearchClient _sharedClient;
-        private static string _lastEndpoint;
+        private static readonly HttpClient _httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(5)
+        };
 
         public ElasticsearchHealthCheck(string endpoint)
         {
             _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
         }
 
-        private ElasticsearchClient GetOrCreateClient()
-        {
-            lock (_lock)
-            {
-                if (_sharedClient == null || _lastEndpoint != _endpoint)
-                {
-                    var settings = new ElasticsearchClientSettings(new Uri(_endpoint))
-                        .RequestTimeout(TimeSpan.FromSeconds(5));
-
-                    _sharedClient = new ElasticsearchClient(settings);
-                    _lastEndpoint = _endpoint;
-                }
-                return _sharedClient;
-            }
-        }
-
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
         {
             try
             {
-                var client = GetOrCreateClient();
-                var pingResponse = await client.PingAsync(cancellationToken);
+                var uri = _endpoint.TrimEnd('/') + "/_cluster/health";
+                var response = await _httpClient.GetAsync(uri, cancellationToken);
 
-                if (pingResponse.IsValidResponse)
+                if (!response.IsSuccessStatusCode)
                 {
-                    return HealthCheckResult.Healthy("Elasticsearch is healthy");
+                    return HealthCheckResult.Unhealthy($"Elasticsearch returned status code: {response.StatusCode}");
                 }
 
-                return HealthCheckResult.Unhealthy($"Elasticsearch ping failed");
+                var content = await response.Content.ReadAsStringAsync();
+                using var document = JsonDocument.Parse(content);
+                var root = document.RootElement;
+
+                if (root.TryGetProperty("status", out var statusProperty))
+                {
+                    var status = statusProperty.GetString();
+                    
+                    return status switch
+                    {
+                        "green" => HealthCheckResult.Healthy($"Elasticsearch cluster is healthy (status: {status})"),
+                        "yellow" => HealthCheckResult.Degraded($"Elasticsearch cluster is degraded (status: {status})"),
+                        "red" => HealthCheckResult.Unhealthy($"Elasticsearch cluster is unhealthy (status: {status})"),
+                        _ => HealthCheckResult.Unhealthy($"Elasticsearch cluster has unknown status: {status}")
+                    };
+                }
+
+                return HealthCheckResult.Unhealthy("Elasticsearch cluster health response missing 'status' field");
             }
             catch (Exception ex)
             {
