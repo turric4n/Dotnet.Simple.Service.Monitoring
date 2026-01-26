@@ -9,15 +9,15 @@
 		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/turric4n/Dotnet.Simple.Service.Monitoring</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Version>1.0.21</Version>
-		<AssemblyVersion>1.0.21</AssemblyVersion>
-		<FileVersion>1.0.21</FileVersion>
+		<Version>1.0.22</Version>
+		<AssemblyVersion>1.0.22</AssemblyVersion>
+		<FileVersion>1.0.22</FileVersion>
 		<Authors>Turrican aka Enrique Fuentes</Authors>
 		<Company>Turrican Software</Company>
 		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <Title>Simple Service Monitoring UI</Title>
-    <Copyright>Turrican 2025</Copyright>
+    <Copyright>Turrican 2026</Copyright>
     <PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 
