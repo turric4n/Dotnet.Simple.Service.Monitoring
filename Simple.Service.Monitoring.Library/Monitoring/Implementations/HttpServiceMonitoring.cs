@@ -84,6 +84,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             var failures = new List<string>();
             var successes = new List<string>();
+            Exception lastException = null;
 
             foreach (var endpoint in _endpoints)
             {
@@ -107,13 +108,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                         failures.Add($"{endpoint} returned {statusCode}, expected {_expectedStatusCode}");
                     }
                 }
-                catch (TaskCanceledException)
+                catch (TaskCanceledException ex)
                 {
                     failures.Add($"{endpoint} timed out after {_timeout.TotalMilliseconds}ms");
+                    lastException = ex;
                 }
                 catch (Exception ex)
                 {
                     failures.Add($"{endpoint} failed: {ex.Message}");
+                    lastException = ex;
                 }
             }
 
@@ -124,7 +127,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     { "Failures", failures },
                     { "Successes", successes }
                 };
-                return HealthCheckResult.Unhealthy($"HTTP health check failed for {failures.Count} of {_endpoints.Count} endpoints", null, data);
+                return HealthCheckResult.Unhealthy(
+                    $"HTTP health check failed for {failures.Count} of {_endpoints.Count} endpoints", 
+                    lastException, 
+                    data);
             }
 
             return HealthCheckResult.Healthy($"All {_endpoints.Count} endpoints returned expected status code {_expectedStatusCode}");

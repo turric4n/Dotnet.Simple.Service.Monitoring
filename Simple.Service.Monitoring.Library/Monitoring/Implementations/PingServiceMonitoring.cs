@@ -62,6 +62,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         {
             var failures = new List<string>();
             var successes = new List<string>();
+            Exception lastException = null;
 
             foreach (var host in _hosts)
             {
@@ -82,6 +83,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 catch (Exception ex)
                 {
                     failures.Add($"{host} failed: {ex.Message}");
+                    lastException = ex;
                 }
             }
 
@@ -92,7 +94,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     { "Failures", failures },
                     { "Successes", successes }
                 };
-                return HealthCheckResult.Unhealthy($"Ping failed for {failures.Count} of {_hosts.Count} hosts", null, data);
+                return HealthCheckResult.Unhealthy(
+                    $"Ping failed for {failures.Count} of {_hosts.Count} hosts", 
+                    lastException, 
+                    data);
             }
 
             return HealthCheckResult.Healthy($"All {_hosts.Count} hosts responded successfully");
