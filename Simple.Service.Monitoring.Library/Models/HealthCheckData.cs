@@ -23,7 +23,7 @@ namespace Simple.Service.Monitoring.Library.Models
             Status = (HealthStatus)healthReportEntry.Status;
             Name = name;
             LastUpdated = DateTime.Now;
-            Duration = healthReportEntry.Duration.Milliseconds.ToString();
+            Duration = healthReportEntry.Duration.TotalMilliseconds.ToString("F2");
             Description = healthReportEntry.Description ?? "No description provided";
             CheckError = healthReportEntry.Exception != null ? healthReportEntry.Exception.Message : Description;
 

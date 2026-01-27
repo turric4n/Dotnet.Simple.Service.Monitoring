@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
+using Telegram.Bot.Types.Enums;
 using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram
@@ -73,14 +74,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
             var currentStatus = $"{statusEmoji} [{healthCheckData.Status}]";
             
-            // Create a detailed and well-formatted message
-            var body = $"{currentStatus} *{healthCheckData.Name}*{Environment.NewLine}{Environment.NewLine}" +
-                       $"🕒 *Triggered On:* {DateTime.Now:yyyy-MM-dd HH:mm:ss}{Environment.NewLine}" +
-                       $"💻 *Machine:* {healthCheckData.MachineName}{Environment.NewLine}" +
-                       $"🔧 *Service Type:* {healthCheckData.ServiceType}{Environment.NewLine}" +
-                       $"🔗 *Endpoint:* {healthCheckData.Tags.GetValueOrDefault("Endpoint", healthCheckData.Tags.GetValueOrDefault("Host", "Not specified"))}{Environment.NewLine}" +
-                       $"⏱ *Duration:* {healthCheckData.Duration} ms{Environment.NewLine}" +
-                       $"📊 *Status:* {healthCheckData.Status}{Environment.NewLine}";
+            // Create a detailed and well-formatted message using HTML formatting
+            var body = $"{currentStatus} <b>{healthCheckData.Name}</b>\n\n" +
+                       $"🕒 <b>Triggered On:</b> {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n" +
+                       $"💻 <b>Machine:</b> {healthCheckData.MachineName}\n" +
+                       $"🔧 <b>Service Type:</b> {healthCheckData.ServiceType}\n" +
+                       $"🔗 <b>Endpoint:</b> {healthCheckData.Tags.GetValueOrDefault("Endpoint", healthCheckData.Tags.GetValueOrDefault("Host", "Not specified"))}\n" +
+                       $"⏱️ <b>Duration:</b> {healthCheckData.Duration} ms\n" +
+                       $"📊 <b>Status:</b> {healthCheckData.Status}\n";
 
             // Add detailed error information
             if (healthCheckData.Status == (Models.HealthStatus)HealthStatus.Unhealthy ||
@@ -90,32 +91,36 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     ? healthCheckData.Description 
                     : healthCheckData.CheckError;
                 
-                body += $"❗ *Error Details:* {errorDetails}{Environment.NewLine}{Environment.NewLine}";
+                body += $"❗️ <b>Error Details:</b> {errorDetails}\n\n";
             }
             else
             {
-                body += $"📝 *Details:* {healthCheckData.Description}{Environment.NewLine}{Environment.NewLine}";
+                body += $"📝 <b>Details:</b> {healthCheckData.Description}\n\n";
             }
 
             // Add additional tags if available
             if (healthCheckData.Tags.Count > 0)
             {
-                body += $"📋 *Additional Information:*{Environment.NewLine}";
+                body += $"📋 <b>Additional Information:</b>\n";
                 
                 foreach (var tag in healthCheckData.Tags)
                 {
                     // Skip endpoint as it's already displayed above
                     if (tag.Key != "Endpoint" && tag.Key != "Host")
                     {
-                        body += $"- {tag.Key}: {tag.Value}{Environment.NewLine}";
+                        body += $"- {tag.Key}: {tag.Value}\n";
                     }
                 }
             }
             
             // Add timestamp footer
-            body += $"{Environment.NewLine}🔄 Last updated: {healthCheckData.LastUpdated:yyyy-MM-dd HH:mm:ss}";
+            body += $"\n🔄 Last updated: {healthCheckData.LastUpdated:yyyy-MM-dd HH:mm:ss}";
 
-            await _telegramBot.SendMessage(_telegramTransportSettings.ChatId, body, cancellationToken: cancellationToken);
+            await _telegramBot.SendMessage(
+                _telegramTransportSettings.ChatId, 
+                body, 
+                parseMode: ParseMode.Html,
+                cancellationToken: cancellationToken);
         }
 
         protected internal override void Validate()
