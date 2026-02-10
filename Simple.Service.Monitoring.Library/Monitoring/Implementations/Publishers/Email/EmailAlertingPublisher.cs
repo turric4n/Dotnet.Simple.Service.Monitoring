@@ -58,43 +58,108 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         {
             try
             {
-                var healthCheckName = entry.Key;
-                var healthCheckEntry = entry.Value;
-
+                var healthCheckData = new HealthCheckData(entry.Value, entry.Key);
+                
                 GetReportLastCheck();
 
-                var currentStatus = healthCheckEntry.Status switch
+                var statusEmoji = healthCheckData.Status switch
                 {
-                    HealthStatus.Unhealthy => "[Unhealthy]",
-                    HealthStatus.Degraded => "[Degraded]",
-                    HealthStatus.Healthy => "[Healthy]",
-                    _ => "[Undefined]"
+                    (Models.HealthStatus)HealthStatus.Unhealthy => "❌",
+                    (Models.HealthStatus)HealthStatus.Degraded => "⚠️",
+                    (Models.HealthStatus)HealthStatus.Healthy => "✅",
+                    _ => "❓"
                 };
 
-                var subject = $"{currentStatus} - Alert Triggered : {healthCheckName}";
+                var currentStatus = $"{statusEmoji} [{healthCheckData.Status}]";
+                var subject = $"{currentStatus} - Alert Triggered: {healthCheckData.Name}";
 
-                var body = $"{currentStatus} - Alert Triggered : {healthCheckName} <br>" +
-                          $"Triggered On    : {DateTime.Now} <br>" +
-                          $"Service Type    : {_healthCheck.ServiceType} <br>" +
-                          $"Alert Endpoint  : {_healthCheck.EndpointOrHost} <br>" +
-                          $"Alert Status    : {healthCheckEntry.Status} <br>" +
-                          $"Alert Duration  : {healthCheckEntry.Duration.TotalMilliseconds}ms <br>" +
-                          $"Alert Details   : {healthCheckEntry.Description} <br>";
+                var body = $"<h2>{currentStatus} - Alert Triggered: {healthCheckData.Name}</h2>" +
+                          $"<table style='border-collapse: collapse; width: 100%;'>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🕒 Triggered On:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{DateTime.Now:yyyy-MM-dd HH:mm:ss}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>💻 Machine:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.MachineName}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🔧 Service Type:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.ServiceType}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🔗 Endpoint:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Tags.GetValueOrDefault("Endpoint", healthCheckData.Tags.GetValueOrDefault("Host", "Not specified"))}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>⏱️ Duration:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Duration} ms</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>📊 Status:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Status}</td></tr>";
 
-                if (healthCheckEntry.Exception != null)
+                // Add detailed error information
+                if (healthCheckData.Status == (Models.HealthStatus)HealthStatus.Unhealthy ||
+                    healthCheckData.Status == (Models.HealthStatus)HealthStatus.Degraded)
                 {
-                    body += $"Exception      : {healthCheckEntry.Exception.Message} <br>";
+                    var errorDetails = string.IsNullOrEmpty(healthCheckData.CheckError) || healthCheckData.CheckError == "None" 
+                        ? healthCheckData.Description 
+                        : healthCheckData.CheckError;
+                    
+                    body += $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>❗️ Error Details:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{errorDetails}</td></tr>";
+                }
+                else
+                {
+                    body += $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>📝 Details:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Description}</td></tr>";
                 }
 
-                foreach (var extraData in healthCheckEntry.Data)
+                body += "</table>";
+
+                // Add detailed failure/success information from HealthCheckResult.Data
+                var failures = healthCheckData.Tags.GetValueOrDefault("Data_Failures");
+                var successes = healthCheckData.Tags.GetValueOrDefault("Data_Successes");
+                
+                if (!string.IsNullOrEmpty(failures) || !string.IsNullOrEmpty(successes))
                 {
-                    body += $"Alert Tags    : {extraData.Key} - {extraData.Value} <br>";
+                    body += "<br/><h3>📋 Detailed Results</h3>";
+                    
+                    if (!string.IsNullOrEmpty(failures))
+                    {
+                        var failureList = failures.Split(new[] { "; " }, StringSplitOptions.RemoveEmptyEntries);
+                        body += $"<h4>❌ Failed ({failureList.Length}):</h4><ul>";
+                        foreach (var failure in failureList)
+                        {
+                            body += $"<li>{failure}</li>";
+                        }
+                        body += "</ul>";
+                    }
+                    
+                    if (!string.IsNullOrEmpty(successes))
+                    {
+                        var successList = successes.Split(new[] { "; " }, StringSplitOptions.RemoveEmptyEntries);
+                        body += $"<h4>✅ Succeeded ({successList.Length}):</h4><ul>";
+                        foreach (var success in successList)
+                        {
+                            body += $"<li>{success}</li>";
+                        }
+                        body += "</ul>";
+                    }
                 }
+
+                // Add additional tags if available
+                var excludedTags = new HashSet<string> 
+                { 
+                    "Endpoint", "Host", "ServiceType", 
+                    "Data_Failures", "Data_Successes"
+                };
+                
+                var additionalTags = healthCheckData.Tags
+                    .Where(t => !excludedTags.Contains(t.Key))
+                    .ToList();
+                
+                if (additionalTags.Any())
+                {
+                    body += "<br/><h3>📋 Additional Information</h3><ul>";
+                    foreach (var tag in additionalTags)
+                    {
+                        body += $"<li><strong>{tag.Key}:</strong> {tag.Value}</li>";
+                    }
+                    body += "</ul>";
+                }
+
+                body += $"<br/><p style='color: #666;'><strong>🔄 Last updated:</strong> {healthCheckData.LastUpdated:yyyy-MM-dd HH:mm:ss}</p>";
 
                 body = StandardEmailTemplate.TemplateBody.Replace("#replace", body);
 
                 var message = MailMessageFactory.Create(_emailTransportSettings.To, subject, body);
                 _mailSenderClient.SendMessage(message);
+
+                // Notify observers after successful send
+                AlertObservers(entry);
 
                 return Task.CompletedTask;
             }

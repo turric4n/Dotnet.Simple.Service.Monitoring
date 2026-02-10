@@ -6,6 +6,8 @@ using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,28 +28,55 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             _httpClient = new HttpClient();
         }
 
-        public override Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
+        public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
         {
-            var serializedReport = JsonConvert.SerializeObject(report);
+            var ownedEntry = this.GetOwnedEntry(report);
+            var interceptedEntries = this.GetInterceptedEntries(report);
+            var ownedAlerting = this.IsOkToAlert(ownedEntry, false);
 
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Simple.Service.Monitoring.WebhookPublisher");
-            _httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
-            var content = new StringContent(serializedReport, System.Text.Encoding.UTF8, "application/json");
-
-            switch (_webhookTransportSettings.HttpBehaviour.HttpVerb)
+            if (ownedAlerting)
             {
-                case HttpVerb.Get:
-                    return _httpClient.GetAsync(_webhookTransportSettings.WebhookUrl, cancellationToken);
-                case HttpVerb.Post:
-                    return _httpClient.PostAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken);
-                case HttpVerb.Put:
-                    return _httpClient.PutAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken);
-                case HttpVerb.Delete:
-                    return _httpClient.DeleteAsync(_webhookTransportSettings.WebhookUrl, cancellationToken);
-                default:
-                    throw new ArgumentOutOfRangeException();
+                await SendWebhookAsync(ownedEntry, cancellationToken);
+            }
+
+            foreach (var interceptedEntry in interceptedEntries)
+            {
+                if (this.IsOkToAlert(interceptedEntry, true))
+                {
+                    await SendWebhookAsync(interceptedEntry, cancellationToken);
+                }
+            }
+        }
+
+        private async Task SendWebhookAsync(KeyValuePair<string, HealthReportEntry> entry, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var healthCheckData = new HealthCheckData(entry.Value, entry.Key);
+                var serializedData = JsonConvert.SerializeObject(healthCheckData, Formatting.Indented);
+
+                _httpClient.DefaultRequestHeaders.Clear();
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "Simple.Service.Monitoring.WebhookPublisher");
+
+                var content = new StringContent(serializedData, System.Text.Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = _webhookTransportSettings.HttpBehaviour.HttpVerb switch
+                {
+                    HttpVerb.Get => await _httpClient.GetAsync(_webhookTransportSettings.WebhookUrl, cancellationToken),
+                    HttpVerb.Post => await _httpClient.PostAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken),
+                    HttpVerb.Put => await _httpClient.PutAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken),
+                    HttpVerb.Delete => await _httpClient.DeleteAsync(_webhookTransportSettings.WebhookUrl, cancellationToken),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+
+                response.EnsureSuccessStatusCode();
+
+                // Notify observers after successful send
+                AlertObservers(entry);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to send webhook: {ex.Message}");
             }
         }
 
