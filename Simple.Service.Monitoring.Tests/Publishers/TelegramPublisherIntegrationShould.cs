@@ -24,15 +24,15 @@ namespace Simple.Service.Monitoring.Tests.Publishers
     [TestFixture(Category = "Integration")]
     [Category("TelegramPublisher")]
     [Category("RealAPI")]
-    [Explicit("Requires real Telegram bot credentials and sends actual messages")]
+    //[Explicit("Requires real Telegram bot credentials and sends actual messages")]
     public class TelegramPublisherIntegrationShould
     {
         private IHealthChecksBuilder _healthChecksBuilder;
         private TelegramTransportSettings _telegramSettings;
 
         // ⚠️ CONFIGURE THESE VALUES BEFORE RUNNING TESTS ⚠️
-        private const string BOT_API_TOKEN = "YOUR_BOT_TOKEN_HERE"; // e.g., "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-        private const string CHAT_ID = "YOUR_CHAT_ID_HERE";         // e.g., "-1001234567890" or "123456789"
+        private const string BOT_API_TOKEN = "6030340647:AAFHv9HMz0nuxuI9450tjVUuYJoCe4jf7JQ"; // e.g., "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+        private const string CHAT_ID = "-960612732";         // e.g., "-1001234567890" or "123456789"
 
         [SetUp]
         public void Setup()
@@ -636,6 +636,368 @@ namespace Simple.Service.Monitoring.Tests.Publishers
 
         #endregion
 
+        #region Detailed Results Tests
+
+        [Test]
+        [Category("DetailedResults")]
+        public async Task Should_Display_Detailed_Failures_And_Successes()
+        {
+            // Arrange - Simulate multi-endpoint HTTP check with mixed results
+            var alertCount = 0;
+
+            var healthCheck = new ServiceHealthCheck()
+            {
+                Name = "telegram_detailed_results",
+                ServiceType = ServiceType.Http,
+                EndpointOrHost = "https://api1.example.com,https://api2.example.com,https://api3.example.com",
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        TransportName = "TelegramTest",
+                        TransportMethod = AlertTransportMethod.Telegram,
+                        AlertByFailCount = 1,
+                        AlertEvery = TimeSpan.FromSeconds(1)
+                    }
+                },
+                Alert = true
+            };
+
+            var publisher = new TelegramAlertingPublisher(_healthChecksBuilder, healthCheck, _telegramSettings);
+            
+            var observer = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>()))
+                .Callback(() => alertCount++);
+
+            publisher.Subscribe(observer.Object);
+
+            // Create report with detailed failure/success data
+            var unhealthyReport = CreateHealthReportWithData(
+                "telegram_detailed_results",
+                HealthStatus.Unhealthy,
+                "HTTP health check failed for 2 of 3 endpoints",
+                failures: new List<string>
+                {
+                    "https://api2.example.com returned 503, expected 200",
+                    "https://api3.example.com timed out after 5000ms"
+                },
+                successes: new List<string>
+                {
+                    "https://api1.example.com returned expected status code 200"
+                });
+
+            // Act
+            TestContext.WriteLine("Sending health check with detailed failures and successes...");
+            await publisher.PublishAsync(unhealthyReport, CancellationToken.None);
+            await Task.Delay(1000);
+
+            // Assert
+            alertCount.Should().Be(1, "Should send alert with detailed results");
+            TestContext.WriteLine("✅ Telegram message sent with detailed failure/success breakdown!");
+            TestContext.WriteLine("Expected message to include:");
+            TestContext.WriteLine("  • ❌ Failed (2): list of 2 failures");
+            TestContext.WriteLine("  • ✅ Succeeded (1): list of 1 success");
+        }
+
+        [Test]
+        [Category("DetailedResults")]
+        public async Task Should_Display_All_Failures_When_Complete_Outage()
+        {
+            // Arrange - All endpoints down
+            var alertCount = 0;
+
+            var healthCheck = new ServiceHealthCheck()
+            {
+                Name = "telegram_complete_outage",
+                ServiceType = ServiceType.Http,
+                EndpointOrHost = "https://primary.example.com,https://backup1.example.com,https://backup2.example.com",
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        TransportName = "TelegramTest",
+                        TransportMethod = AlertTransportMethod.Telegram,
+                        AlertByFailCount = 1,
+                        AlertEvery = TimeSpan.FromSeconds(1)
+                    }
+                },
+                Alert = true
+            };
+
+            var publisher = new TelegramAlertingPublisher(_healthChecksBuilder, healthCheck, _telegramSettings);
+            
+            var observer = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>()))
+                .Callback(() => alertCount++);
+
+            publisher.Subscribe(observer.Object);
+
+            var unhealthyReport = CreateHealthReportWithData(
+                "telegram_complete_outage",
+                HealthStatus.Unhealthy,
+                "HTTP health check failed for 3 of 3 endpoints",
+                failures: new List<string>
+                {
+                    "https://primary.example.com timed out after 5000ms",
+                    "https://backup1.example.com returned 500, expected 200",
+                    "https://backup2.example.com failed: Connection refused"
+                },
+                successes: new List<string>());
+
+            // Act
+            TestContext.WriteLine("Sending complete outage scenario (all endpoints failed)...");
+            await publisher.PublishAsync(unhealthyReport, CancellationToken.None);
+            await Task.Delay(1000);
+
+            // Assert
+            alertCount.Should().Be(1, "Should send alert for complete outage");
+            TestContext.WriteLine("✅ Telegram message sent showing all 3 failures!");
+            TestContext.WriteLine("Expected message to show critical situation with all endpoints down");
+        }
+
+        [Test]
+        [Category("DetailedResults")]
+        public async Task Should_Display_Ping_Results_With_Multiple_Hosts()
+        {
+            // Arrange - Ping check with multiple hosts
+            var alertCount = 0;
+
+            var healthCheck = new ServiceHealthCheck()
+            {
+                Name = "telegram_ping_multiple_hosts",
+                ServiceType = ServiceType.Ping,
+                EndpointOrHost = "192.168.1.1,192.168.1.2,192.168.1.3,192.168.1.4,192.168.1.5",
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        TransportName = "TelegramTest",
+                        TransportMethod = AlertTransportMethod.Telegram,
+                        AlertByFailCount = 1,
+                        AlertEvery = TimeSpan.FromSeconds(1)
+                    }
+                },
+                Alert = true
+            };
+
+            var publisher = new TelegramAlertingPublisher(_healthChecksBuilder, healthCheck, _telegramSettings);
+            
+            var observer = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>()))
+                .Callback(() => alertCount++);
+
+            publisher.Subscribe(observer.Object);
+
+            var unhealthyReport = CreateHealthReportWithData(
+                "telegram_ping_multiple_hosts",
+                HealthStatus.Unhealthy,
+                "Ping failed for 2 of 5 hosts",
+                failures: new List<string>
+                {
+                    "192.168.1.3 timed out after 1000ms",
+                    "192.168.1.5 returned status TimedOut"
+                },
+                successes: new List<string>
+                {
+                    "192.168.1.1 responded in 12ms",
+                    "192.168.1.2 responded in 15ms",
+                    "192.168.1.4 responded in 8ms"
+                });
+
+            // Act
+            TestContext.WriteLine("Sending ping check with multiple hosts (partial failure)...");
+            await publisher.PublishAsync(unhealthyReport, CancellationToken.None);
+            await Task.Delay(1000);
+
+            // Assert
+            alertCount.Should().Be(1, "Should send alert with ping results");
+            TestContext.WriteLine("✅ Telegram message sent with network diagnostic details!");
+            TestContext.WriteLine("Expected message to include:");
+            TestContext.WriteLine("  • ❌ 2 hosts unreachable with timeout details");
+            TestContext.WriteLine("  • ✅ 3 hosts responding with latency info");
+        }
+
+        [Test]
+        [Category("DetailedResults")]
+        public async Task Should_Display_Only_Failures_When_No_Successes()
+        {
+            // Arrange - Test with only failures, no successes
+            var alertCount = 0;
+
+            var healthCheck = new ServiceHealthCheck()
+            {
+                Name = "telegram_only_failures",
+                ServiceType = ServiceType.Http,
+                EndpointOrHost = "https://down1.example.com,https://down2.example.com",
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        TransportName = "TelegramTest",
+                        TransportMethod = AlertTransportMethod.Telegram,
+                        AlertByFailCount = 1,
+                        AlertEvery = TimeSpan.FromSeconds(1)
+                    }
+                },
+                Alert = true
+            };
+
+            var publisher = new TelegramAlertingPublisher(_healthChecksBuilder, healthCheck, _telegramSettings);
+            
+            var observer = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>()))
+                .Callback(() => alertCount++);
+
+            publisher.Subscribe(observer.Object);
+
+            var unhealthyReport = CreateHealthReportWithData(
+                "telegram_only_failures",
+                HealthStatus.Unhealthy,
+                "All endpoints failed",
+                failures: new List<string>
+                {
+                    "https://down1.example.com connection refused",
+                    "https://down2.example.com DNS resolution failed"
+                },
+                successes: null); // No successes
+
+            // Act
+            TestContext.WriteLine("Sending health check with only failures (no successes)...");
+            await publisher.PublishAsync(unhealthyReport, CancellationToken.None);
+            await Task.Delay(1000);
+
+            // Assert
+            alertCount.Should().Be(1, "Should send alert with only failure details");
+            TestContext.WriteLine("✅ Telegram message sent showing only failures section!");
+        }
+
+        [Test]
+        [Category("DetailedResults")]
+        public async Task Should_Handle_Large_Number_Of_Endpoints()
+        {
+            // Arrange - Stress test with many endpoints
+            var alertCount = 0;
+
+            var healthCheck = new ServiceHealthCheck()
+            {
+                Name = "telegram_many_endpoints",
+                ServiceType = ServiceType.Http,
+                EndpointOrHost = "Multiple endpoints (10 total)",
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        TransportName = "TelegramTest",
+                        TransportMethod = AlertTransportMethod.Telegram,
+                        AlertByFailCount = 1,
+                        AlertEvery = TimeSpan.FromSeconds(1)
+                    }
+                },
+                Alert = true
+            };
+
+            var publisher = new TelegramAlertingPublisher(_healthChecksBuilder, healthCheck, _telegramSettings);
+            
+            var observer = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>()))
+                .Callback(() => alertCount++);
+
+            publisher.Subscribe(observer.Object);
+
+            // Create lists with many items
+            var failures = new List<string>();
+            var successes = new List<string>();
+            
+            for (int i = 1; i <= 3; i++)
+            {
+                failures.Add($"https://api{i}.example.com returned 500, expected 200");
+            }
+            
+            for (int i = 4; i <= 10; i++)
+            {
+                successes.Add($"https://api{i}.example.com returned expected status code 200");
+            }
+
+            var unhealthyReport = CreateHealthReportWithData(
+                "telegram_many_endpoints",
+                HealthStatus.Unhealthy,
+                "HTTP health check failed for 3 of 10 endpoints",
+                failures: failures,
+                successes: successes);
+
+            // Act
+            TestContext.WriteLine("Sending health check with 10 endpoints (3 failed, 7 succeeded)...");
+            await publisher.PublishAsync(unhealthyReport, CancellationToken.None);
+            await Task.Delay(1000);
+
+            // Assert
+            alertCount.Should().Be(1, "Should send alert with all endpoint details");
+            TestContext.WriteLine("✅ Telegram message sent with comprehensive endpoint list!");
+            TestContext.WriteLine("Expected message to include:");
+            TestContext.WriteLine("  • ❌ Failed (3): 3 failures listed");
+            TestContext.WriteLine("  • ✅ Succeeded (7): 7 successes listed");
+        }
+
+        [Test]
+        [Category("DetailedResults")]
+        public async Task Should_Display_Degraded_Status_With_Partial_Failures()
+        {
+            // Arrange - Degraded status with mixed results
+            var alertCount = 0;
+
+            var healthCheck = new ServiceHealthCheck()
+            {
+                Name = "telegram_degraded_partial",
+                ServiceType = ServiceType.Http,
+                EndpointOrHost = "https://api1.example.com,https://api2.example.com,https://api3.example.com,https://api4.example.com",
+                AlertBehaviour = new List<AlertBehaviour>()
+                {
+                    new AlertBehaviour()
+                    {
+                        TransportName = "TelegramTest",
+                        TransportMethod = AlertTransportMethod.Telegram,
+                        AlertByFailCount = 1,
+                        AlertEvery = TimeSpan.FromSeconds(1)
+                    }
+                },
+                Alert = true
+            };
+
+            var publisher = new TelegramAlertingPublisher(_healthChecksBuilder, healthCheck, _telegramSettings);
+            
+            var observer = new Mock<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+            observer.Setup(o => o.OnNext(It.IsAny<KeyValuePair<string, HealthReportEntry>>()))
+                .Callback(() => alertCount++);
+
+            publisher.Subscribe(observer.Object);
+
+            var degradedReport = CreateHealthReportWithData(
+                "telegram_degraded_partial",
+                HealthStatus.Degraded,
+                "Service degraded: 1 of 4 endpoints slow",
+                failures: new List<string>
+                {
+                    "https://api2.example.com responded in 4500ms (threshold: 2000ms)"
+                },
+                successes: new List<string>
+                {
+                    "https://api1.example.com responded in 120ms",
+                    "https://api3.example.com responded in 85ms",
+                    "https://api4.example.com responded in 95ms"
+                });
+
+            // Act
+            TestContext.WriteLine("Sending degraded status with performance issue...");
+            await publisher.PublishAsync(degradedReport, CancellationToken.None);
+            await Task.Delay(1000);
+
+            // Assert
+            alertCount.Should().Be(1, "Should send alert for degraded status");
+            TestContext.WriteLine("✅ Telegram message sent with ⚠️ degraded warning and performance details!");
+        }
+
+        #endregion
+
         #region Helper Methods
 
         private HealthReport CreateHealthReport(string name, HealthStatus status, string description)
@@ -659,6 +1021,47 @@ namespace Simple.Service.Monitoring.Tests.Publishers
             };
 
             return new HealthReport(entries, TimeSpan.FromMilliseconds(100));
+        }
+
+        private HealthReport CreateHealthReportWithData(
+            string name, 
+            HealthStatus status, 
+            string description,
+            List<string> failures = null,
+            List<string> successes = null)
+        {
+            var data = new Dictionary<string, object>
+            {
+                { "Endpoint", "Multiple endpoints" },
+                { "Host", "example.com" },
+                { "Environment", "Test" }
+            };
+
+            // Add failures and successes to the data dictionary
+            if (failures != null && failures.Any())
+            {
+                data.Add("Failures", failures);
+            }
+
+            if (successes != null && successes.Any())
+            {
+                data.Add("Successes", successes);
+            }
+
+            var entries = new Dictionary<string, HealthReportEntry>
+            {
+                { 
+                    name, 
+                    new HealthReportEntry(
+                        status, 
+                        description, 
+                        TimeSpan.FromMilliseconds(2001), // More realistic duration
+                        null, 
+                        data) 
+                }
+            };
+
+            return new HealthReport(entries, TimeSpan.FromMilliseconds(2001));
         }
 
         #endregion

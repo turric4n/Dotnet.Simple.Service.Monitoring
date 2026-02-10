@@ -7,6 +7,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
 using Simple.Service.Monitoring.Library.Monitoring.Exceptions.AlertBehaviour;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -91,30 +92,68 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     ? healthCheckData.Description 
                     : healthCheckData.CheckError;
                 
-                body += $"❗️ <b>Error Details:</b> {errorDetails}\n\n";
+                body += $"\n❗️ <b>Error Details:</b> {errorDetails}\n";
+                
+                // Add detailed failure/success information from HealthCheckResult.Data
+                var failures = healthCheckData.Tags.GetValueOrDefault("Data_Failures");
+                var successes = healthCheckData.Tags.GetValueOrDefault("Data_Successes");
+                
+                if (!string.IsNullOrEmpty(failures) || !string.IsNullOrEmpty(successes))
+                {
+                    body += $"\n📋 <b>Detailed Results:</b>\n";
+                    
+                    if (!string.IsNullOrEmpty(failures))
+                    {
+                        var failureList = failures.Split(new[] { "; " }, StringSplitOptions.RemoveEmptyEntries);
+                        body += $"\n❌ <b>Failed ({failureList.Length}):</b>\n";
+                        foreach (var failure in failureList)
+                        {
+                            body += $"  • {failure}\n";
+                        }
+                    }
+                    
+                    if (!string.IsNullOrEmpty(successes))
+                    {
+                        var successList = successes.Split(new[] { "; " }, StringSplitOptions.RemoveEmptyEntries);
+                        body += $"\n✅ <b>Succeeded ({successList.Length}):</b>\n";
+                        foreach (var success in successList)
+                        {
+                            body += $"  • {success}\n";
+                        }
+                    }
+                }
             }
             else
             {
-                body += $"📝 <b>Details:</b> {healthCheckData.Description}\n\n";
+                body += $"\n📝 <b>Details:</b> {healthCheckData.Description}\n";
             }
 
             // Add additional tags if available
             if (healthCheckData.Tags.Count > 0)
             {
-                body += $"📋 <b>Additional Information:</b>\n";
+                var excludedTags = new HashSet<string> 
+                { 
+                    "Endpoint", "Host", "ServiceType", 
+                    "Data_Failures", "Data_Successes" // Exclude these as they're shown above
+                };
                 
-                foreach (var tag in healthCheckData.Tags)
+                var additionalTags = healthCheckData.Tags
+                    .Where(t => !excludedTags.Contains(t.Key))
+                    .ToList();
+                
+                if (additionalTags.Any())
                 {
-                    // Skip endpoint as it's already displayed above
-                    if (tag.Key != "Endpoint" && tag.Key != "Host")
+                    body += $"\n📋 <b>Additional Information:</b>\n";
+                    
+                    foreach (var tag in additionalTags)
                     {
-                        body += $"- {tag.Key}: {tag.Value}\n";
+                        body += $"  • {tag.Key}: {tag.Value}\n";
                     }
                 }
             }
             
             // Add timestamp footer
-            body += $"\n🔄 Last updated: {healthCheckData.LastUpdated:yyyy-MM-dd HH:mm:ss}";
+            body += $"\n🔄 <b>Last updated:</b> {healthCheckData.LastUpdated:yyyy-MM-dd HH:mm:ss}";
 
             await _telegramBot.SendMessage(
                 _telegramTransportSettings.ChatId, 

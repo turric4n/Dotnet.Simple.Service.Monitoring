@@ -19,6 +19,40 @@ namespace Simple.Service.Monitoring.Library.Models
                 }
             }
 
+            // Add data from HealthCheckResult.Data (e.g., Failures, Successes)
+            if (healthReportEntry.Data != null)
+            {
+                foreach (var dataItem in healthReportEntry.Data)
+                {
+                    // Convert the data to string representation
+                    if (dataItem.Value != null)
+                    {
+                        // Handle lists/arrays specially for better formatting
+                        if (dataItem.Value is System.Collections.IEnumerable enumerable && 
+                            !(dataItem.Value is string))
+                        {
+                            var items = new List<string>();
+                            foreach (var item in enumerable)
+                            {
+                                if (item != null)
+                                {
+                                    items.Add(item.ToString());
+                                }
+                            }
+                            
+                            if (items.Any())
+                            {
+                                Tags[$"Data_{dataItem.Key}"] = string.Join("; ", items);
+                            }
+                        }
+                        else
+                        {
+                            Tags[$"Data_{dataItem.Key}"] = dataItem.Value.ToString();
+                        }
+                    }
+                }
+            }
+
             CreationDate = DateTime.Now;
             Status = (HealthStatus)healthReportEntry.Status;
             Name = name;

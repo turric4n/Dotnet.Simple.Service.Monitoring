@@ -1,4 +1,3 @@
-using Elastic.Clients.Elasticsearch.IndexLifecycleManagement;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -7,8 +6,6 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.SignalRPublisher;
 using Simple.Service.Monitoring.Library.Options;
 using Simple.Service.Monitoring.Sample.API.External;
 using System.Collections.Generic;
