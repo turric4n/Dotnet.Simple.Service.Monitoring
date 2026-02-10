@@ -31,8 +31,8 @@ namespace Simple.Service.Monitoring.Tests.Publishers
         private TelegramTransportSettings _telegramSettings;
 
         // ⚠️ CONFIGURE THESE VALUES BEFORE RUNNING TESTS ⚠️
-        private const string BOT_API_TOKEN = "6030340647:AAFHv9HMz0nuxuI9450tjVUuYJoCe4jf7JQ"; // e.g., "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
-        private const string CHAT_ID = "-960612732";         // e.g., "-1001234567890" or "123456789"
+        private const string BOT_API_TOKEN = "YOUR_BOT_TOKEN_HERE"; // e.g., "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+        private const string CHAT_ID = "YOUR_CHAT_ID_HERE";         // e.g., "-1001234567890" or "123456789"
 
         [SetUp]
         public void Setup()
