@@ -538,6 +538,10 @@ MonitoringUi:
 | `BotApiToken` | Telegram bot API token | String | ✅ |
 | `ChatId` | Telegram chat ID | String | ✅ |
 
+**Telegram Alert Example:**
+
+![Telegram Alert Screenshot](Telegram.png)
+
 #### InfluxDB Transport
 
 | Property | Description | Type | Required |
