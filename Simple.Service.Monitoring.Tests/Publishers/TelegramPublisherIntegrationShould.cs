@@ -24,7 +24,7 @@ namespace Simple.Service.Monitoring.Tests.Publishers
     [TestFixture(Category = "Integration")]
     [Category("TelegramPublisher")]
     [Category("RealAPI")]
-    //[Explicit("Requires real Telegram bot credentials and sends actual messages")]
+    [Explicit("Requires real Telegram bot credentials and sends actual messages")]
     public class TelegramPublisherIntegrationShould
     {
         private IHealthChecksBuilder _healthChecksBuilder;
