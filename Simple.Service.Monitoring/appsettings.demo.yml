@@ -63,6 +63,145 @@ MonitorOptions:
           AlertOnServiceRecovered: true
 
     # --------------------------------------------------------------------------
+    # HTTP WITH BEARER TOKEN AUTHENTICATION
+    # --------------------------------------------------------------------------
+    # Monitor secured API with Bearer token
+    - Name: "Secured API with Bearer Token"
+      ServiceType: Http
+      EndpointOrHost: "https://api.example.com/secure/health"
+      Alert: true
+      AdditionalTags:
+        - "secured"
+        - "authentication"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 5000
+          HttpVerb: Get
+          # Custom HTTP headers for authentication and tracking
+          CustomHttpHeaders:
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+            X-API-Version: "v2"
+            X-Request-ID: "health-check-001"
+      AlertBehaviour:
+        - TransportMethod: Telegram
+          TransportName: "InfrastructureAlerts"
+          AlertByFailCount: 2
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # HTTP WITH API KEY AUTHENTICATION
+    # --------------------------------------------------------------------------
+    # Monitor third-party API with API key
+    - Name: "Third-Party Payment API"
+      ServiceType: Http
+      EndpointOrHost: "https://api.payment-provider.com/health"
+      Alert: true
+      AdditionalTags:
+        - "external"
+        - "payment"
+        - "critical"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 10000
+          HttpVerb: Get
+          # API Key authentication headers
+          CustomHttpHeaders:
+            X-API-Key: "sk_live_51H..."
+            X-API-Secret: "your-api-secret"
+            Accept: "application/json"
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "OpsTeam"
+          AlertByFailCount: 1
+          AlertOnServiceRecovered: true
+        - TransportMethod: Slack
+          TransportName: "DevOpsChannel"
+          AlertOnce: false
+
+    # --------------------------------------------------------------------------
+    # HTTP WITH MULTIPLE ENDPOINTS (LOAD BALANCER)
+    # --------------------------------------------------------------------------
+    # Monitor multiple backend servers with shared authentication
+    - Name: "Load Balanced API Cluster"
+      ServiceType: Http
+      EndpointOrHost: "https://api1.example.com/health,https://api2.example.com/health,https://api3.example.com/health"
+      Alert: true
+      AdditionalTags:
+        - "cluster"
+        - "load-balanced"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 5000
+          HttpVerb: Get
+          # Shared headers for all endpoints
+          CustomHttpHeaders:
+            Authorization: "Bearer shared-cluster-token"
+            X-Environment: "Production"
+            X-Cluster-Check: "true"
+      AlertBehaviour:
+        - TransportMethod: Email
+          TransportName: "PrimaryEmail"
+          AlertByFailCount: 2
+          AlertOnServiceRecovered: true
+        - TransportMethod: Telegram
+          TransportName: "InfrastructureAlerts"
+          AlertOnce: false
+
+    # --------------------------------------------------------------------------
+    # HTTP WITH CUSTOM USER-AGENT
+    # --------------------------------------------------------------------------
+    # Monitor service with custom identification
+    - Name: "Analytics Service"
+      ServiceType: Http
+      EndpointOrHost: "https://analytics.example.com/health"
+      Alert: true
+      AdditionalTags:
+        - "analytics"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 5000
+          HttpVerb: Get
+          # Custom User-Agent for identification in logs
+          CustomHttpHeaders:
+            User-Agent: "MyCompany-HealthMonitor/2.0"
+            X-Monitoring-Source: "Production-Monitor"
+      AlertBehaviour:
+        - TransportMethod: Slack
+          TransportName: "SearchTeam"
+          AlertOnServiceRecovered: true
+
+    # --------------------------------------------------------------------------
+    # HTTP WITH CORRELATION HEADERS
+    # --------------------------------------------------------------------------
+    # Monitor microservice with request tracking
+    - Name: "Microservice API"
+      ServiceType: Http
+      EndpointOrHost: "https://microservice.example.com/health"
+      Alert: true
+      AdditionalTags:
+        - "microservice"
+        - "distributed-tracing"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200
+          HttpTimeoutMs: 5000
+          HttpVerb: Get
+          # Request tracking and correlation headers
+          CustomHttpHeaders:
+            X-Request-ID: "health-monitor-${timestamp}"
+            X-Correlation-ID: "monitoring-service"
+            X-Source-Service: "HealthCheckService"
+            X-Environment: "Production"
+      AlertBehaviour:
+        - TransportMethod: Influx
+          TransportName: "MetricsDB"
+          PublishAllResults: true
+
+    # --------------------------------------------------------------------------
     # PING SERVICE MONITORING
     # --------------------------------------------------------------------------
     # Monitor server availability using ICMP ping
@@ -435,6 +574,22 @@ AppSettings:
 # HttpVerb Options:
 #   - Get, Post, Put, Delete
 #
+# CustomHttpHeaders (NEW in v2.0):
+#   - Add custom HTTP headers to health check requests
+#   - Common use cases:
+#     * Authentication: Bearer tokens, API keys
+#     * Request Tracking: X-Request-ID, X-Correlation-ID
+#     * Custom Identification: User-Agent, X-Source-Service
+#     * Content Negotiation: Accept, Accept-Language
+#   - Example:
+#     CustomHttpHeaders:
+#       Authorization: "Bearer your-token"
+#       X-API-Key: "your-api-key"
+#       X-Request-ID: "health-check-001"
+#   - Security Note: Store tokens in environment variables or secrets
+#   - Works with multiple endpoints (same headers sent to all)
+#   - Optional: Omit for no custom headers (backward compatible)
+#
 # ResultExpression Options:
 #   - Equals: Value must equal expected result
 #   - NotEquals: Value must not equal expected result
@@ -462,6 +617,18 @@ AppSettings:
 #   - Use Timezone to specify timezone (e.g., "UTC", "America/New_York")
 #   - Useful for preventing alerts during off-hours
 #
+# Detailed Alert Results (NEW in v2.0):
+#   - Multi-endpoint health checks now show detailed failure/success lists
+#   - Available in all alert channels: Email, Slack, Telegram, Webhook
+#   - Example alert message:
+#     "HTTP health check failed for 2 of 3 endpoints
+#      ❌ Failed (2):
+#        • https://api2.example.com returned 503
+#        • https://api3.example.com timed out
+#      ✅ Succeeded (1):
+#        • https://api1.example.com returned 200"
+#   - No configuration needed - works automatically
+#
 # Best Practices:
 #   - Use AlertByFailCount to avoid false positives from transient issues
 #   - Set AlertOnServiceRecovered to get notified when issues are resolved
@@ -469,5 +636,32 @@ AppSettings:
 #   - Configure multiple transport methods for critical services
 #   - Use AdditionalTags to categorize and filter health checks
 #   - Store sensitive data (passwords, tokens) in environment variables or secrets
+#   - Use CustomHttpHeaders for secured endpoints requiring authentication
+#   - For load-balanced services, use comma-separated endpoints with shared headers
+#   - Set appropriate HttpTimeoutMs based on expected response times
+#   - Use X-Request-ID headers for correlation in distributed tracing
+#
+# Security Best Practices (v2.0):
+#   - Never hardcode sensitive tokens/keys in YAML files
+#   - Use environment variables: Authorization: "${BEARER_TOKEN}"
+#   - Rotate authentication tokens regularly
+#   - Use separate credentials for monitoring vs production access
+#   - Store credentials in:
+#     * Environment variables
+#     * Azure Key Vault
+#     * AWS Secrets Manager
+#     * HashiCorp Vault
+#   - Enable HTTPS for all monitored endpoints
+#   - Review alert messages to ensure tokens aren't logged
+#
+# Version 2.0 New Features:
+#   ✅ CustomHttpHeaders support for HTTP health checks
+#   ✅ Detailed failure/success reporting in alerts
+#   ✅ Enhanced Email formatting (HTML tables)
+#   ✅ Enhanced Slack formatting (Markdown)
+#   ✅ Enhanced Telegram formatting (HTML)
+#   ✅ Webhook publisher improvements (HealthCheckData payload)
+#   ✅ Accurate duration reporting (TotalMilliseconds)
+#   ✅ Redis concurrency fixes
 #
 # ==============================================================================
