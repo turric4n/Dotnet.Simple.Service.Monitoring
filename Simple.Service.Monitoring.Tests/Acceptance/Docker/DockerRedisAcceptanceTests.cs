@@ -130,7 +130,7 @@ namespace Simple.Service.Monitoring.Tests.Acceptance.Docker
             var value = await db.StringGetAsync("health:check");
             value.ToString().Should().Be("test");
             
-            redis.Dispose();
+            await redis.DisposeAsync();
 
             // Now test the health check
             var healthCheck = new ServiceHealthCheck

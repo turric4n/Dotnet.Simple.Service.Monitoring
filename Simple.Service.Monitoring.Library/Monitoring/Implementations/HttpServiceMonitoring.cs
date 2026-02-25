@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using IHealthChecksBuilder = Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder;
@@ -45,12 +46,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             var timeout = timeoutMs > 0 ? TimeSpan.FromMilliseconds(timeoutMs) : TimeSpan.FromSeconds(30);
             var expectedCode = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpExpectedCode;
             var httpVerb = HealthCheck.HealthCheckConditions.HttpBehaviour.HttpVerb;
+            var customHeaders = HealthCheck.HealthCheckConditions.HttpBehaviour.CustomHttpHeaders ?? new Dictionary<string, string>();
 
             HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
                 async () =>
                 {
-                    var healthCheck = new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb);
+                    var healthCheck = new HttpHealthCheck(endpoints, timeout, expectedCode, httpVerb, customHeaders);
                     return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
                 },
                 GetTags());
@@ -66,18 +68,20 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         private readonly TimeSpan _timeout;
         private readonly int _expectedStatusCode;
         private readonly HttpVerb _httpVerb;
-        
+        private readonly Dictionary<string, string> _customHeaders;
+
         private static readonly HttpClient _httpClient = new HttpClient
         {
             Timeout = Timeout.InfiniteTimeSpan
         };
 
-        public HttpHealthCheck(List<Uri> endpoints, TimeSpan timeout, int expectedStatusCode, HttpVerb httpVerb)
+        public HttpHealthCheck(List<Uri> endpoints, TimeSpan timeout, int expectedStatusCode, HttpVerb httpVerb, Dictionary<string, string> customHeaders)
         {
             _endpoints = endpoints ?? throw new ArgumentNullException(nameof(endpoints));
             _timeout = timeout;
             _expectedStatusCode = expectedStatusCode;
             _httpVerb = httpVerb;
+            _customHeaders = customHeaders;
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
@@ -95,6 +99,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
                     using var request = new HttpRequestMessage(GetHttpMethod(_httpVerb), endpoint);
                     request.Headers.Add("User-Agent", "HealthChecks");
+
+                    foreach (var header in _customHeaders)
+                    {
+                        request.Headers.Add(header.Key, header.Value);
+                    }
 
                     var response = await _httpClient.SendAsync(request, cts.Token);
                     var statusCode = (int)response.StatusCode;
@@ -135,6 +144,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
             return HealthCheckResult.Healthy($"All {_endpoints.Count} endpoints returned expected status code {_expectedStatusCode}");
         }
+
 
         private static HttpMethod GetHttpMethod(HttpVerb verb)
         {
