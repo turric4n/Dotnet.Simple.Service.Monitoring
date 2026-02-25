@@ -98,11 +98,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     cts.CancelAfter(_timeout);
 
                     using var request = new HttpRequestMessage(GetHttpMethod(_httpVerb), endpoint);
-                    request.Headers.Add("User-Agent", "HealthChecks");
 
                     foreach (var header in _customHeaders)
                     {
                         request.Headers.Add(header.Key, header.Value);
+                    }
+
+                    if (!_customHeaders.ContainsKey("User-Agent"))
+                    {
+                        request.Headers.Add("User-Agent", "HealthChecks");
                     }
 
                     var response = await _httpClient.SendAsync(request, cts.Token);
