@@ -1,6 +1,7 @@
 ﻿using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -60,12 +61,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 _connection = ConnectionMultiplexer.Connect(options);
                 _connection.ConnectionFailed += (sender, args) =>
                 {
-                    System.Diagnostics.Debug.WriteLine($"Redis connection failed: {args.Exception.Message}");
+                    _logger?.LogError(args.Exception, "Redis connection failed");
                 };
 
                 _connection.ConnectionRestored += (sender, args) =>
                 {
-                    System.Diagnostics.Debug.WriteLine("Redis connection restored");
+                    _logger?.LogInformation("Redis connection restored");
                 };
 
                 return _connection;
@@ -97,7 +98,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             catch (Exception ex)
             {
                 // Log the exception, but don't throw to avoid breaking health checks
-                System.Diagnostics.Debug.WriteLine($"Failed to publish health report to Redis: {ex.Message}");
+                _logger?.LogError(ex, "Failed to publish health report to Redis");
             }
         }
 
@@ -137,7 +138,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to publish entry {entry.Key} to Redis: {ex.Message}");
+                _logger?.LogError(ex, "Failed to publish entry {EntryKey} to Redis", entry.Key);
             }
         }
         

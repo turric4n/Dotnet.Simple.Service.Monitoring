@@ -1,6 +1,7 @@
 using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -53,7 +54,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to connect to SignalR hub: {ex.Message}");
+                _logger?.LogError(ex, "Failed to connect to SignalR hub");
                 return null;
             }
         }
@@ -65,7 +66,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 var connection = await GetHubConnectionAsync();
                 if (connection == null || connection.State != HubConnectionState.Connected)
                 {
-                    System.Diagnostics.Debug.WriteLine("Failed to connect to SignalR hub");
+                    _logger?.LogWarning("Failed to connect to SignalR hub");
                     return;
                 }
 
@@ -83,7 +84,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             catch (Exception ex)
             {
                 // Log the exception, but don't throw to avoid breaking health checks
-                System.Diagnostics.Debug.WriteLine($"Failed to publish health report to SignalR: {ex.Message}");
+                _logger?.LogError(ex, "Failed to publish health report to SignalR");
             }
         }
 

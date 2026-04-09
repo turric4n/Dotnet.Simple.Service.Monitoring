@@ -13,6 +13,7 @@ using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Em
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Transport.Implementations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Templates;
 using HealthStatus = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus;
 
@@ -166,7 +167,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             catch (Exception ex)
             {
                 // Log exception but don't throw to avoid breaking health checks
-                System.Diagnostics.Debug.WriteLine($"Failed to send email alert: {ex.Message}");
+                _logger?.LogError(ex, "Failed to send email alert");
                 return Task.CompletedTask;
             }
         }

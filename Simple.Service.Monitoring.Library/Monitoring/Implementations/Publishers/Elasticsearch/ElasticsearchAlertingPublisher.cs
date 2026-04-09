@@ -1,6 +1,7 @@
 using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -99,7 +100,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to index health check to Elasticsearch: {ex.Message}");
+                _logger?.LogError(ex, "Failed to index health check to Elasticsearch");
             }
         }
 

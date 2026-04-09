@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
@@ -49,7 +50,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error in custom notification publisher: {ex.Message}");
+                _logger?.LogError(ex, "Error in custom notification publisher");
                 // Log but don't rethrow to avoid breaking health checks
             }
         }
@@ -106,12 +107,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Failed to send notification: {response.StatusCode}");
+                    _logger?.LogWarning("Failed to send notification, status code: {StatusCode}", response.StatusCode);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error sending custom notification: {ex.Message}");
+                _logger?.LogError(ex, "Error sending custom notification");
                 // Log but don't rethrow
             }
         }

@@ -1,6 +1,7 @@
 using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
@@ -92,7 +93,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to send Datadog event: {ex.Message}");
+                _logger?.LogError(ex, "Failed to send Datadog event");
             }
         }
 

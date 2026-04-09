@@ -2,6 +2,7 @@
 using InfluxDB.Collector;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
@@ -82,7 +83,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to auto-create InfluxDB database: {ex.Message}");
+                _logger?.LogWarning(ex, "Failed to auto-create InfluxDB database");
             }
         }
 
