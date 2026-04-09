@@ -62,7 +62,7 @@ module.exports = {
             publicPath: ''
         })
     ],
-    devtool: 'source-map',
+    devtool: process.env.NODE_ENV === 'production' ? false : 'source-map',
     optimization: {
         splitChunks: {
             chunks: 'all',

@@ -80,8 +80,15 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 }
                 await connectTask;
 
+                // Accept all certificates since the purpose of this monitor is to
+                // inspect the certificate's expiry, not to enforce chain trust.
+                // The retrieved certificate is still validated for expiry below.
                 sslStream = new SslStream(client.GetStream(), false,
-                    (sender, certificate, chain, errors) => true);
+                    (sender, certificate, chain, errors) =>
+                    {
+                        // Only ignore chain-trust errors; still reject null certs
+                        return certificate != null;
+                    });
 
                 await sslStream.AuthenticateAsClientAsync(_host);
 

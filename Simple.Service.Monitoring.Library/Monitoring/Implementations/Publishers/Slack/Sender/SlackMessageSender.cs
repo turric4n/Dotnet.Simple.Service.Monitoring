@@ -22,11 +22,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 "application/json"
             );
 
-            // set token in authorization header
-            Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            // Use per-request headers to avoid thread-safety issues with DefaultRequestHeaders
+            using var request = new HttpRequestMessage(HttpMethod.Post, "https://slack.com/api/chat.postMessage");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Content = httpContent;
 
             // send message to API
-            var response = await Client.PostAsync("https://slack.com/api/chat.postMessage", httpContent);
+            var response = await Client.SendAsync(request);
 
             // fetch response from API
             var responseJson = await response.Content.ReadAsStringAsync();

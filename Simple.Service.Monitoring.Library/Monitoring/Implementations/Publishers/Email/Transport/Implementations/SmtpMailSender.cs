@@ -1,5 +1,6 @@
 ﻿using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Transport.Abstractions;
+using System.Net;
 using System.Net.Mail;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email.Transport.Implementations
@@ -19,6 +20,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             using var smtpclient = _settings.SmtpPort > 0
                 ? new SmtpClient(_settings.SmtpHost, _settings.SmtpPort)
                 : new SmtpClient(_settings.SmtpHost);
+
+            if (_settings.Authentication && !string.IsNullOrEmpty(_settings.Username))
+            {
+                smtpclient.Credentials = new NetworkCredential(_settings.Username, _settings.Password);
+                smtpclient.EnableSsl = true;
+            }
 
             smtpclient.Send((MailMessage)msg);
         }

@@ -10,7 +10,6 @@ namespace Simple.Service.Monitoring.UI.Controllers
 {
     [ApiController]
     [Route("monitoring/api")]
-    [AllowAnonymous]
     public class MonitoringApiController : ControllerBase
     {
         private readonly IMonitoringDataService _monitoringDataService;
