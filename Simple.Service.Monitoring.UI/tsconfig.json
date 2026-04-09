@@ -3,16 +3,28 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "strict": true,
     "sourceMap": true,
     "outDir": "./wwwroot/js",
     "rootDir": "./Front/src",
+    "baseUrl": "./Front/src",
+    "paths": {
+      "@/*": ["./*"],
+      "@/components/*": ["./components/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/stores/*": ["./stores/*"],
+      "@/services/*": ["./services/*"],
+      "@/models/*": ["./models/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/pages/*": ["./pages/*"]
+    },
     "lib": [ "ES2020", "DOM", "DOM.Iterable" ],
     "removeComments": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": [ "Front/src/**/*.ts" ],
+  "include": [ "Front/src/**/*.ts", "Front/src/**/*.tsx" ],
   "exclude": [ "node_modules", "wwwroot" ]
 }

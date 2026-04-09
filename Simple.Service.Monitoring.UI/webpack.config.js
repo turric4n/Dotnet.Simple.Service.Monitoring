@@ -6,21 +6,24 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
     entry: {
-        monitoring: './Front/src/monitoring.ts',
+        monitoring: './Front/src/index.tsx',
     },
     output: {
         path: path.resolve(__dirname, 'wwwroot'),
-        publicPath: '',  // Empty for relative paths in the manifest
-        filename: 'js/[name].[contenthash].js', // Using contenthash instead of hash
-        chunkFilename: 'js/[name].[chunkhash].js' // Chunks with chunk-specific hash
+        publicPath: '/monitoring-static/',
+        filename: 'js/[name].[contenthash].js',
+        chunkFilename: 'js/[name].[chunkhash].js'
     },
     resolve: {
-        extensions: ['.ts', '.js']
+        extensions: ['.tsx', '.ts', '.js'],
+        alias: {
+            '@': path.resolve(__dirname, 'Front/src')
+        }
     },
     module: {
         rules: [
             {
-                test: /\.ts$/,
+                test: /\.tsx?$/,
                 use: 'ts-loader',
                 exclude: /node_modules/
             },
@@ -28,7 +31,8 @@ module.exports = {
                 test: /\.css$/,
                 use: [
                     MiniCssExtractPlugin.loader,
-                    'css-loader'
+                    'css-loader',
+                    'postcss-loader'
                 ]
             }
         ]
@@ -43,10 +47,6 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                {
-                    from: 'node_modules/@microsoft/signalr/dist/browser',
-                    to: 'lib/microsoft/signalr/dist/browser'
-                },
                 {
                     from: 'node_modules/vis-timeline/styles',
                     to: 'lib/vis-timeline/styles'
