@@ -2,20 +2,19 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Simple.Service.Monitoring.Extensions;
 using Simple.Service.Monitoring.UI.Hubs;
 using Simple.Service.Monitoring.UI.Models;
-using Simple.Service.Monitoring.UI.Services;
-using System;
-using Simple.Service.Monitoring.UI.Repositories;
 using Simple.Service.Monitoring.UI.Options;
-using Simple.Service.Monitoring.Library.Options;
-using Microsoft.Extensions.Configuration;
+using Simple.Service.Monitoring.UI.Repositories;
 using Simple.Service.Monitoring.UI.Repositories.LiteDb;
 using Simple.Service.Monitoring.UI.Repositories.Memory;
 using Simple.Service.Monitoring.UI.Repositories.SQL;
+using Simple.Service.Monitoring.UI.Services;
+using System;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -43,6 +42,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IMonitoringDataRepositoryLocator, MonitoringDataRepositoryLocator>();
 
             services.AddRazorPages()
+                .AddApplicationPart(typeof(IndexModel).Assembly);
+
+            services.AddControllers()
                 .AddApplicationPart(typeof(IndexModel).Assembly);
 
             services.AddKeyedSingleton<IMonitoringDataRepository, SqlMonitoringDataRepository>("Sql");
@@ -94,6 +96,9 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             // Map Razor Pages
             endpoints.MapRazorPages();
+
+            // Map REST API controllers
+            endpoints.MapControllers();
 
             // Map SignalR Hub
             endpoints.MapHub<MonitoringHub>("/monitoringhub");

@@ -64,6 +64,74 @@ namespace Simple.Service.Monitoring.Extensions
                             transport = _options.SignalRTransportSettings
                                 .FirstOrDefault(x => x.Name == ab.TransportName);
                             break;
+                        case AlertTransportMethod.Teams:
+                            transport = _options.TeamsTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Discord:
+                            transport = _options.DiscordTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.PagerDuty:
+                            transport = _options.PagerDutyTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Opsgenie:
+                            transport = _options.OpsgenieTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Datadog:
+                            transport = _options.DatadogTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Prometheus:
+                            transport = _options.PrometheusTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.CloudWatch:
+                            transport = _options.CloudWatchTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.AppInsights:
+                            transport = _options.AppInsightsTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Elasticsearch:
+                            transport = _options.ElasticsearchTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.GoogleChat:
+                            transport = _options.GoogleChatTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Mattermost:
+                            transport = _options.MattermostTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Console:
+                            transport = _options.ConsoleTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.FileLog:
+                            transport = _options.FileTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.RabbitMq:
+                            transport = _options.RmqTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.KafkaTransport:
+                            transport = _options.KafkaTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.Webhook:
+                            transport = _options.WebhookTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
+                        case AlertTransportMethod.RedisTransport:
+                            transport = _options.RedisTransportSettings
+                                .FirstOrDefault(x => x.Name == ab.TransportName);
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException();
                     }

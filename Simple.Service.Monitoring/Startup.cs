@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 
 namespace Simple.Service.Monitoring
@@ -24,10 +25,10 @@ namespace Simple.Service.Monitoring
                 .WithServiceMonitoringUi(services, Configuration)
                 .WithApplicationSettings();
 
-            //services.AddHealthChecks()
-            //    .AddCheck("test_healthy", () => HealthCheckResult.Healthy("Test is healthy"))
-            //    .AddCheck("test_degraded", () => HealthCheckResult.Degraded("Test is degraded"))
-            //    .AddCheck("test_unhealthy", () => HealthCheckResult.Unhealthy("Test is unhealthy"));
+            services.AddHealthChecks()
+                .AddCheck("test_healthy", () => HealthCheckResult.Healthy("Test is healthy"))
+                .AddCheck("test_degraded", () => HealthCheckResult.Degraded("Test is degraded"))
+                .AddCheck("test_unhealthy", () => HealthCheckResult.Unhealthy("Test is unhealthy"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

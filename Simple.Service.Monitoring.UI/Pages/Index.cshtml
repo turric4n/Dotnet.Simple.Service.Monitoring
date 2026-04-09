@@ -1,63 +1,6 @@
-﻿@page "/monitoring"
+﻿@page "/monitoring/{**slug}"
 @using Microsoft.AspNetCore.Authorization
 @attribute [AllowAnonymous]
 @model Simple.Service.Monitoring.UI.Models.IndexModel
-@{
-    ViewData["Title"] = "Service Monitoring";
-}
 
-<div class="text-center mb-3">
-    <img src="@Model.LogoUrl" alt="Logo" style="max-height:80px;" />
-</div>
-
-<h1>@Model.HeaderTitle</h1>
-
-<div class="row">
-    <div class="col-12 mb-4">
-        <div class="card">
-            <div class="card-header bg-@GetStatusColor(Model.OverallStatus)">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">System Health</h4>
-                    <span class="badge bg-@GetStatusColor(Model.OverallStatus) text-white">@Model.OverallStatus</span>
-                </div>
-                <small>Last Updated: @Model.LastUpdated</small>
-            </div>
-            <div class="card-body">
-                <h5>Health Checks</h5>                
-                <div class="table-responsive">
-                    <!-- Enhanced DataTable Container -->
-                    <div id="health-checks-table-container">
-                        <!-- The Enhanced DataTable component will render the entire table here -->
-                    </div>
-                </div>
-
-                <!-- Visual Timeline Chart -->
-                <h5 class="mt-4">Health Checks Timeline</h5>
-                <div class="mb-4">
-                    <div id="timeline-chart"></div>
-                </div>
-
-                <!-- Timeline Controls -->
-                <div class="btn-group" role="group">
-                    <button id="timeline-1h" class="btn btn-outline-primary">1h</button>
-                    <button id="timeline-24h" class="btn btn-outline-primary">24h</button>
-                    <button id="timeline-7d" class="btn btn-outline-primary">7d</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-@functions {
-    private string GetStatusColor(object statusObj)
-    {
-        var status = statusObj?.ToString();
-        return status switch
-        {
-            "Healthy" => "success",
-            "Degraded" => "warning",
-            "Unhealthy" => "danger",
-            _ => "secondary"
-        };
-    }
-}
+<div id="root"></div>
