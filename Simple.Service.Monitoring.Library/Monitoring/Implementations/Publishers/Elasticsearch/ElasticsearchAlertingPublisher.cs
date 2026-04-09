@@ -131,6 +131,11 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed) return;
+            if (disposing)
+            {
+                // ElasticsearchClient uses an internal transport that should be released
+                _client = null;
+            }
             _disposed = true;
         }
 

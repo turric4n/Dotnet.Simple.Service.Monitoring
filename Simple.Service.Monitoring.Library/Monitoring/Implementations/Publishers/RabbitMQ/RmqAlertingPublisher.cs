@@ -20,6 +20,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         private readonly RmqTransportSettings _rmqTransportSettings;
         private IConnection _connection;
         private IChannel _channel;
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private bool _disposed = false;
 
         public RmqAlertingPublisher(IHealthChecksBuilder healthChecksBuilder,
@@ -34,43 +35,53 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
         {
             if (_channel != null) return _channel;
 
-            var factory = new ConnectionFactory
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
-                Uri = new Uri(_rmqTransportSettings.ConnectionString)
-            };
+                if (_channel != null) return _channel;
 
-            _connection = await factory.CreateConnectionAsync(cancellationToken);
-            _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
+                var factory = new ConnectionFactory
+                {
+                    Uri = new Uri(_rmqTransportSettings.ConnectionString)
+                };
 
-            if (!string.IsNullOrEmpty(_rmqTransportSettings.Exchange))
-            {
-                await _channel.ExchangeDeclareAsync(
-                    _rmqTransportSettings.Exchange,
-                    ExchangeType.Topic,
-                    durable: true,
-                    cancellationToken: cancellationToken);
-            }
-
-            if (!string.IsNullOrEmpty(_rmqTransportSettings.QueueName))
-            {
-                await _channel.QueueDeclareAsync(
-                    _rmqTransportSettings.QueueName,
-                    durable: true,
-                    exclusive: false,
-                    autoDelete: false,
-                    cancellationToken: cancellationToken);
+                _connection = await factory.CreateConnectionAsync(cancellationToken);
+                _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
                 if (!string.IsNullOrEmpty(_rmqTransportSettings.Exchange))
                 {
-                    await _channel.QueueBindAsync(
-                        _rmqTransportSettings.QueueName,
+                    await _channel.ExchangeDeclareAsync(
                         _rmqTransportSettings.Exchange,
-                        _rmqTransportSettings.RoutingKey ?? "health.check.#",
+                        ExchangeType.Topic,
+                        durable: true,
                         cancellationToken: cancellationToken);
                 }
-            }
 
-            return _channel;
+                if (!string.IsNullOrEmpty(_rmqTransportSettings.QueueName))
+                {
+                    await _channel.QueueDeclareAsync(
+                        _rmqTransportSettings.QueueName,
+                        durable: true,
+                        exclusive: false,
+                        autoDelete: false,
+                        cancellationToken: cancellationToken);
+
+                    if (!string.IsNullOrEmpty(_rmqTransportSettings.Exchange))
+                    {
+                        await _channel.QueueBindAsync(
+                            _rmqTransportSettings.QueueName,
+                            _rmqTransportSettings.Exchange,
+                            _rmqTransportSettings.RoutingKey ?? "health.check.#",
+                            cancellationToken: cancellationToken);
+                    }
+                }
+
+                return _channel;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
@@ -162,6 +173,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             {
                 _channel?.Dispose();
                 _connection?.Dispose();
+                _semaphore?.Dispose();
             }
             _disposed = true;
         }

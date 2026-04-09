@@ -27,8 +27,8 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
         // Lock objects for thread-safe behaviour state updates
         protected readonly ConcurrentDictionary<string, object> _behaviourLocks = new ConcurrentDictionary<string, object>();
 
-        protected readonly ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers =
-            new ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>>();
+        protected readonly ConcurrentDictionary<Guid, IObserver<KeyValuePair<string, HealthReportEntry>>> _observers =
+            new ConcurrentDictionary<Guid, IObserver<KeyValuePair<string, HealthReportEntry>>>();
 
         protected PublisherBase(
             ILogger<IHealthCheckPublisher> logger,
@@ -64,22 +64,20 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
 
         private class Unsubscriber : IDisposable
         {
-            private readonly ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> _observers;
-            private readonly IObserver<KeyValuePair<string, HealthReportEntry>> _observer;
+            private readonly ConcurrentDictionary<Guid, IObserver<KeyValuePair<string, HealthReportEntry>>> _observers;
+            private readonly Guid _key;
 
             public Unsubscriber(
-                ConcurrentBag<IObserver<KeyValuePair<string, HealthReportEntry>>> observers,
-                IObserver<KeyValuePair<string, HealthReportEntry>> observer)
+                ConcurrentDictionary<Guid, IObserver<KeyValuePair<string, HealthReportEntry>>> observers,
+                Guid key)
             {
                 _observers = observers ?? throw new ArgumentNullException(nameof(observers));
-                _observer = observer ?? throw new ArgumentNullException(nameof(observer));
+                _key = key;
             }
 
             public void Dispose()
             {
-                // Note: ConcurrentBag doesn't support removal, so this is a limitation
-                // Consider using ConcurrentDictionary if removal is critical
-                // For now, we'll rely on weak references or observer pattern cleanup
+                _observers.TryRemove(_key, out _);
             }
         }
 
@@ -342,7 +340,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
         public void AlertObservers(KeyValuePair<string, HealthReportEntry> entry)
         {
             // Create a snapshot of observers to avoid locking during iteration
-            var observerSnapshot = _observers.ToArray();
+            var observerSnapshot = _observers.Values.ToArray();
 
             Parallel.ForEach(observerSnapshot, observer =>
             {
@@ -405,12 +403,10 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Abstractions
                 throw new ArgumentNullException(nameof(observer));
             }
 
-            if (!_observers.Contains(observer))
-            {
-                _observers.Add(observer);
-            }
+            var key = Guid.NewGuid();
+            _observers.TryAdd(key, observer);
 
-            return new Unsubscriber(_observers, observer);
+            return new Unsubscriber(_observers, key);
         }
 
         private AlertBehaviour GetAlertBehaviour()

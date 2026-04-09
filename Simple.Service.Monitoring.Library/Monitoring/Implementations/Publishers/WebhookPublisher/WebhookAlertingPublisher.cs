@@ -1,6 +1,7 @@
 ﻿using CuttingEdge.Conditions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
@@ -17,7 +18,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
     public class WebhookAlertingPublisher : PublisherBase
     {
         private readonly WebhookTransportSettings _webhookTransportSettings;
-        private readonly HttpClient _httpClient;
+        private static readonly HttpClient _httpClient = new HttpClient();
 
         public WebhookAlertingPublisher(IHealthChecksBuilder healthChecksBuilder, 
             ServiceHealthCheck healthCheck, 
@@ -25,7 +26,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             base(healthChecksBuilder, healthCheck, alertTransportSettings)
         {
             _webhookTransportSettings = (WebhookTransportSettings)alertTransportSettings;
-            _httpClient = new HttpClient();
         }
 
         public override async Task PublishAsync(HealthReport report, CancellationToken cancellationToken)
@@ -55,20 +55,36 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 var healthCheckData = new HealthCheckData(entry.Value, entry.Key);
                 var serializedData = JsonConvert.SerializeObject(healthCheckData, Formatting.Indented);
 
-                _httpClient.DefaultRequestHeaders.Clear();
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", "Simple.Service.Monitoring.WebhookPublisher");
-
                 var content = new StringContent(serializedData, System.Text.Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = _webhookTransportSettings.HttpBehaviour.HttpVerb switch
+                using var request = new HttpRequestMessage();
+                request.RequestUri = new Uri(_webhookTransportSettings.WebhookUrl);
+                request.Headers.Add("User-Agent", "Simple.Service.Monitoring.WebhookPublisher");
+
+                // Apply user-configured custom headers
+                if (_webhookTransportSettings.Headers != null)
                 {
-                    HttpVerb.Get => await _httpClient.GetAsync(_webhookTransportSettings.WebhookUrl, cancellationToken),
-                    HttpVerb.Post => await _httpClient.PostAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken),
-                    HttpVerb.Put => await _httpClient.PutAsync(_webhookTransportSettings.WebhookUrl, content, cancellationToken),
-                    HttpVerb.Delete => await _httpClient.DeleteAsync(_webhookTransportSettings.WebhookUrl, cancellationToken),
+                    foreach (var header in _webhookTransportSettings.Headers)
+                    {
+                        request.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                    }
+                }
+
+                request.Method = _webhookTransportSettings.HttpBehaviour.HttpVerb switch
+                {
+                    HttpVerb.Get => HttpMethod.Get,
+                    HttpVerb.Post => HttpMethod.Post,
+                    HttpVerb.Put => HttpMethod.Put,
+                    HttpVerb.Delete => HttpMethod.Delete,
                     _ => throw new ArgumentOutOfRangeException()
                 };
 
+                if (request.Method != HttpMethod.Get)
+                {
+                    request.Content = content;
+                }
+
+                var response = await _httpClient.SendAsync(request, cancellationToken);
                 response.EnsureSuccessStatusCode();
 
                 // Notify observers after successful send
@@ -76,7 +92,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Failed to send webhook: {ex.Message}");
+                _logger?.LogError(ex, "Failed to send webhook to {Url}", _webhookTransportSettings.WebhookUrl);
             }
         }
 
@@ -89,8 +105,6 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
             Condition.Ensures(_webhookTransportSettings.WebhookUrl)
                 .Evaluate(v => Uri.IsWellFormedUriString(v, UriKind.Absolute),
                     "The provided Webhook URL is malformed.");
-
-            _httpClient.BaseAddress = new Uri(_webhookTransportSettings.WebhookUrl);
         }
 
         protected internal override void SetPublishing()

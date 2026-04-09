@@ -10,10 +10,11 @@ using System.Threading.Tasks;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
-    public class CustomMonitoring : ServiceMonitoringBase
+    public class CustomMonitoring : ServiceMonitoringBase, IDisposable
     {
         private readonly IHealthChecksBuilder _healthChecksBuilder;
         private readonly IServiceProvider _serviceProvider;
+        private bool _disposed = false;
 
         public CustomMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
         {
@@ -91,6 +92,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                         return await classInstance.CheckHealthAsync(new HealthCheckContext(), System.Threading.CancellationToken.None);
                     });
             }
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            (_serviceProvider as IDisposable)?.Dispose();
         }
     }
 }

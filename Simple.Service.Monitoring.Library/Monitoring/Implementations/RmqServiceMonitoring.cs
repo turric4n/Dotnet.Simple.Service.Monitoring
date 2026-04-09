@@ -60,7 +60,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     internal class RabbitMqConnectionHealthCheck : IHealthCheck
     {
         private readonly string _connectionString;
-        private static readonly object _lock = new object();
+        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
         private static IConnection _sharedConnection;
         private static string _lastConnectionString;
 
@@ -71,38 +71,32 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 
         private async Task<IConnection> GetOrCreateConnectionAsync(CancellationToken cancellationToken)
         {
-            IConnection connection = null;
-            
-            lock (_lock)
+            await _semaphore.WaitAsync(cancellationToken);
+            try
             {
-                if (_sharedConnection == null || !_sharedConnection.IsOpen || _lastConnectionString != _connectionString)
-                {
-                    _sharedConnection?.Dispose();
-                    connection = null;
-                }
-                else
+                if (_sharedConnection != null && _sharedConnection.IsOpen && _lastConnectionString == _connectionString)
                 {
                     return _sharedConnection;
                 }
-            }
 
-            // Create connection outside lock to avoid blocking
-            var factory = new ConnectionFactory
-            {
-                Uri = new Uri(_connectionString),
-                AutomaticRecoveryEnabled = true,
-                RequestedHeartbeat = TimeSpan.FromSeconds(10),
-                ContinuationTimeout = TimeSpan.FromSeconds(10),
-                HandshakeContinuationTimeout = TimeSpan.FromSeconds(10)
-            };
+                _sharedConnection?.Dispose();
 
-            connection = await factory.CreateConnectionAsync(cancellationToken);
+                var factory = new ConnectionFactory
+                {
+                    Uri = new Uri(_connectionString),
+                    AutomaticRecoveryEnabled = true,
+                    RequestedHeartbeat = TimeSpan.FromSeconds(10),
+                    ContinuationTimeout = TimeSpan.FromSeconds(10),
+                    HandshakeContinuationTimeout = TimeSpan.FromSeconds(10)
+                };
 
-            lock (_lock)
-            {
-                _sharedConnection = connection;
+                _sharedConnection = await factory.CreateConnectionAsync(cancellationToken);
                 _lastConnectionString = _connectionString;
                 return _sharedConnection;
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
