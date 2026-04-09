@@ -1,814 +1,664 @@
+<div align="center">
+
 # Dotnet.Simple.Service.Monitoring
 
-> Enterprise-Grade Health Monitoring and Alerting System for .NET Applications
+**Enterprise-Grade Health Monitoring & Alerting for .NET**
+
+[![.NET](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/actions/workflows/dotnet.yml/badge.svg)](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/actions/workflows/dotnet.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
+
+Monitor **26 service types** across your infrastructure, alert through **24 transport channels**, and visualize everything in a **React-based real-time dashboard** — all driven by configuration.
+
+[Quick Start](#-quick-start) · [Documentation](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/wiki) · [Examples](docs/examples/) · [Contributing](CONTRIBUTING.md)
+
+</div>
+
+---
 
 ## Overview
 
-Dotnet.Simple.Service.Monitoring is a comprehensive health monitoring solution that simplifies the implementation of health checks in .NET applications. Built on top of the robust .NET HealthChecks framework with custom health check implementations, it provides enterprise-grade monitoring capabilities with minimal configuration.
+Dotnet.Simple.Service.Monitoring is a comprehensive health monitoring solution for .NET applications. Built on the .NET HealthChecks framework, it provides enterprise-grade monitoring, intelligent alerting, and a modern web dashboard — all with minimal code and configuration-first design.
 
-The system offers real-time monitoring, intelligent alerting, and a beautiful web-based dashboard to keep track of your application's health across multiple environments.
+## Key Features
 
-## 🚀 Key Features
+### Comprehensive Service Monitoring (26 Types)
 
-### **Comprehensive Service Monitoring**
+| Category | Service Types |
+|----------|--------------|
+| **Web & API** | HTTP/HTTPS, gRPC, TCP, Ping/ICMP, DNS, FTP, SMTP |
+| **SQL Databases** | SQL Server, MySQL, PostgreSQL, Oracle, SQLite |
+| **NoSQL & Cache** | Redis, Elasticsearch, MongoDB, CosmosDB, Memcached |
+| **Message Brokers** | RabbitMQ, Kafka, Azure Service Bus, AWS SQS |
+| **Infrastructure** | Docker, SSL Certificate, Hangfire |
+| **Custom** | Custom `IHealthCheck` implementations, Request Interceptors |
 
-- **11+ Service Types**: HTTP/HTTPS, SQL Server, MySQL, PostgreSQL, Redis, ElasticSearch, RabbitMQ, Hangfire, Ping/ICMP, Custom implementations, and Request Interceptors
-- **Advanced Health Conditions**: Custom queries, response time thresholds, connection validation, and business logic checks
-- **Flexible Scheduling**: Configurable monitoring intervals per service
-- **Smart Tagging**: Organize services with custom tags for better management
+### Intelligent Alerting (24 Transport Channels)
 
-### **Intelligent Alerting System**
+| Category | Transports |
+|----------|-----------|
+| **Chat & Messaging** | Slack, Telegram, Discord, Microsoft Teams, Google Chat, Mattermost |
+| **Email** | SMTP with HTML/Markdown templates |
+| **Incident Management** | PagerDuty, Opsgenie |
+| **Metrics & Observability** | Prometheus, Datadog, AWS CloudWatch, Azure Application Insights, InfluxDB, Elasticsearch |
+| **Streaming** | Kafka, Redis Pub/Sub, RabbitMQ |
+| **Webhooks & API** | Generic Webhook, Custom Notification API, SignalR |
+| **Local** | Console, File Log |
 
-- **7 Transport Methods**: Email (SMTP), Slack, Telegram, InfluxDB, Custom APIs, SignalR, and Webhooks
-- **Conditional Alerting**: Time-based alerting windows, failure count thresholds, and recovery notifications
-- **Alert Deduplication**: Prevent alert spam with configurable frequency controls
-- **Multi-Channel Support**: Send alerts to multiple channels simultaneously
+### Modern React Dashboard
 
-### **Modern Web Dashboard**
+- **Real-time updates** via SignalR WebSocket
+- **Timeline visualization** with service name grouping and active services filtering
+- **Dark mode** with system preference detection
+- **Responsive design** — mobile, tablet, and desktop
+- **Custom branding** — company logo and name
+- **Built with**: React 18, TypeScript, Tailwind CSS, shadcn/ui, Zustand, TanStack Query
 
-- **Real-time Updates**: Live status updates via SignalR
-- **Timeline Visualization**: Historical health data with interactive charts
-- **Dark Mode Support**: Modern UI with user preference persistence
-- **Responsive Design**: Mobile-friendly dashboard for monitoring on-the-go
-- **Company Branding**: Customizable logos and company information
+### Developer Experience
 
-### **Developer Experience**
+- **Configuration-first**: JSON or YAML — no code required for standard monitors
+- **Hot reload**: Change configuration without restarting
+- **3 storage backends**: InMemory, LiteDB, SQL Server
+- **Extensible**: Add custom health checks and transport publishers
+- **Docker ready**: Includes `docker-compose.yml` for local development
 
-- **Configuration-First Approach**: Define everything through JSON/YAML configuration
-- **Hot Reload**: Configuration changes without application restart
-- **Multiple Data Storage**: In-memory, LiteDB, or SQL Server backends
-- **Extensible Architecture**: Easy to add custom health checks and transport methods
+## Project Structure
 
-## 🏗️ Project Structure
+```
+Simple.Service.Monitoring/           # Core host application
+Simple.Service.Monitoring.Library/   # Business logic, monitors, publishers, models
+Simple.Service.Monitoring.Extensions/# Integration extension methods
+Simple.Service.Monitoring.UI/        # React SPA dashboard (Webpack 5)
+Simple.Service.Monitoring.UI.Extensions/ # UI middleware extensions
+Simple.Service.Monitoring.Config.Generator/ # WinForms configuration tool
+Simple.Service.Monitoring.Sample.API/# Example implementation
+Simple.Service.Monitoring.Tests/     # Unit & integration tests
+```
 
-This solution consists of several key components:
-
-- **Simple.Service.Monitoring**: Core monitoring service and web dashboard
-- **Simple.Service.Monitoring.Library**: Core business logic and models
-- **Simple.Service.Monitoring.Extensions**: Extension methods for easy integration
-- **Simple.Service.Monitoring.UI**: Modern web-based monitoring dashboard
-- **Simple.Service.Monitoring.UI.Extensions**: UI-specific extension methods
-- **Simple.Service.Monitoring.Config.Generator**: Windows Forms configuration tool
-- **Simple.Service.Monitoring.Sample.API**: Example implementation
-
-## 📦 Installation
-
-### NuGet Package Installation
+## Installation
 
 ```bash
 dotnet add package Simple.Service.Monitoring.Extensions
 dotnet add package Simple.Service.Monitoring.UI.Extensions
 ```
 
-### Manual Installation
-
-1. Clone the repository:
+Or clone and reference directly:
 
 ```bash
-git clone https://github.com/yourusername/Dotnet.Simple.Service.Monitoring.git
+git clone https://github.com/turric4n/Dotnet.Simple.Service.Monitoring.git
 ```
 
-1. Add project references to your solution:
+## Quick Start
 
-```bash
-dotnet add reference Simple.Service.Monitoring.Extensions
-dotnet add reference Simple.Service.Monitoring.UI.Extensions
-```
-
-## ⚡ Quick Start
-
-### 1. Basic Setup
-
-In your `Startup.cs` or `Program.cs`:
+### 1. Wire up in Program.cs / Startup.cs
 
 ```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    services
-        .AddServiceMonitoring(Configuration)
-        .WithServiceMonitoringUi(services, Configuration)
-        .WithApplicationSettings();
-}
+// ConfigureServices
+services
+    .AddServiceMonitoring(Configuration)
+    .WithServiceMonitoringUi(services, Configuration)
+    .WithApplicationSettings();
 
-public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-{
-    app.UseServiceMonitoringUi(env);
-    
-    app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapServiceMonitoringUi();
-    });
-}
+// Configure
+app.UseServiceMonitoringUi(env);
+app.UseEndpoints(endpoints => endpoints.MapServiceMonitoringUi());
 ```
 
-### 2. Configuration
-
-Add configuration to your `appsettings.yml` or `appsettings.json`:
+### 2. Add configuration (appsettings.yml)
 
 ```yaml
 MonitoringUi:
-  CompanyName: "Your Company"
-  HeaderLogoUrl: "https://yourcompany.com/logo.png"
-  DataRepositoryType: "LiteDb"
+  CompanyName: "Acme Corp"
+  HeaderLogoUrl: "https://acme.com/logo.png"
+  DataRepositoryType: "LiteDb" # InMemory | LiteDb | Sql
 
 Monitoring:
   Settings:
     ShowUI: true
-    UseGlobalServiceName: "Production Services"
+    UseGlobalServiceName: "Production"
   HealthChecks:
-    - Name: "API Health Check"
+    - Name: "Main API"
       ServiceType: Http
-      EndpointOrHost: "https://api.yourapp.com/health"
-      Port: 443
-      Alert: true
-      AlertBehaviour:
-        - TransportMethod: Email
-          TransportName: "DevOpsEmail"
-          AlertEvery: "00:05:00"
-  EmailTransportSettings:
-    - Name: "DevOpsEmail"
-      From: "monitoring@yourcompany.com"
-      To: "devops@yourcompany.com"
-      SmtpHost: "smtp.yourcompany.com"
-      SmtpPort: 587
-      Authentication: true
-```
-
-### 3. Run Your Application
-
-Navigate to `/monitoring` to access the dashboard.
-
-## 📋 Comprehensive Configuration
-
-The monitoring system supports both JSON and YAML configuration formats. Below are detailed examples showcasing all available options.
-
-### Service Types
-
-| Service Type | Description | Use Case |
-|--------------|-------------|----------|
-| `Http` | HTTP/HTTPS endpoint monitoring | Web APIs, websites, microservices |
-| `MsSql` | SQL Server database monitoring | Database connectivity and custom queries |
-| `MySql` | MySQL database monitoring | MySQL database health checks |
-| `PostgreSql` | PostgreSQL database monitoring | PostgreSQL database health checks |
-| `Redis` | Redis cache monitoring | Cache availability and performance |
-| `ElasticSearch` | Elasticsearch cluster monitoring | Search and logging infrastructure |
-| `Rmq` | RabbitMQ message queue monitoring | Message broker health |
-| `Hangfire` | Hangfire background job monitoring | Background job processing |
-| `Ping` | ICMP ping monitoring | Network connectivity |
-| `Custom` | Custom health check implementations | Business logic validation |
-| `Interceptor` | Request interception monitoring | Application request monitoring |
-
-### Transport Methods
-
-| Transport | Description | Configuration |
-|-----------|-------------|---------------|
-| `Email` | SMTP email notifications | SMTP server, credentials, templates |
-| `Slack` | Slack channel messages | Bot token, channel, username |
-| `Telegram` | Telegram bot messages | Bot API token, chat ID |
-| `Influx` | InfluxDB metrics storage | Database host, database name |
-| `CustomApi` | Custom API webhooks | API endpoint, authentication |
-| `SignalR` | Real-time web notifications | Hub URL, method name |
-| `Dummy` | No-op transport for testing | No configuration needed |
-
-### Complete Configuration Examples
-
-#### JSON Configuration (appsettings.json)
-
-```json
-{
-  "MonitoringUi": {
-    "CompanyName": "Your Company Name",
-    "HeaderLogoUrl": "https://company.com/logo.png",
-    "DataRepositoryType": "LiteDb"
-  },
-  "Monitoring": {
-    "Settings": {
-      "ShowUI": true,
-      "UseGlobalServiceName": "Production Services"
-    },
-    "HealthChecks": [
-      {
-        "Name": "API Gateway",
-        "ServiceType": "Http",
-        "EndpointOrHost": "https://api.company.com/health",
-        "Port": 443,
-        "MonitoringInterval": "00:01:00",
-        "HealthCheckConditions": {
-          "HttpBehaviour": {
-            "HttpExpectedCode": 200,
-            "HttpTimeoutMs": 5000,
-            "HttpVerb": "Get"
-          },
-          "ServiceReach": true,
-          "ServiceConnectionEstablished": true
-        },
-        "Alert": true,
-        "AlertBehaviour": [
-          {
-            "TransportMethod": "Email",
-            "TransportName": "DevOpsEmail",
-            "AlertEvery": "00:05:00",
-            "AlertOnServiceRecovered": true,
-            "AlertByFailCount": 3
-          }
-        ],
-        "AdditionalTags": ["critical", "api"]
-      },
-      {
-        "Name": "User Database",
-        "ServiceType": "MsSql",
-        "ConnectionString": "Server=db.company.com;Database=Users;Integrated Security=true;",
-        "HealthCheckConditions": {
-          "SqlBehaviour": {
-            "Query": "SELECT COUNT(*) FROM Users WHERE LastLoginDate > DATEADD(day, -30, GETDATE())",
-            "ResultExpression": "GreaterThan",
-            "SqlResultDataType": "Int",
-            "ExpectedResult": 100
-          }
-        },
-        "Alert": true,
-        "AlertBehaviour": [
-          {
-            "TransportMethod": "Slack",
-            "TransportName": "DevOpsSlack",
-            "AlertEvery": "00:10:00"
-          }
-        ]
-      }
-    ],
-    "EmailTransportSettings": [
-      {
-        "Name": "DevOpsEmail",
-        "From": "monitoring@company.com",
-        "To": "devops@company.com",
-        "SmtpHost": "smtp.company.com",
-        "SmtpPort": 587,
-        "Authentication": true,
-        "Username": "monitoring@company.com",
-        "Password": "secure_password"
-      }
-    ],
-    "SlackTransportSettings": [
-      {
-        "Name": "DevOpsSlack",
-        "Token": "xoxb-your-slack-bot-token",
-        "Channel": "#devops-alerts",
-        "Username": "Health Monitor"
-      }
-    ]
-  }
-}
-```
-
-#### YAML Configuration (appsettings.yml)
-
-```yaml
-MonitoringUi:
-  CompanyName: "Your Company Name"
-  HeaderLogoUrl: "https://company.com/logo.png"
-  DataRepositoryType: "LiteDb" # Options: InMemory, LiteDb, Sql
-
-Monitoring:
-  Settings:
-    ShowUI: true
-    UseGlobalServiceName: "Production Services"
-  
-  HealthChecks:
-    - Name: "API Gateway"
-      ServiceType: Http
-      EndpointOrHost: "https://api.company.com/health"
+      EndpointOrHost: "https://api.acme.com/health"
       Port: 443
       MonitoringInterval: "00:01:00"
       HealthCheckConditions:
         HttpBehaviour:
           HttpExpectedCode: 200
           HttpTimeoutMs: 5000
-          HttpVerb: Get # Options: Get, Post, Put, Delete
-        ServiceReach: true
-        ServiceConnectionEstablished: true
-      Alert: true
-      AlertBehaviour:
-        - TransportMethod: Email # Options: Email, Slack, Telegram, Influx, CustomApi, SignalR
-          TransportName: "DevOpsEmail"
-          AlertEvery: "00:05:00"
-          AlertOnServiceRecovered: true
-          AlertByFailCount: 3
-          StartAlertingOn: "00:00:00"
-          StopAlertingOn: "23:59:59"
-          IncludeEnvironment: true
-          Timezone: "UTC"
-      AdditionalTags:
-        - "critical"
-        - "api"
-    
-    - Name: "User Database"
-      ServiceType: MsSql
-      ConnectionString: "Server=db.company.com;Database=Users;Integrated Security=true;"
-      MonitoringInterval: "00:02:00"
-      HealthCheckConditions:
-        SqlBehaviour:
-          Query: "SELECT COUNT(*) FROM Users WHERE LastLoginDate > DATEADD(day, -30, GETDATE())"
-          ResultExpression: GreaterThan # Options: Equal, NotEqual, GreaterThan, LessThan
-          SqlResultDataType: Int # Options: String, Int, Bool, DateTime
-          ExpectedResult: 100
+          HttpVerb: Get
+          HttpCustomHeaders:         # v2.0 — custom headers
+            Authorization: "Bearer <token>"
+            X-Api-Key: "key-123"
       Alert: true
       AlertBehaviour:
         - TransportMethod: Slack
-          TransportName: "DevOpsSlack"
-          AlertEvery: "00:10:00"
-      
-    - Name: "PostgreSQL Database"
-      ServiceType: PostgreSql
-      ConnectionString: "Host=localhost;Port=5432;Database=myapp;Username=postgres;Password=secret"
-      MonitoringInterval: "00:02:00"
-      HealthCheckConditions:
-        SqlBehaviour:
-          Query: "SELECT COUNT(*) FROM users WHERE active = true"
-          ResultExpression: GreaterThan
-          SqlResultDataType: Int
-          ExpectedResult: 0
-      Alert: true
-      AlertBehaviour:
-        - TransportMethod: Email
-          TransportName: "DevOpsEmail"
-      AdditionalTags:
-        - "database"
-        - "postgresql"
-      
-    - Name: "Redis Cache"
-      ServiceType: Redis
-      ConnectionString: "localhost:6379"
-      HealthCheckConditions:
-        RedisBehaviour:
-          TimeOutMs: 3000
-      Alert: true
-      AlertBehaviour:
-        - TransportMethod: Telegram
-          TransportName: "DevOpsTelegram"
-  
-  EmailTransportSettings:
-    - Name: "DevOpsEmail"
-      From: "monitoring@company.com"
-      DisplayName: "Health Monitoring"
-      To: "devops@company.com"
-      SmtpHost: "smtp.company.com"
-      SmtpPort: 587
-      Authentication: true
-      Username: "monitoring@company.com"
-      Password: "secure_password"
-  
+          TransportName: "OpsSlack"
+          AlertEvery: "00:05:00"
+          AlertOnServiceRecovered: true
+          AlertByFailCount: 3
   SlackTransportSettings:
-    - Name: "DevOpsSlack"
-      Token: "xoxb-your-slack-bot-token"
-      Channel: "#devops-alerts"
-      Username: "Health Monitor"
-  
-  TelegramTransportSettings:
-    - Name: "DevOpsTelegram"
-      BotApiToken: "00000:000000"
-      ChatId: "-000000"
+    - Name: "OpsSlack"
+      Token: "xoxb-your-token"
+      Channel: "#ops-alerts"
 ```
 
-## 🔧 Advanced Configuration
+### 3. Run and open the dashboard
 
-### Health Check Conditions
-
-Each service type supports specific health check conditions:
-
-#### HTTP/HTTPS Services
-
-```yaml
-HealthCheckConditions:
-  HttpBehaviour:
-    HttpExpectedCode: 200        # Expected HTTP status code
-    HttpTimeoutMs: 5000          # Request timeout in milliseconds
-    HttpVerb: Get                # HTTP method (Get, Post, Put, Delete)
-  ServiceReach: true             # Verify service is reachable
-  ServiceConnectionEstablished: true  # Verify connection can be established
+```bash
+dotnet run
+# Navigate to https://localhost:5001/monitoring
 ```
 
-#### SQL Database Services
+## Service Types Reference
+
+### Web & API
+
+| Type | Config Key | Required Fields | Notes |
+|------|-----------|----------------|-------|
+| HTTP/HTTPS | `Http` | `EndpointOrHost`, `Port` | Custom headers, expected status code, verb, timeout |
+| gRPC | `Grpc` | `EndpointOrHost`, `Port` | gRPC health check protocol |
+| TCP | `Tcp` | `EndpointOrHost`, `Port` | Raw TCP connection check |
+| Ping/ICMP | `Ping` | `EndpointOrHost` | Network reachability |
+| DNS | `Dns` | `EndpointOrHost` | DNS resolution check |
+| FTP | `Ftp` | `EndpointOrHost`, `Port` | FTP server availability |
+| SMTP | `Smtp` | `EndpointOrHost`, `Port` | Mail server availability |
+
+### Databases
+
+| Type | Config Key | Required Fields | Notes |
+|------|-----------|----------------|-------|
+| SQL Server | `MsSql` | `ConnectionString` | Custom SQL queries with result validation |
+| MySQL | `MySql` | `ConnectionString` | Custom SQL queries with result validation |
+| PostgreSQL | `PostgreSql` | `ConnectionString` | Custom SQL queries with result validation |
+| Oracle | `Oracle` | `ConnectionString` | Custom SQL queries with result validation |
+| SQLite | `Sqlite` | `ConnectionString` | Custom SQL queries with result validation |
+| MongoDB | `MongoDb` | `ConnectionString` | Collection availability |
+| CosmosDB | `CosmosDb` | `ConnectionString` | Azure Cosmos DB health |
+
+### Cache & Search
+
+| Type | Config Key | Required Fields | Notes |
+|------|-----------|----------------|-------|
+| Redis | `Redis` | `ConnectionString` | Connection + optional timeout |
+| Elasticsearch | `ElasticSearch` | `EndpointOrHost` | Cluster health status |
+| Memcached | `Memcached` | `EndpointOrHost`, `Port` | Memcached server check |
+
+### Message Brokers
+
+| Type | Config Key | Required Fields | Notes |
+|------|-----------|----------------|-------|
+| RabbitMQ | `Rmq` | `ConnectionString` | Broker connectivity |
+| Kafka | `Kafka` | `EndpointOrHost` | Bootstrap server check |
+| Azure Service Bus | `AzureServiceBus` | `ConnectionString` | Queue/topic health |
+| AWS SQS | `AwsSqs` | `ConnectionString` | SQS queue health |
+
+### Infrastructure
+
+| Type | Config Key | Required Fields | Notes |
+|------|-----------|----------------|-------|
+| Docker | `Docker` | `EndpointOrHost` | Docker daemon health |
+| SSL Certificate | `SslCertificate` | `EndpointOrHost` | Certificate expiry check |
+| Hangfire | `Hangfire` | `ConnectionString` | Failed jobs & server count |
+
+### Custom
+
+| Type | Config Key | Required Fields | Notes |
+|------|-----------|----------------|-------|
+| Custom | `Custom` | `FullClassName` | Any `IHealthCheck` implementation |
+| Interceptor | `Interceptor` | — | Application request monitoring |
+
+### SQL Query Validation
+
+SQL-based monitors (MsSql, MySql, PostgreSql, Oracle, Sqlite) support custom query validation:
 
 ```yaml
 HealthCheckConditions:
   SqlBehaviour:
-    Query: "SELECT COUNT(*) FROM Users"
-    ResultExpression: GreaterThan    # Equal, NotEqual, GreaterThan, LessThan
-    SqlResultDataType: Int           # String, Int, Bool, DateTime
-    ExpectedResult: 0
+    Query: "SELECT COUNT(*) FROM Orders WHERE Status = 'Stuck'"
+    ResultExpression: LessThan   # Equal | NotEqual | GreaterThan | LessThan
+    SqlResultDataType: Int       # String | Int | Bool | DateTime
+    ExpectedResult: 10
 ```
 
-#### Redis Services
+## Transport Channels Reference
+
+### Chat & Messaging
+
+<details>
+<summary><strong>Slack</strong></summary>
 
 ```yaml
-HealthCheckConditions:
-  RedisBehaviour:
-    TimeOutMs: 3000              # Connection timeout in milliseconds
+SlackTransportSettings:
+  - Name: "OpsSlack"
+    Token: "xoxb-your-slack-bot-token"
+    Channel: "#ops-alerts"
+    Username: "Health Monitor"
 ```
+</details>
 
-#### Hangfire Services
+<details>
+<summary><strong>Telegram</strong></summary>
 
 ```yaml
-HealthCheckConditions:
-  HangfireBehaviour:
-    MaximumJobsFailed: 10        # Maximum failed jobs threshold
-    MinimumAvailableServers: 1   # Minimum required servers
+TelegramTransportSettings:
+  - Name: "OpsTelegram"
+    BotApiToken: "123456:ABC-DEF"
+    ChatId: "-100123456789"
 ```
 
-### Alert Behavior Configuration
+Supports HTML formatting with detailed failure/success reports (v2.0).
+</details>
 
-Configure sophisticated alerting behavior:
+<details>
+<summary><strong>Discord</strong></summary>
+
+```yaml
+DiscordTransportSettings:
+  - Name: "OpsDiscord"
+    WebhookUrl: "https://discord.com/api/webhooks/..."
+```
+</details>
+
+<details>
+<summary><strong>Microsoft Teams</strong></summary>
+
+```yaml
+TeamsTransportSettings:
+  - Name: "OpsTeams"
+    WebhookUrl: "https://outlook.office.com/webhook/..."
+```
+</details>
+
+<details>
+<summary><strong>Google Chat</strong></summary>
+
+```yaml
+GoogleChatTransportSettings:
+  - Name: "OpsGoogleChat"
+    WebhookUrl: "https://chat.googleapis.com/v1/spaces/..."
+```
+</details>
+
+<details>
+<summary><strong>Mattermost</strong></summary>
+
+```yaml
+MattermostTransportSettings:
+  - Name: "OpsMattermost"
+    WebhookUrl: "https://mattermost.company.com/hooks/..."
+```
+</details>
+
+### Email
+
+<details>
+<summary><strong>Email (SMTP)</strong></summary>
+
+```yaml
+EmailTransportSettings:
+  - Name: "OpsEmail"
+    From: "monitoring@company.com"
+    DisplayName: "Health Monitor"
+    To: "devops@company.com"
+    SmtpHost: "smtp.company.com"
+    SmtpPort: 587
+    Authentication: true
+    Username: "monitoring@company.com"
+    Password: "secure_password"
+```
+
+Supports HTML templates with detailed failure reports (v2.0).
+</details>
+
+### Incident Management
+
+<details>
+<summary><strong>PagerDuty</strong></summary>
+
+```yaml
+PagerDutyTransportSettings:
+  - Name: "OpsPagerDuty"
+    IntegrationKey: "your-integration-key"
+```
+</details>
+
+<details>
+<summary><strong>Opsgenie</strong></summary>
+
+```yaml
+OpsgenieTransportSettings:
+  - Name: "OpsOpsgenie"
+    ApiKey: "your-api-key"
+```
+</details>
+
+### Metrics & Observability
+
+<details>
+<summary><strong>Prometheus</strong></summary>
+
+```yaml
+PrometheusTransportSettings:
+  - Name: "OpsPrometheus"
+    PushgatewayUrl: "https://pushgateway.company.com"
+```
+</details>
+
+<details>
+<summary><strong>Datadog</strong></summary>
+
+```yaml
+DatadogTransportSettings:
+  - Name: "OpsDatadog"
+    ApiKey: "your-datadog-api-key"
+```
+</details>
+
+<details>
+<summary><strong>AWS CloudWatch</strong></summary>
+
+```yaml
+CloudWatchTransportSettings:
+  - Name: "OpsCloudWatch"
+    Region: "us-east-1"
+    Namespace: "HealthChecks"
+```
+</details>
+
+<details>
+<summary><strong>Azure Application Insights</strong></summary>
+
+```yaml
+AppInsightsTransportSettings:
+  - Name: "OpsAppInsights"
+    InstrumentationKey: "your-instrumentation-key"
+```
+</details>
+
+<details>
+<summary><strong>InfluxDB</strong></summary>
+
+```yaml
+InfluxDbTransportSettings:
+  - Name: "OpsInflux"
+    Host: "https://influx.company.com"
+    Database: "health_metrics"
+```
+</details>
+
+### Webhooks & Streaming
+
+<details>
+<summary><strong>Webhook</strong></summary>
+
+```yaml
+WebhookTransportSettings:
+  - Name: "OpsWebhook"
+    Url: "https://api.company.com/health-webhook"
+    Headers:
+      Authorization: "Bearer token"
+```
+</details>
+
+<details>
+<summary><strong>Custom Notification API</strong></summary>
+
+```yaml
+CustomNotificationTransportSettings:
+  - Name: "OpsCustom"
+    BaseEndpoint: "https://notifications.company.com/api"
+    ApiKey: "your-api-key"
+    ProjectName: "MyApp"
+    Environment: "Production"
+```
+</details>
+
+<details>
+<summary><strong>SignalR</strong></summary>
+
+```yaml
+SignalRTransportSettings:
+  - Name: "OpsSignalR"
+    HubUrl: "https://app.company.com/monitoringhub"
+    HubMethod: "ReceiveHealthAlert"
+```
+</details>
+
+## Alert Behavior
+
+Configure sophisticated alerting rules per health check:
 
 ```yaml
 AlertBehaviour:
   - TransportMethod: Email
     TransportName: "PrimaryEmail"
-    AlertOnce: false                    # Send repeated alerts
-    AlertOnServiceRecovered: true       # Alert when service recovers
-    AlertEvery: "00:05:00"             # Alert frequency
-    AlertByFailCount: 3                 # Alert after N consecutive failures
-    StartAlertingOn: "09:00:00"        # Start alerting at specific time
-    StopAlertingOn: "17:00:00"         # Stop alerting at specific time
-    PublishAllResults: false            # Publish all check results
-    IncludeEnvironment: true            # Include environment info
-    Timezone: "UTC"                     # Timezone for time-based alerts
+    AlertOnce: false                  # false = repeated alerts
+    AlertOnServiceRecovered: true     # notify on recovery
+    AlertEvery: "00:05:00"           # alert frequency
+    AlertByFailCount: 3              # trigger after N consecutive failures
+    StartAlertingOn: "09:00:00"      # business hours only
+    StopAlertingOn: "17:00:00"
+    PublishAllResults: false
+    IncludeEnvironment: true
+    Timezone: "UTC"
 ```
 
-### Data Storage Options
+| Property | Description | Default |
+|----------|-------------|---------|
+| `TransportMethod` | Transport type (`Email`, `Slack`, `Telegram`, `Webhook`, etc.) | — |
+| `TransportName` | References a named transport config | — |
+| `AlertOnce` | Single alert per failure episode | `false` |
+| `AlertOnServiceRecovered` | Alert when service recovers | `true` |
+| `AlertEvery` | Minimum interval between alerts | `00:05:00` |
+| `AlertByFailCount` | Consecutive failures before alerting | `1` |
+| `StartAlertingOn` / `StopAlertingOn` | Time-of-day alert window | `00:00:00` / `23:59:59` |
+| `PublishAllResults` | Publish all results (not just failures) | `false` |
+| `IncludeEnvironment` | Include environment in alert | `false` |
+| `Timezone` | Timezone for time-based windows | `UTC` |
 
-Choose your preferred data storage backend:
+## Data Storage
 
 ```yaml
 MonitoringUi:
-  DataRepositoryType: "LiteDb"  # Options: InMemory, LiteDb, Sql
-  SqlConnectionString: "Server=localhost;Database=HealthChecks;Integrated Security=true;"
+  DataRepositoryType: "LiteDb"  # InMemory | LiteDb | Sql
+  SqlConnectionString: "Server=localhost;Database=HealthChecks;..."
 ```
 
-- **InMemory**: Fast, no persistence, suitable for development
-- **LiteDb**: File-based, no external dependencies, great for small deployments
-- **Sql**: Full SQL Server support, suitable for enterprise deployments
+| Backend | Persistence | Dependencies | Best For |
+|---------|------------|--------------|----------|
+| **InMemory** | None | None | Development, testing |
+| **LiteDb** | File-based | None | Small-medium deployments |
+| **Sql** | SQL Server | SQL Server instance | Enterprise, multi-instance |
 
-## 📊 Configuration Reference
+## Docker Support
 
-### Core Properties
+A `docker-compose.yml` is included for local development with all supported services:
 
-#### MonitoringUi Settings
+```bash
+docker-compose up -d
+```
 
-| Property | Description | Type | Default |
-|----------|-------------|------|---------|
-| `CompanyName` | Company name displayed in UI | String | - |
-| `HeaderDescription` | Header description text | String | - |
-| `HeaderLogoUrl` | URL to company logo | String | - |
-| `DataRepositoryType` | Data storage backend | Enum | `LiteDb` |
-| `SqlConnectionString` | SQL connection (if using Sql storage) | String | - |
+Starts: SQL Server, MySQL, PostgreSQL, Redis, RabbitMQ, Elasticsearch, Hangfire SQL, and an HTTP test server.
 
-#### Monitoring Settings
+### Running the Monitor in Docker
 
-| Property | Description | Type | Default |
-|----------|-------------|------|---------|
-| `ShowUI` | Enable web dashboard | Boolean | `true` |
-| `UseGlobalServiceName` | Global service identifier | String | - |
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "Simple.Service.Monitoring.dll"]
+```
 
-#### Health Check Properties
+## Dashboard
 
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Unique health check identifier | String | ✅ |
-| `ServiceType` | Type of service to monitor | Enum | ✅ |
-| `EndpointOrHost` | Service endpoint or hostname | String | ✅* |
-| `ConnectionString` | Database/service connection string | String | ✅* |
-| `Port` | Service port number | Integer | - |
-| `MonitoringInterval` | Check frequency | TimeSpan | `00:01:00` |
-| `FullClassName` | Custom health check class | String | - |
-| `PublishChecks` | Publish results to storage | Boolean | `true` |
-| `Alert` | Enable alerting | Boolean | `false` |
-| `AlertBehaviour` | Alert configurations | Array | - |
-| `AdditionalTags` | Custom tags for organization | String[] | - |
-| `ExcludedInterceptionNames` | Excluded interceptor names | String[] | - |
+Access the monitoring dashboard at `/monitoring`. Built with React 18, TypeScript, and Tailwind CSS.
 
-*Required depending on ServiceType
+**Features:**
+- Real-time health status with SignalR live updates
+- Interactive timeline visualization with configurable time ranges
+- Service name grouping — aggregate checks across multiple machines
+- Active services filter — hide inactive monitors
+- Dark mode with system preference detection
+- Mobile-responsive layout
+- Company branding (logo + name)
 
-### Alert Behavior Properties
+## Use Cases
 
-| Property | Description | Type | Default |
-|----------|-------------|------|---------|
-| `TransportMethod` | Alert transport type | Enum | - |
-| `TransportName` | Reference to transport config | String | - |
-| `AlertOnce` | Send single alert per failure | Boolean | `false` |
-| `AlertOnServiceRecovered` | Alert on recovery | Boolean | `true` |
-| `AlertEvery` | Alert frequency | TimeSpan | `00:05:00` |
-| `AlertByFailCount` | Alert after N failures | Integer | `1` |
-| `StartAlertingOn` | Start time for alerts | TimeSpan | `00:00:00` |
-| `StopAlertingOn` | Stop time for alerts | TimeSpan | `23:59:59` |
-| `PublishAllResults` | Publish all check results | Boolean | `false` |
-| `IncludeEnvironment` | Include environment info | Boolean | `false` |
-| `Timezone` | Timezone for time-based alerts | String | `UTC` |
-
-### Transport Settings
-
-#### Email Transport
-
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Transport identifier | String | ✅ |
-| `From` | Sender email address | String | ✅ |
-| `DisplayName` | Sender display name | String | - |
-| `To` | Recipient email address | String | ✅ |
-| `SmtpHost` | SMTP server hostname | String | ✅ |
-| `SmtpPort` | SMTP server port | Integer | ✅ |
-| `Authentication` | Enable SMTP authentication | Boolean | `false` |
-| `Username` | SMTP username | String | - |
-| `Password` | SMTP password | String | - |
-| `Template` | Email template type | String | `Plain` |
-
-#### Slack Transport
-
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Transport identifier | String | ✅ |
-| `Token` | Slack bot token | String | ✅ |
-| `Channel` | Slack channel name | String | ✅ |
-| `Username` | Bot display name | String | - |
-
-#### Telegram Transport
-
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Transport identifier | String | ✅ |
-| `BotApiToken` | Telegram bot API token | String | ✅ |
-| `ChatId` | Telegram chat ID | String | ✅ |
-
-**Telegram Alert Example:**
-
-![Telegram Alert Screenshot](Telegram.png)
-
-#### InfluxDB Transport
-
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Transport identifier | String | ✅ |
-| `Host` | InfluxDB server URL | String | ✅ |
-| `Database` | Database name | String | ✅ |
-
-#### Custom API Transport
-
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Transport identifier | String | ✅ |
-| `BaseEndpoint` | API base URL | String | ✅ |
-| `ApiKey` | API authentication key | String | ✅ |
-| `ProjectName` | Project identifier | String | - |
-| `Environment` | Environment name | String | - |
-
-#### SignalR Transport
-
-| Property | Description | Type | Required |
-|----------|-------------|------|----------|
-| `Name` | Transport identifier | String | ✅ |
-| `HubUrl` | SignalR hub URL | String | ✅ |
-| `HubMethod` | Hub method name | String | `ReceiveHealthAlert` |
-
-## 🎯 Use Cases and Examples
-
-### Microservices Architecture
-
-Monitor multiple microservices with different alert priorities:
+### Microservices Monitoring
 
 ```yaml
 HealthChecks:
-  # Critical user-facing API
   - Name: "User API"
     ServiceType: Http
     EndpointOrHost: "https://user-api.company.com/health"
-    Alert: true
+    AlertBehaviour:
+      - TransportMethod: PagerDuty
+        TransportName: "CriticalPD"
+        AlertByFailCount: 2
+    AdditionalTags: ["critical", "user-facing"]
+
+  - Name: "Order Queue"
+    ServiceType: Kafka
+    EndpointOrHost: "kafka-broker:9092"
     AlertBehaviour:
       - TransportMethod: Slack
-        TransportName: "CriticalAlerts"
-        AlertEvery: "00:01:00"
-    AdditionalTags: ["critical", "user-facing"]
-  
-  # Internal service with less critical monitoring
-  - Name: "Internal Cache"
-    ServiceType: Redis
-    ConnectionString: "internal-redis:6379"
-    Alert: true
-    AlertBehaviour:
-      - TransportMethod: Email
-        TransportName: "DevOpsEmail"
-        AlertEvery: "00:15:00"
-    AdditionalTags: ["internal", "cache"]
+        TransportName: "OpsSlack"
+    AdditionalTags: ["messaging"]
 ```
 
-### Database Monitoring with Custom Queries
-
-Monitor database health with business logic validation:
-
-#### SQL Server Example
+### Database Health with Business Logic
 
 ```yaml
 HealthChecks:
-  - Name: "Order Processing Health"
+  - Name: "Stuck Orders Alert"
     ServiceType: MsSql
-    ConnectionString: "Server=db.company.com;Database=Orders;..."
+    ConnectionString: "Server=db;Database=Orders;..."
     HealthCheckConditions:
       SqlBehaviour:
         Query: |
-          SELECT COUNT(*) 
-          FROM Orders 
-          WHERE CreatedDate > DATEADD(hour, -1, GETDATE()) 
-          AND Status = 'Processing'
+          SELECT COUNT(*) FROM Orders
+          WHERE Status = 'Processing'
+          AND CreatedDate < DATEADD(hour, -1, GETDATE())
         ResultExpression: LessThan
         SqlResultDataType: Int
-        ExpectedResult: 100  # Alert if more than 100 orders stuck processing
-    Alert: true
+        ExpectedResult: 50
     AlertBehaviour:
-      - TransportMethod: Telegram
-        TransportName: "BusinessAlerts"
+      - TransportMethod: Teams
+        TransportName: "BusinessTeams"
 ```
 
-#### PostgreSQL Example
+### SSL Certificate Expiry
 
 ```yaml
 HealthChecks:
-  - Name: "PostgreSQL User Activity"
-    ServiceType: PostgreSql
-    ConnectionString: "Host=postgres.company.com;Port=5432;Database=app;Username=monitor;Password=secret;SSL Mode=Require"
-    MonitoringInterval: "00:02:00"
-    HealthCheckConditions:
-      SqlBehaviour:
-        Query: |
-          SELECT COUNT(*) 
-          FROM active_sessions 
-          WHERE last_activity > NOW() - INTERVAL '5 minutes'
-        ResultExpression: GreaterThan
-        SqlResultDataType: Int
-        ExpectedResult: 0
-    Alert: true
+  - Name: "API SSL Certificate"
+    ServiceType: SslCertificate
+    EndpointOrHost: "api.company.com"
+    Port: 443
     AlertBehaviour:
       - TransportMethod: Email
-        TransportName: "DevOpsEmail"
-    AdditionalTags:
-      - "database"
-      - "postgresql"
+        TransportName: "SecurityEmail"
+        AlertEvery: "24:00:00"
 ```
 
-**PostgreSQL Connection String Options:**
-- `Host` - Server hostname or IP
-- `Port` - Server port (default: 5432)
-- `Database` - Database name
-- `Username` - Database user
-- `Password` - User password
-- `SSL Mode` - SSL connection mode (Disable, Allow, Prefer, Require)
-- `Timeout` - Connection timeout in seconds
-- `Pooling` - Enable/disable connection pooling (default: true)
-
-#### MySQL Example
+### Multi-Environment Setup
 
 ```yaml
-HealthChecks:
-  - Name: "MySQL Replication Lag"
-    ServiceType: MySql
-    ConnectionString: "Server=mysql.company.com;Database=app;Uid=monitor;Pwd=secret;"
-    HealthCheckConditions:
-      SqlBehaviour:
-        Query: "SHOW SLAVE STATUS"
-        ResultExpression: Equal
-        SqlResultDataType: Int
-        ExpectedResult: 0
-    Alert: true
-```
-
-### Environment-Specific Configuration
-
-Configure different monitoring for different environments:
-
-```yaml
-# Production - High frequency monitoring
+# appsettings.Production.yml
 Monitoring:
   Settings:
-    UseGlobalServiceName: "Production Services"
+    UseGlobalServiceName: "Production"
   HealthChecks:
-    - Name: "Production API"
-      MonitoringInterval: "00:00:30"  # 30 seconds
-      Alert: true
+    - Name: "Prod API"
+      MonitoringInterval: "00:00:30"
       AlertBehaviour:
-        - TransportMethod: Slack
-          AlertEvery: "00:01:00"      # Immediate alerts
+        - TransportMethod: PagerDuty
+          AlertEvery: "00:01:00"
 
----
-# Development - Relaxed monitoring  
+# appsettings.Development.yml
 Monitoring:
   Settings:
-    UseGlobalServiceName: "Development Services"
+    UseGlobalServiceName: "Development"
   HealthChecks:
     - Name: "Dev API"
-      MonitoringInterval: "00:05:00"  # 5 minutes
-      Alert: false                    # No alerts in dev
+      MonitoringInterval: "00:05:00"
+      Alert: false
 ```
 
-## 🛠️ Tools and Utilities
+## Tools
 
-### Configuration Generator
+| Tool | Description |
+|------|-------------|
+| **Config Generator** (`Simple.Service.Monitoring.Config.Generator`) | WinForms app for visual health check configuration with JSON/YAML export |
+| **Sample API** (`Simple.Service.Monitoring.Sample.API`) | Reference implementation with custom health checks and transport configs |
 
-The solution includes a Windows Forms application for visual configuration management:
+## Configuration Reference
 
-- **Location**: `Simple.Service.Monitoring.Config.Generator`
-- **Features**:
-  - Visual health check configuration
-  - Real-time validation
-  - Export to JSON/YAML
-  - Import existing configurations
+### Health Check Properties
 
-### Sample Implementation
+| Property | Type | Required | Default | Description |
+|----------|------|----------|---------|-------------|
+| `Name` | String | Yes | — | Unique identifier |
+| `ServiceType` | Enum | Yes | — | One of [26 service types](#service-types-reference) |
+| `EndpointOrHost` | String | Varies | — | Service endpoint or hostname |
+| `ConnectionString` | String | Varies | — | Database/service connection string |
+| `Port` | Integer | No | — | Service port |
+| `MonitoringInterval` | TimeSpan | No | `00:01:00` | Check frequency |
+| `FullClassName` | String | No | — | Custom `IHealthCheck` class (for `Custom` type) |
+| `PublishChecks` | Boolean | No | `true` | Publish results to storage |
+| `Alert` | Boolean | No | `false` | Enable alerting |
+| `AlertBehaviour` | Array | No | — | Alert configurations |
+| `AdditionalTags` | String[] | No | — | Tags for grouping/filtering |
 
-Reference the sample API project for implementation examples:
+### MonitoringUi Settings
 
-- **Location**: `Simple.Service.Monitoring.Sample.API`
-- **Features**:
-  - Custom health check implementations
-  - Multiple transport configurations
-  - Real-world monitoring scenarios
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `CompanyName` | String | — | Displayed in dashboard header |
+| `HeaderDescription` | String | — | Header subtitle |
+| `HeaderLogoUrl` | String | — | Company logo URL |
+| `DataRepositoryType` | Enum | `LiteDb` | `InMemory`, `LiteDb`, or `Sql` |
+| `SqlConnectionString` | String | — | Required when using `Sql` storage |
 
-## 🔍 Dashboard Features
+## What's New in v2.0
 
-### Real-time Monitoring Dashboard
+- **HTTP Custom Headers** — attach `Authorization`, `X-Api-Key`, or any custom headers to HTTP health checks
+- **Detailed Failure/Success Reports** — rich diagnostic info in alerts (response time, status code, error details)
+- **Enhanced Telegram Formatting** — HTML templates with emoji indicators
+- **15 New Service Monitors** — Kafka, gRPC, TCP, DNS, SSL Certificate, FTP, SMTP, Azure Service Bus, Memcached, Docker, AWS SQS, CosmosDB, MongoDB, Oracle, SQLite
+- **17 New Transport Publishers** — Discord, Teams, Google Chat, Mattermost, PagerDuty, Opsgenie, Datadog, CloudWatch, App Insights, Prometheus, Kafka, Redis, RabbitMQ, Elasticsearch, Console, File Log
+- **React SPA Dashboard** — complete rewrite with React 18, TypeScript, Tailwind CSS, shadcn/ui
+- **Timeline Grouping** — group health checks by service name across machines
+- **Active Services Filter** — hide inactive monitors from the timeline
+- **Bug Fixes** — duration reporting accuracy, Redis concurrency safety, credential security
 
-Access the web dashboard at `/monitoring` (configurable) to view:
+See [RELEASE_NOTES_v2.0.0.md](Simple.Service.Monitoring/RELEASE_NOTES_v2.0.0.md) for full details.
 
-- **Live Status**: Real-time health status with automatic updates
-- **Timeline View**: Historical health data visualization
-- **Service Groups**: Organized view by tags and categories
-- **Alert History**: Complete audit trail of all alerts
-- **Performance Metrics**: Response times and availability statistics
+## Contributing
 
-### Dark Mode Support
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-The dashboard includes a modern dark mode with:
+```bash
+git clone https://github.com/turric4n/Dotnet.Simple.Service.Monitoring.git
+cd Dotnet.Simple.Service.Monitoring
+dotnet restore Simple.Service.Monitoring/Simple.Service.Monitoring.sln
+dotnet build Simple.Service.Monitoring/Simple.Service.Monitoring.sln
+dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj
+```
 
-- Automatic system preference detection
-- Manual toggle option
-- Persistent user preferences
-- Consistent theming across all components
+## License
 
-### Mobile Responsiveness
+MIT — see [LICENSE](LICENSE) for details.
 
-Fully responsive design supporting:
+## Support
 
-- Mobile phones and tablets
-- Touch-friendly interactions
-- Optimized layouts for different screen sizes
-- Offline-capable PWA features
-
-## 🚀 Performance and Scalability
-
-### Lightweight Architecture
-
-- **Minimal Dependencies**: Built on standard .NET health check framework
-- **Efficient Polling**: Configurable intervals prevent resource waste
-- **Async Operations**: Non-blocking health check execution
-- **Memory Optimized**: LiteDB option for minimal memory footprint
-
-### Enterprise Ready
-
-- **Multiple Storage Backends**: Scale from single instance to enterprise
-- **Load Balancer Support**: Health checks work behind load balancers
-- **Container Ready**: Docker and Kubernetes compatible
-- **Cloud Native**: Works with Azure, AWS, and other cloud platforms
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our contributing guidelines:
-
-1. Fork the repository
-1. Create a feature branch (`git checkout -b feature/amazing-feature`)
-1. Commit your changes (`git commit -m 'Add some amazing feature'`)
-1. Push to the branch (`git push origin feature/amazing-feature`)
-1. Open a Pull Request
-
-### Development Setup
-
-1. Clone the repository
-1. Open in Visual Studio 2022 or VS Code
-1. Restore NuGet packages: `dotnet restore`
-1. Build solution: `dotnet build`
-1. Run tests: `dotnet test`
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built on top of Microsoft.Extensions.Diagnostics.HealthChecks framework
-- Inspired by enterprise monitoring needs
-- Community contributions and feedback
-
-## 📞 Support
-
-- **Issues**: [GitHub Issues](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/discussions)
-- **Documentation**: [Wiki](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/wiki)
+- [GitHub Issues](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues) — bug reports & feature requests
+- [GitHub Discussions](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/discussions) — questions & ideas
+- [Wiki](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/wiki) — full documentation
 
 ---
 
-Made with ❤️ for the .NET community
+<div align="center">
+Made with ❤️ for the .NET community by <a href="https://github.com/turric4n">Turrican</a>
+</div>

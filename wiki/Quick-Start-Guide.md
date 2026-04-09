@@ -4,7 +4,7 @@ Get up and running with Simple Service Monitoring in just a few minutes!
 
 ## Prerequisites
 
-- .NET 8.0 SDK or later
+- .NET 6.0 SDK or later (.NET 10 recommended)
 - ASP.NET Core application
 - Visual Studio 2022, VS Code, or Rider
 

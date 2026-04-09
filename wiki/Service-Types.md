@@ -1,6 +1,41 @@
 # Service Types
 
-Simple Service Monitoring supports 10+ different service types for comprehensive monitoring of your infrastructure.
+Simple Service Monitoring supports **26 service types** for comprehensive monitoring of your entire infrastructure.
+
+> **Full reference with all types**: See [docs/service-monitors.md](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/service-monitors.md)
+
+## All Service Types
+
+| Category | Type | Config Key | Description |
+|----------|------|-----------|-------------|
+| Web & API | HTTP/HTTPS | `Http` | Endpoint monitoring with custom headers, expected codes, timeouts |
+| Web & API | gRPC | `Grpc` | gRPC health check protocol |
+| Web & API | TCP | `Tcp` | Raw TCP connection check |
+| Web & API | Ping/ICMP | `Ping` | Network reachability |
+| Web & API | DNS | `Dns` | DNS resolution check |
+| Web & API | FTP | `Ftp` | FTP server availability |
+| Web & API | SMTP | `Smtp` | Mail server availability |
+| SQL Databases | SQL Server | `MsSql` | Custom queries with result validation |
+| SQL Databases | MySQL | `MySql` | Custom queries with result validation |
+| SQL Databases | PostgreSQL | `PostgreSql` | Custom queries with result validation |
+| SQL Databases | Oracle | `Oracle` | Custom queries with result validation |
+| SQL Databases | SQLite | `Sqlite` | Custom queries with result validation |
+| NoSQL & Cache | Redis | `Redis` | Connection + timeout check |
+| NoSQL & Cache | Elasticsearch | `ElasticSearch` | Cluster health |
+| NoSQL & Cache | MongoDB | `MongoDb` | Collection availability |
+| NoSQL & Cache | CosmosDB | `CosmosDb` | Azure Cosmos DB health |
+| NoSQL & Cache | Memcached | `Memcached` | Server check |
+| Message Brokers | RabbitMQ | `Rmq` | Broker connectivity |
+| Message Brokers | Kafka | `Kafka` | Bootstrap server check |
+| Message Brokers | Azure Service Bus | `AzureServiceBus` | Queue/topic health |
+| Message Brokers | AWS SQS | `AwsSqs` | SQS queue health |
+| Infrastructure | Docker | `Docker` | Docker daemon health |
+| Infrastructure | SSL Certificate | `SslCertificate` | Certificate expiry check |
+| Infrastructure | Hangfire | `Hangfire` | Failed jobs & server count |
+| Custom | Custom | `Custom` | Any `IHealthCheck` implementation |
+| Custom | Interceptor | `Interceptor` | Application request monitoring |
+
+---
 
 ## HTTP/HTTPS Services
 

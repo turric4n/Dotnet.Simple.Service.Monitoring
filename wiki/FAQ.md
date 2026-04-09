@@ -12,7 +12,7 @@ Yes! Simple Service Monitoring is open source and licensed under the MIT License
 
 ### What .NET versions are supported?
 
-The system supports .NET 6.0, .NET 7.0, and .NET 8.0+. It's built on ASP.NET Core and leverages the standard .NET health checks framework.
+The library targets .NET Standard 2.1 and works with .NET 6.0, .NET 7.0, .NET 8.0, and .NET 10.0+. Tests require .NET 10.
 
 ### Do I need external dependencies?
 

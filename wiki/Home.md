@@ -1,72 +1,51 @@
 # Simple Service Monitoring - Wiki
 
-Welcome to the **Simple Service Monitoring** wiki! This comprehensive guide will help you understand, configure, and extend this enterprise-grade health monitoring solution for .NET applications.
+Welcome to the **Simple Service Monitoring** wiki! This comprehensive guide covers the full v2.0 feature set: **26 service monitors**, **24 transport publishers**, and a **React-based real-time dashboard**.
 
 ## 📚 Table of Contents
 
 ### Getting Started
-- [Introduction](Introduction.md) - Overview and key features
-- [Quick Start Guide](Quick-Start-Guide.md) - Get up and running in minutes
-- [Installation](Installation.md) - Detailed installation instructions
-- [Architecture Overview](Architecture-Overview.md) - System architecture and components
+- [Introduction](Introduction.md) — Overview and key features
+- [Quick Start Guide](Quick-Start-Guide.md) — Get up and running in minutes
 
 ### Configuration
-- [Configuration Guide](Configuration-Guide.md) - Complete configuration reference
-- [Service Types](Service-Types.md) - All supported service monitoring types
-- [Alert Configuration](Alert-Configuration.md) - Setting up intelligent alerting
-- [Transport Methods](Transport-Methods.md) - Email, Slack, Telegram, and more
-- [Data Storage Options](Data-Storage-Options.md) - InMemory, LiteDB, SQL Server
+- [Service Types](Service-Types.md) — All 26 supported service monitoring types
+- [Transport Methods](Transport-Methods.md) — All 24 alert transport channels
+- [Alert Configuration](Alert-Configuration.md) — Intelligent alerting rules
 
 ### Dashboard & UI
-- [Web Dashboard](Web-Dashboard.md) - Using the monitoring dashboard
-- [Status Page Component](Status-Page-Component.md) - Status page visualization
-- [Dark Mode](Dark-Mode.md) - Theme customization
-- [Custom Branding](Custom-Branding.md) - Company logos and branding
+- [Status Page Component](Status-Page-Component.md) — Timeline visualization and status indicators
 
-### Advanced Topics
-- [Custom Health Checks](Custom-Health-Checks.md) - Implementing custom monitoring
-- [SQL Query Health Checks](SQL-Query-Health-Checks.md) - Database monitoring with custom queries
-- [Request Interceptors](Request-Interceptors.md) - Application request monitoring
-- [Performance Tuning](Performance-Tuning.md) - Optimization and best practices
-- [Scaling Strategies](Scaling-Strategies.md) - Enterprise deployment patterns
+### Troubleshooting
+- [FAQ](FAQ.md) — Frequently asked questions
 
-### Integration & Deployment
-- [Docker Deployment](Docker-Deployment.md) - Container deployment guide
-- [Kubernetes Deployment](Kubernetes-Deployment.md) - K8s deployment patterns
-- [Azure Integration](Azure-Integration.md) - Azure App Service and AKS
-- [CI/CD Integration](CICD-Integration.md) - Automated deployment pipelines
+### Extended Documentation
 
-### Development
-- [Project Structure](Project-Structure.md) - Codebase organization
-- [Contributing Guide](Contributing-Guide.md) - How to contribute
-- [Building from Source](Building-from-Source.md) - Development setup
-- [API Reference](API-Reference.md) - Code API documentation
+For detailed guides, see the [docs/](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/tree/master/docs) directory:
 
-### Troubleshooting & FAQ
-- [Common Issues](Common-Issues.md) - Troubleshooting guide
-- [FAQ](FAQ.md) - Frequently asked questions
-- [Performance Issues](Performance-Issues.md) - Performance troubleshooting
-- [Debugging Guide](Debugging-Guide.md) - TypeScript and C# debugging
-
-### Examples & Recipes
-- [Example Configurations](Example-Configurations.md) - Ready-to-use configurations
-- [Microservices Monitoring](Microservices-Monitoring.md) - Monitoring microservices
-- [Database Monitoring Patterns](Database-Monitoring-Patterns.md) - Database health check patterns
-- [Multi-Environment Setup](Multi-Environment-Setup.md) - Dev, staging, production
+| Guide | Description |
+|-------|-------------|
+| [Architecture](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/architecture.md) | System architecture, data flow, component overview |
+| [Service Monitors](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/service-monitors.md) | All 26 monitor types with full config examples |
+| [Transport Publishers](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/transport-publishers.md) | All 24 transport channels with config examples |
+| [Dashboard](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/dashboard.md) | React SPA dashboard features and configuration |
+| [Deployment](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/deployment.md) | Docker, Kubernetes, Azure, IIS deployment |
+| [Migration v1→v2](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/migration-v2.md) | Upgrade guide from v1.x to v2.0 |
+| [Example Configs](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/examples/configurations.md) | Ready-to-use configuration examples |
 
 ## 🚀 Quick Links
 
-- **[Quick Start Guide](Quick-Start-Guide.md)** - New to the project? Start here!
-- **[Configuration Examples](Example-Configurations.md)** - Copy-paste ready configurations
-- **[Troubleshooting](Common-Issues.md)** - Having issues? Check here first
-- **[API Reference](API-Reference.md)** - Complete API documentation
+- **[Quick Start Guide](Quick-Start-Guide.md)** — New to the project? Start here!
+- **[Example Configurations](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/examples/configurations.md)** — Copy-paste ready configurations
+- **[FAQ](FAQ.md)** — Common questions answered
+- **[Contributing](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/CONTRIBUTING.md)** — How to contribute
 
 ## 📦 Project Information
 
 - **Repository**: [GitHub](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring)
 - **License**: MIT
 - **Author**: Turrican (Enrique Fuentes)
-- **Version**: 1.0.17+
+- **Version**: 2.0.0
 
 ## 🤝 Community
 
@@ -74,10 +53,12 @@ Welcome to the **Simple Service Monitoring** wiki! This comprehensive guide will
 - [Request Features](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues/new)
 - [Discussions](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/discussions)
 
-## 📝 Recent Updates
+## 📝 v2.0 Highlights
 
-- Status Page Component with timeline visualization
-- Enhanced dark mode support
+- **15 new service monitors**: Kafka, gRPC, TCP, DNS, SSL Certificate, FTP, SMTP, Azure Service Bus, Memcached, Docker, AWS SQS, CosmosDB, MongoDB, Oracle, SQLite
+- **17 new transport publishers**: Discord, Teams, Google Chat, Mattermost, PagerDuty, Opsgenie, Datadog, CloudWatch, App Insights, Prometheus, Kafka, Redis, RabbitMQ, Elasticsearch, Console, File Log
+- **React SPA dashboard**: React 18 + TypeScript + Tailwind CSS + shadcn/ui
+- **HTTP custom headers**, **detailed failure reports**, **timeline grouping**, **active services filter**
 - TypeScript debugging integration
 - Improved webpack configuration
 - Extended configuration options
