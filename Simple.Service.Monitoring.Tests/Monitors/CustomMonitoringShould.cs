@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NUnit.Framework;
 using Simple.Service.Monitoring.Library.Models;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations;
 using System;
+using System.Threading.Tasks;
 
 namespace Simple.Service.Monitoring.Tests.Monitors
 {
@@ -19,7 +22,7 @@ namespace Simple.Service.Monitoring.Tests.Monitors
         }
 
         [Test]
-        public void Given_Valid_Custom_Monitoring_Will_Return_Healthy_Status()
+        public void Given_Valid_Custom_Monitoring_Will_Create_Instance()
         {
             //Arrange
             var custompointhealthcheck = new ServiceHealthCheck()
@@ -27,6 +30,28 @@ namespace Simple.Service.Monitoring.Tests.Monitors
                 Name = "testhealthcheck",
                 ServiceType = ServiceType.Custom
             };
+
+            //Act
+            var monitor = new CustomMonitoring(healthChecksBuilder, custompointhealthcheck);
+
+            //Assert
+            Assert.That(monitor, Is.Not.Null);
+        }
+
+        [Test]
+        public void Given_Custom_Check_Function_Will_Not_Throw()
+        {
+            //Arrange
+            var custompointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheck",
+                ServiceType = ServiceType.Custom
+            };
+
+            var monitor = new CustomMonitoring(healthChecksBuilder, custompointhealthcheck);
+
+            //Act & Assert
+            Assert.DoesNotThrow(() => monitor.AddCustomCheck(() => Task.FromResult(HealthCheckResult.Healthy("OK"))));
         }
     }
 }
