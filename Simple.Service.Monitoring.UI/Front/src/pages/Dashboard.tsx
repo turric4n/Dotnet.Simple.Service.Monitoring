@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { type ColumnDef } from '@tanstack/react-table';
 import type { GroupedHealthCheck } from '@/models/types';
+import { HealthStatus } from '@/models/types';
 import { StatusCard } from '@/components/shared/StatusCard';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { StatusDot } from '@/components/shared/StatusDot';
@@ -120,9 +121,9 @@ export default function Dashboard() {
     if (!grouped.length) return { total: 0, healthy: 0, degraded: 0, unhealthy: 0 };
     return {
       total: grouped.length,
-      healthy: grouped.filter((c) => c.status === 'Healthy').length,
-      degraded: grouped.filter((c) => c.status === 'Degraded').length,
-      unhealthy: grouped.filter((c) => c.status === 'Unhealthy').length,
+      healthy: grouped.filter((c) => c.status === HealthStatus.Healthy).length,
+      degraded: grouped.filter((c) => c.status === HealthStatus.Degraded).length,
+      unhealthy: grouped.filter((c) => c.status === HealthStatus.Unhealthy).length,
     };
   }, [grouped]);
 

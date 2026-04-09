@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryProvider } from '@/providers/QueryProvider';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { router } from '@/routes';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,12 +20,14 @@ function LoadingFallback() {
 
 export default function App() {
   return (
-    <QueryProvider>
-      <TooltipProvider delayDuration={300}>
-        <Suspense fallback={<LoadingFallback />}>
-          <RouterProvider router={router} />
-        </Suspense>
-      </TooltipProvider>
-    </QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
+        <TooltipProvider delayDuration={300}>
+          <Suspense fallback={<LoadingFallback />}>
+            <RouterProvider router={router} />
+          </Suspense>
+        </TooltipProvider>
+      </QueryProvider>
+    </ErrorBoundary>
   );
 }

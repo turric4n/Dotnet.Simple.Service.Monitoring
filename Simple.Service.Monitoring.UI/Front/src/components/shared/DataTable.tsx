@@ -1,5 +1,6 @@
 import {
   type ColumnDef,
+  type Column,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -9,7 +10,7 @@ import {
   type ColumnFiltersState,
   useReactTable,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -44,6 +45,16 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [searchValue, setSearchValue] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  useEffect(() => {
+    if (!searchKey) return;
+    debounceRef.current = setTimeout(() => {
+      table.getColumn(searchKey)?.setFilterValue(searchValue);
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchValue, searchKey]);
 
   const table = useReactTable({
     data,
@@ -65,8 +76,8 @@ export function DataTable<TData, TValue>({
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={searchPlaceholder}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-            onChange={(e) => table.getColumn(searchKey)?.setFilterValue(e.target.value)}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             className="pl-9"
           />
         </div>
@@ -139,7 +150,7 @@ export function DataTable<TData, TValue>({
   );
 }
 
-export function SortableHeader({ column, children }: { column: any; children: React.ReactNode }) {
+export function SortableHeader<TData>({ column, children }: { column: Column<TData, unknown>; children: React.ReactNode }) {
   return (
     <Button
       variant="ghost"
