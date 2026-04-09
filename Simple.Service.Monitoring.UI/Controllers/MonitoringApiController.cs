@@ -40,7 +40,8 @@ namespace Simple.Service.Monitoring.UI.Controllers
         [HttpGet("timeline")]
         public async Task<IActionResult> GetTimeline([FromQuery] int hours = 24)
         {
-            if (hours < 1 || hours > 720) hours = 24;
+            if (hours < 1 || hours > 720)
+                return BadRequest("'hours' must be between 1 and 720");
             var timeline = await _monitoringDataService.GetHealthCheckTimeline(hours);
             return Ok(timeline);
         }
@@ -51,7 +52,8 @@ namespace Simple.Service.Monitoring.UI.Controllers
             [FromQuery] bool activeOnly = false,
             [FromQuery] int activeThresholdMinutes = 60)
         {
-            if (hours < 1 || hours > 720) hours = 24;
+            if (hours < 1 || hours > 720)
+                return BadRequest("'hours' must be between 1 and 720");
             var timeline = await _monitoringDataService.GetHealthCheckTimelineGroupedByService(
                 hours, activeOnly, activeThresholdMinutes);
             return Ok(timeline);

@@ -72,16 +72,29 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 FileProvider = embeddedFileProvider,
                 RequestPath = "/monitoring-static",
-                // Add cache control headers for better caching behavior
                 OnPrepareResponse = ctx =>
                 {
-                    // Set cache control headers
+                    var path = ctx.File.Name;
                     var headers = ctx.Context.Response.GetTypedHeaders();
-                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+
+                    // Content-hashed files (e.g. main.abc123.js) get long cache
+                    // Non-hashed files (e.g. asset-manifest.json) get no-cache
+                    if (IsContentHashedFile(path))
                     {
-                        Public = true,
-                        MaxAge = TimeSpan.FromDays(365) // Long cache for hashed assets
-                    };
+                        headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                        {
+                            Public = true,
+                            MaxAge = TimeSpan.FromDays(365)
+                        };
+                    }
+                    else
+                    {
+                        headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                        {
+                            NoCache = true,
+                            NoStore = true
+                        };
+                    }
                 }
             });
 
@@ -104,6 +117,13 @@ namespace Microsoft.Extensions.DependencyInjection
             endpoints.MapHub<MonitoringHub>("/monitoringhub");
 
             return endpoints;
+        }
+
+        private static bool IsContentHashedFile(string fileName)
+        {
+            // Webpack outputs content-hashed files like main.abc12345.js or main.abc12345.css
+            var parts = fileName.Split('.');
+            return parts.Length >= 3 && parts[^2].Length >= 8;
         }
     }
 }
