@@ -21,6 +21,7 @@
             MemcachedBehaviour = new MemcachedBehaviour();
             DockerBehaviour = new DockerBehaviour();
             AwsSqsBehaviour = new AwsSqsBehaviour();
+            PingBehaviour = new PingBehaviour();
         }
 
         public HttpBehaviour HttpBehaviour { get; set; }
@@ -40,6 +41,7 @@
         public MemcachedBehaviour MemcachedBehaviour { get; set; }
         public DockerBehaviour DockerBehaviour { get; set; }
         public AwsSqsBehaviour AwsSqsBehaviour { get; set; }
+        public PingBehaviour PingBehaviour { get; set; }
 
         // TCP, DNS, ICMP
         public bool ServiceReach { get; set; }

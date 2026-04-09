@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,12 +75,19 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                 var currentStatus = $"{statusEmoji} [{healthCheckData.Status}]";
                 var subject = $"{currentStatus} - Alert Triggered: {healthCheckData.Name}";
 
-                var body = $"<h2>{currentStatus} - Alert Triggered: {healthCheckData.Name}</h2>" +
+                var encodedName = WebUtility.HtmlEncode(healthCheckData.Name);
+                var encodedMachine = WebUtility.HtmlEncode(healthCheckData.MachineName);
+                var encodedServiceType = WebUtility.HtmlEncode(healthCheckData.ServiceType.ToString());
+                var encodedDescription = WebUtility.HtmlEncode(healthCheckData.Description);
+                var encodedCheckError = WebUtility.HtmlEncode(healthCheckData.CheckError);
+                var encodedEndpoint = WebUtility.HtmlEncode(healthCheckData.Tags.GetValueOrDefault("Endpoint", healthCheckData.Tags.GetValueOrDefault("Host", "Not specified")));
+
+                var body = $"<h2>{currentStatus} - Alert Triggered: {encodedName}</h2>" +
                           $"<table style='border-collapse: collapse; width: 100%;'>" +
                           $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🕒 Triggered On:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{DateTime.Now:yyyy-MM-dd HH:mm:ss}</td></tr>" +
-                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>💻 Machine:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.MachineName}</td></tr>" +
-                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🔧 Service Type:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.ServiceType}</td></tr>" +
-                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🔗 Endpoint:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Tags.GetValueOrDefault("Endpoint", healthCheckData.Tags.GetValueOrDefault("Host", "Not specified"))}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>💻 Machine:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{encodedMachine}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🔧 Service Type:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{encodedServiceType}</td></tr>" +
+                          $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>🔗 Endpoint:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{encodedEndpoint}</td></tr>" +
                           $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>⏱️ Duration:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Duration} ms</td></tr>" +
                           $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>📊 Status:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Status}</td></tr>";
 
@@ -88,14 +96,14 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     healthCheckData.Status == (Models.HealthStatus)HealthStatus.Degraded)
                 {
                     var errorDetails = string.IsNullOrEmpty(healthCheckData.CheckError) || healthCheckData.CheckError == "None" 
-                        ? healthCheckData.Description 
-                        : healthCheckData.CheckError;
+                        ? encodedDescription 
+                        : encodedCheckError;
                     
                     body += $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>❗️ Error Details:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{errorDetails}</td></tr>";
                 }
                 else
                 {
-                    body += $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>📝 Details:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{healthCheckData.Description}</td></tr>";
+                    body += $"<tr><td style='padding: 8px; border: 1px solid #ddd;'><strong>📝 Details:</strong></td><td style='padding: 8px; border: 1px solid #ddd;'>{encodedDescription}</td></tr>";
                 }
 
                 body += "</table>";
@@ -114,7 +122,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                         body += $"<h4>❌ Failed ({failureList.Length}):</h4><ul>";
                         foreach (var failure in failureList)
                         {
-                            body += $"<li>{failure}</li>";
+                            body += $"<li>{WebUtility.HtmlEncode(failure)}</li>";
                         }
                         body += "</ul>";
                     }
@@ -125,7 +133,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                         body += $"<h4>✅ Succeeded ({successList.Length}):</h4><ul>";
                         foreach (var success in successList)
                         {
-                            body += $"<li>{success}</li>";
+                            body += $"<li>{WebUtility.HtmlEncode(success)}</li>";
                         }
                         body += "</ul>";
                     }
@@ -147,7 +155,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations.Publisher
                     body += "<br/><h3>📋 Additional Information</h3><ul>";
                     foreach (var tag in additionalTags)
                     {
-                        body += $"<li><strong>{tag.Key}:</strong> {tag.Value}</li>";
+                        body += $"<li><strong>{WebUtility.HtmlEncode(tag.Key)}:</strong> {WebUtility.HtmlEncode(tag.Value)}</li>";
                     }
                     body += "</ul>";
                 }

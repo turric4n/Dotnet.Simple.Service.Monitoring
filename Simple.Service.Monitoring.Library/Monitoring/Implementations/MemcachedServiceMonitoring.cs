@@ -60,9 +60,22 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
             TcpClient client = null;
             try
             {
-                var parts = _endpoint.Split(':');
-                var host = parts[0];
-                var port = parts.Length > 1 && int.TryParse(parts[1], out var p) ? p : 11211;
+                string host;
+                int port;
+
+                // Handle IPv6 bracket notation: [::1]:11211
+                if (_endpoint.StartsWith("["))
+                {
+                    var closeBracket = _endpoint.IndexOf(']');
+                    host = _endpoint.Substring(1, closeBracket - 1);
+                    port = _endpoint.Length > closeBracket + 2 && int.TryParse(_endpoint.Substring(closeBracket + 2), out var p6) ? p6 : 11211;
+                }
+                else
+                {
+                    var parts = _endpoint.Split(':');
+                    host = parts[0];
+                    port = parts.Length > 1 && int.TryParse(parts[1], out var p) ? p : 11211;
+                }
 
                 client = new TcpClient();
                 using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);

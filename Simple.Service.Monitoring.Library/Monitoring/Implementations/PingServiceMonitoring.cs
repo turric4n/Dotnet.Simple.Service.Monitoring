@@ -32,12 +32,13 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
         protected internal override void SetMonitoring()
         {
             var hosts = HealthCheck.EndpointOrHost.Split(',').Select(h => h.Trim()).ToList();
+            var timeoutMs = HealthCheck.HealthCheckConditions.PingBehaviour.TimeOutMs;
 
             HealthChecksBuilder.AddAsyncCheck(
                 HealthCheck.Name,
                 async () =>
                 {
-                    var healthCheck = new PingHealthCheck(hosts);
+                    var healthCheck = new PingHealthCheck(hosts, timeoutMs);
                     return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
                 },
                 GetTags());
@@ -51,11 +52,12 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
     internal class PingHealthCheck : IHealthCheck
     {
         private readonly List<string> _hosts;
-        private const int TimeoutMs = 1000;
+        private readonly int _timeoutMs;
 
-        public PingHealthCheck(List<string> hosts)
+        public PingHealthCheck(List<string> hosts, int timeoutMs = 5000)
         {
             _hosts = hosts ?? throw new ArgumentNullException(nameof(hosts));
+            _timeoutMs = timeoutMs;
         }
 
         public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
@@ -69,7 +71,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 try
                 {
                     using var ping = new Ping();
-                    var reply = await ping.SendPingAsync(host, TimeoutMs);
+                    var reply = await ping.SendPingAsync(host, _timeoutMs);
 
                     if (reply.Status == IPStatus.Success)
                     {

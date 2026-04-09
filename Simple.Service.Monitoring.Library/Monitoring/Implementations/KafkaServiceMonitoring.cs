@@ -70,7 +70,9 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                 };
 
                 using var adminClient = new AdminClientBuilder(config).Build();
-                var metadata = adminClient.GetMetadata(TimeSpan.FromMilliseconds(_timeout.TotalMilliseconds));
+                var metadata = await Task.Run(
+                    () => adminClient.GetMetadata(TimeSpan.FromMilliseconds(_timeout.TotalMilliseconds)),
+                    cancellationToken);
 
                 if (metadata.Brokers == null || metadata.Brokers.Count == 0)
                 {
@@ -86,8 +88,7 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     }
                 }
 
-                return await Task.FromResult(
-                    HealthCheckResult.Healthy($"Kafka cluster healthy. {metadata.Brokers.Count} broker(s) available"));
+                return HealthCheckResult.Healthy($"Kafka cluster healthy. {metadata.Brokers.Count} broker(s) available");
             }
             catch (Exception ex)
             {
