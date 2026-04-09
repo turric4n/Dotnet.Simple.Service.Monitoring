@@ -3,15 +3,32 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Simple.Service.Monitoring.Library.Models;
 using Simple.Service.Monitoring.Library.Models.TransportSettings;
 using Simple.Service.Monitoring.Library.Monitoring.Abstractions;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.AppInsights;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CloudWatch;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Console;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.CustomNotificationService;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Datadog;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Discord;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Elasticsearch;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Email;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.FileLog;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.GoogleChat;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.InfluxDB;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.KafkaPublisher;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Mattermost;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Opsgenie;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.PagerDuty;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Prometheus;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.RabbitMQ;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.RedisPublisher;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.SignalRPublisher;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Slack;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Teams;
 using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.Telegram;
+using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.WebhookPublisher;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Simple.Service.Monitoring.Library.Monitoring.Implementations.Publishers.SignalRPublisher;
 
 namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
 {
@@ -66,6 +83,51 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                     break;
                 case ServiceType.Interceptor:
                     mymonitor = new InterceptionMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.MongoDb:
+                    mymonitor = new MongoDbServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.CosmosDb:
+                    mymonitor = new CosmosDbServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Kafka:
+                    mymonitor = new KafkaServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Grpc:
+                    mymonitor = new GrpcServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Tcp:
+                    mymonitor = new TcpServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Dns:
+                    mymonitor = new DnsServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.SslCertificate:
+                    mymonitor = new SslCertificateServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Ftp:
+                    mymonitor = new FtpServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Smtp:
+                    mymonitor = new SmtpServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.AzureServiceBus:
+                    mymonitor = new AzureServiceBusServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Memcached:
+                    mymonitor = new MemcachedServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Oracle:
+                    mymonitor = new OracleServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Sqlite:
+                    mymonitor = new SqliteServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.Docker:
+                    mymonitor = new DockerServiceMonitoring(_healthChecksBuilder, monitor);
+                    break;
+                case ServiceType.AwsSqs:
+                    mymonitor = new AwsSqsServiceMonitoring(_healthChecksBuilder, monitor);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -152,6 +214,125 @@ namespace Simple.Service.Monitoring.Library.Monitoring.Implementations
                         {
                             _publishers.Add(publisher);
                         }
+                        break;
+                    }
+
+                case TeamsTransportSettings _:
+                    {
+                        publisher = new TeamsAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case DiscordTransportSettings _:
+                    {
+                        publisher = new DiscordAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case PagerDutyTransportSettings _:
+                    {
+                        publisher = new PagerDutyAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case OpsgenieTransportSettings _:
+                    {
+                        publisher = new OpsgenieAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case DatadogTransportSettings _:
+                    {
+                        publisher = new DatadogAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case PrometheusTransportSettings _:
+                    {
+                        publisher = new PrometheusAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case CloudWatchTransportSettings _:
+                    {
+                        publisher = new CloudWatchAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case AppInsightsTransportSettings _:
+                    {
+                        publisher = new AppInsightsAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case ElasticsearchTransportSettings _:
+                    {
+                        publisher = new ElasticsearchAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case GoogleChatTransportSettings _:
+                    {
+                        publisher = new GoogleChatAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case MattermostTransportSettings _:
+                    {
+                        publisher = new MattermostAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case ConsoleTransportSettings _:
+                    {
+                        publisher = new ConsoleAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case FileTransportSettings _:
+                    {
+                        publisher = new FileAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case RmqTransportSettings _:
+                    {
+                        publisher = new RmqAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case KafkaTransportSettings _:
+                    {
+                        publisher = new KafkaAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case WebhookTransportSettings _:
+                    {
+                        publisher = new WebhookAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
+                        break;
+                    }
+
+                case RedisTransportSettings _:
+                    {
+                        publisher = new RedisAlertingPublisher(_healthChecksBuilder, monitor, alertTransportSettings);
+                        lock (_publishers) { _publishers.Add(publisher); }
                         break;
                     }
             }

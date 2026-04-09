@@ -12,6 +12,21 @@
         Redis,
         MySql,
         PostgreSql,
-        Interceptor
+        Interceptor,
+        MongoDb,
+        CosmosDb,
+        Kafka,
+        Grpc,
+        Tcp,
+        Dns,
+        SslCertificate,
+        Ftp,
+        Smtp,
+        AzureServiceBus,
+        Memcached,
+        Oracle,
+        Sqlite,
+        Docker,
+        AwsSqs
     }
 }
