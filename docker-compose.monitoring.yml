@@ -1,0 +1,103 @@
+# =============================================================================
+# Simple.Service.Monitoring - Standalone Deployment
+# =============================================================================
+# Deploy the monitoring suite as a standalone Docker container.
+#
+# Usage:
+#   docker-compose -f docker-compose.monitoring.yml up -d
+#
+# Configuration:
+#   1. Copy appsettings.docker.yml to ./config/appsettings.yml and customize
+#   2. Override secrets via environment variables below
+#   3. Or configure everything via environment variables (no YAML needed)
+# =============================================================================
+
+services:
+  monitoring:
+    image: turric4n/simple-service-monitoring:latest
+    container_name: simple-service-monitoring
+    restart: unless-stopped
+
+    ports:
+      - "5000:5000"
+
+    # -------------------------------------------------------------------------
+    # VOLUMES
+    # -------------------------------------------------------------------------
+    # Mount your custom appsettings.yml for full configuration.
+    # The /app/data volume persists LiteDb dashboard data across restarts.
+    volumes:
+      - ./config/appsettings.yml:/app/appsettings.yml:ro
+      - monitoring-data:/app/data
+
+    # -------------------------------------------------------------------------
+    # ENVIRONMENT VARIABLES
+    # -------------------------------------------------------------------------
+    # Environment variables override YAML values. Use UPPERCASE with single
+    # underscores (_) as section separators. Arrays use zero-based index: _0_, _1_.
+    #
+    # RECOMMENDED PATTERN:
+    #   - Use mounted YAML for the full configuration structure
+    #   - Use env vars to inject secrets (passwords, tokens, API keys)
+    #
+    # Alternatively, configure EVERYTHING via env vars (no YAML needed).
+    # -------------------------------------------------------------------------
+    environment:
+      # ASP.NET Core settings
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+
+      # --- UI Configuration ---
+      - MONITORINGUI_COMPANYNAME=My Company
+      - MONITORINGUI_DATAREPOSITORYTYPE=LiteDb
+      # - MONITORINGUI_HEADERLOGOURL=https://example.com/logo.png
+      # - MONITORINGUI_SQLCONNECTIONSTRING=Server=...
+
+      # --- Global Monitoring Settings ---
+      - MONITORING_SETTINGS_USEGLOBALSERVICENAME=Docker Monitoring
+
+      # --- Secret overrides (override YAML values with env vars) ---
+      # Email transport password
+      # - MONITORING_EMAILTRANSPORTSETTINGS_0_PASSWORD=your-secret-password
+
+      # Slack token
+      # - MONITORING_SLACKTRANSPORTSETTINGS_0_TOKEN=xoxb-your-token
+
+      # Telegram bot token
+      # - MONITORING_TELEGRAMTRANSPORTSETTINGS_0_BOTAPITOKEN=your-bot-token
+
+      # PagerDuty routing key
+      # - MONITORING_PAGERDUTYTRANSPORTSETTINGS_0_ROUTINGKEY=your-key
+
+      # Database connection strings
+      # - MONITORING_HEALTHCHECKS_0_CONNECTIONSTRING=Server=...;Password=secret
+
+      # --- Example: Configure a health check entirely via env vars ---
+      # - MONITORING_HEALTHCHECKS_0_NAME=HTTP API Health
+      # - MONITORING_HEALTHCHECKS_0_SERVICETYPE=Http
+      # - MONITORING_HEALTHCHECKS_0_ENDPOINTORHOST=https://api.example.com/health
+      # - MONITORING_HEALTHCHECKS_0_ALERT=true
+      # - MONITORING_HEALTHCHECKS_0_HEALTHCHECKCONDITIONS_HTTPBEHAVIOUR_HTTPEXPECTEDCODE=200
+      # - MONITORING_HEALTHCHECKS_0_HEALTHCHECKCONDITIONS_HTTPBEHAVIOUR_HTTPVERB=Get
+      # - MONITORING_HEALTHCHECKS_0_ALERTBEHAVIOUR_0_TRANSPORTMETHOD=Console
+      # - MONITORING_HEALTHCHECKS_0_ALERTBEHAVIOUR_0_TRANSPORTNAME=DefaultConsole
+      # - MONITORING_HEALTHCHECKS_0_ALERTBEHAVIOUR_0_ALERTONSERVICERECOVERED=true
+
+      # --- Example: Configure console transport via env vars ---
+      # - MONITORING_CONSOLETRANSPORTSETTINGS_0_NAME=DefaultConsole
+      # - MONITORING_CONSOLETRANSPORTSETTINGS_0_USECOLORS=true
+
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5000/", "-o", "/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  monitoring-data:
+    driver: local
+
+networks:
+  default:
+    name: monitoring-network

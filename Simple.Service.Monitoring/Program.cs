@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Simple.Service.Monitoring.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +22,11 @@ namespace Simple.Service.Monitoring
                 {
                     var env = context.HostingEnvironment;
                     builder
-                        .AddYamlFile("appsettings.yml", optional: false)
-                        .AddYamlFile($"appsettings.{env.EnvironmentName}.yml", optional: true);
+                        .AddYamlFile("appsettings.yml", optional: true)
+                        .AddYamlFile($"appsettings.{env.EnvironmentName}.yml", optional: true)
+                        .AddEnvironmentVariables()
+                        .AddSingleUnderscoreEnvironmentVariables(
+                            "MONITORING_", "MONITORINGUI_");
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
