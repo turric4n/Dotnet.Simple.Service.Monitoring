@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with Simple Service Monitoring in just a few minutes!
+Get up and running with Kythr in just a few minutes!
 
 ## Prerequisites
 
@@ -13,8 +13,8 @@ Get up and running with Simple Service Monitoring in just a few minutes!
 Add the required NuGet packages to your project:
 
 ```bash
-dotnet add package Simple.Service.Monitoring.Extensions
-dotnet add package Simple.Service.Monitoring.UI.Extensions
+dotnet add package Kythr.Extensions
+dotnet add package Kythr.UI.Extensions
 ```
 
 ## Step 2: Update Program.cs
@@ -22,7 +22,7 @@ dotnet add package Simple.Service.Monitoring.UI.Extensions
 ### For .NET 8+ (Minimal API)
 
 ```csharp
-using Simple.Service.Monitoring.Extensions;
+using Kythr.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -262,7 +262,7 @@ Now that you have the basics working, explore:
 
 - Review [Common Issues](Common-Issues.md)
 - Check the [FAQ](FAQ.md)
-- [Open an issue](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues) on GitHub
+- [Open an issue](https://github.com/turric4n/Dotnet.Kythr/issues) on GitHub
 
 ---
 

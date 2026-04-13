@@ -1,0 +1,77 @@
+using System;
+using Kythr.Library.Models;
+using Kythr.Library.Monitoring.Exceptions;
+using Kythr.Library.Monitoring.Implementations;
+using Microsoft.Extensions.DependencyInjection;
+using NUnit.Framework;
+using Kythr.Library;
+using FluentAssertions;
+
+namespace Kythr.Tests.Monitors
+{
+    [TestFixture(Category = "Unit")]
+    public class MysqlServiceMonitoringShould
+    {
+        private IHealthChecksBuilder healthChecksBuilder;
+        [SetUp]
+        public void Setup()
+        {
+            var healthcheckbuildermock = new Moq.Mock<IHealthChecksBuilder>();
+            healthcheckbuildermock
+                .Setup(m => m.Services)
+                .Returns(new ServiceCollection());
+            healthChecksBuilder = healthcheckbuildermock.Object;
+        }
+
+        [Test]
+        public void Given_Valid_Mysql_Host_Monitoring_Settings()
+        {
+            //Arrange
+            var mysqlCheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheck",
+                AlertBehaviour = null,
+                ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
+                ServiceType = ServiceType.MySql,
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                }
+            };
+            //Act
+            var mysqlMonitoring = new MySqlServiceMonitoring(healthChecksBuilder, mysqlCheck);
+            //Assert
+            Action act = () => mysqlMonitoring.SetUp();
+            act.Should().NotThrow();
+        }
+
+        [Test]
+        public void Given_Valid_Mysql_Host_And_Query_Monitoring_Settings()
+        {
+            //Arrange
+            var httpendpointhealthcheck = new ServiceHealthCheck()
+            {
+                Name = "testhealthcheck",
+                AlertBehaviour = null,
+                ConnectionString = "server=127.0.0.1;uid=root;pwd=12345;database=test",
+                ServiceType = ServiceType.MySql,
+                HealthCheckConditions = new HealthCheckConditions()
+                {
+                    SqlBehaviour = new SqlBehaviour()
+                    {
+                        Query = "SELECT 1",
+                        ExpectedResult = 1,
+                        ResultExpression = ResultExpression.Equal,
+                        SqlResultDataType = SqlResultDataType.Int
+                    }
+                }
+            };
+            //Act
+            var mysqlMonitoring = new MySqlServiceMonitoring(healthChecksBuilder, httpendpointhealthcheck);
+            mysqlMonitoring.SetUp();
+
+            //Assert
+            Action act = () => mysqlMonitoring.SetUp();
+            act.Should().NotThrow();
+        }
+    }
+}

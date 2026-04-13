@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Simple.Service.Monitoring - Docker Image Build Script (Linux/macOS/CI)
+# Kythr - Docker Image Build Script (Linux/macOS/CI)
 # =============================================================================
 # Usage:
 #   ./build-docker.sh                                  # builds with :latest tag
@@ -13,12 +13,12 @@ set -euo pipefail
 
 # Defaults
 TAG="latest"
-IMAGE_NAME="turric4n/simple-service-monitoring"
+IMAGE_NAME="turric4n/kythr"
 PUSH=false
 CONFIGURATION="Release"
 PUBLISH_DIR="./publish"
-PROJECT_PATH="Simple.Service.Monitoring/Simple.Service.Monitoring.csproj"
-DOCKERFILE_PATH="Simple.Service.Monitoring/Dockerfile"
+PROJECT_PATH="Kythr/Kythr.csproj"
+DOCKERFILE_PATH="Kythr/Dockerfile"
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -39,7 +39,7 @@ done
 FULL_IMAGE_TAG="${IMAGE_NAME}:${TAG}"
 
 echo "============================================================"
-echo " Simple.Service.Monitoring - Docker Build"
+echo " Kythr - Docker Build"
 echo "============================================================"
 echo ""
 echo "  Image:          ${FULL_IMAGE_TAG}"

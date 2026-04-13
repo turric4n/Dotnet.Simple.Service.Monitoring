@@ -1,0 +1,70 @@
+Logging:
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+Monitoring:
+  Settings:
+    ShowUI: 'True'
+    UseGlobalServiceName: 'Test'
+  HealthChecks:
+  - Name: TurriCustom
+    ServiceType: Custom
+    FullClassName: Kythr.Sample.API.Health.CustomHealth
+    PublishChecks: true    
+    Alert: false
+    AlertBehaviour:
+    - TransportMethod: Telegram
+      TransportName: DevOpsTelegramChat
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+  - Name: Redis
+    ServiceType: Redis
+    ConnectionString: 192.168.0.200:6379
+    PublishChecks: true    
+    Alert: true
+    HealthCheckConditions:
+      RedisBehaviour:
+        TimeoutMs: 5000
+    AlertBehaviour:
+    - TransportMethod: Telegram
+      TransportName: DevOpsTelegramChat
+      AlertOnce: true
+      AlertOnServiceRecovered: true
+      StartAlertingOn: ''
+      StopAlertingOn: ''
+      AlertEvery: '00:00:05'
+      AlertOn: ''
+  ####################################
+  CustomNotificationTransportSettings:
+  EmailTransportSettings:
+  - Name: StandardEmailTransport
+    From: test@test.com
+    To: test@test.com
+    SmtpHost: test.test.com
+    SmtpPort: 25
+    Authentication: false
+    Username: ''
+    Password: ''
+    Template: Plain
+  - Name: EmailTransport2
+    From: test@test.com
+    To: test@test.com
+    SmtpHost: host
+    SmtpPort: 25
+    Authentication: false
+    Username: ''
+    Password: ''
+  InfluxDBTransportSettings:
+  - Name: InfluxTransport1
+    Host: 
+    Database: health_checks
+  TelegramTransportSettings:
+  - Name: TelegramTransport1
+    BotName: ''
+    BotApiToken: 
+    ChatId: ''

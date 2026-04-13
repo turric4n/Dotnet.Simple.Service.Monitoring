@@ -1,0 +1,9 @@
+namespace Kythr.Library.Models.TransportSettings
+{
+    public class SlackTransportSettings : AlertTransportSettings
+    {
+        public string Token { get; set; }
+        public string Channel { get; set; }
+        public string Username { get; set; }
+    }
+}

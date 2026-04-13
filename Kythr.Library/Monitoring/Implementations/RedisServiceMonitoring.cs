@@ -1,0 +1,95 @@
+using CuttingEdge.Conditions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Kythr.Library.Models;
+using Kythr.Library.Monitoring.Abstractions;
+using Kythr.Library.Monitoring.Exceptions;
+using StackExchange.Redis;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using IHealthChecksBuilder = Microsoft.Extensions.DependencyInjection.IHealthChecksBuilder;
+
+namespace Kythr.Library.Monitoring.Implementations
+{
+    public class RedisServiceMonitoring : ServiceMonitoringBase
+    {
+
+        public RedisServiceMonitoring(IHealthChecksBuilder healthChecksBuilder, ServiceHealthCheck healthCheck) : base(healthChecksBuilder, healthCheck)
+        {
+        }
+
+        protected internal override void Validate()
+        {
+            CuttingEdge.Conditions.Condition
+                .WithExceptionOnFailure<InvalidConnectionStringException>()
+                .Requires(HealthCheck.ConnectionString)
+                .IsNotNullOrEmpty();
+        }
+
+        protected internal override void SetMonitoring()
+        {
+            var connectionString = !string.IsNullOrEmpty(HealthCheck.ConnectionString) 
+                ? HealthCheck.ConnectionString 
+                : HealthCheck.EndpointOrHost;
+
+            var timeout = TimeSpan.FromMilliseconds(HealthCheck.HealthCheckConditions.RedisBehaviour.TimeOutMs);
+
+            HealthChecksBuilder.AddAsyncCheck(
+                HealthCheck.Name,
+                async () =>
+                {
+                    var healthCheck = new RedisHealthCheck(connectionString, timeout);
+                    return await healthCheck.CheckHealthAsync(new HealthCheckContext(), CancellationToken.None);
+                },
+                GetTags());
+        }
+    }
+
+    /// <summary>
+    /// Custom Redis health check implementation
+    /// </summary>
+    public class RedisHealthCheck : IHealthCheck
+    {
+        private readonly string _connectionString;
+        private readonly TimeSpan _timeout;
+
+        public RedisHealthCheck(string connectionString, TimeSpan timeout)
+        {
+            _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+            _timeout = timeout;
+        }
+
+        public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
+        {
+            IConnectionMultiplexer connection = null;
+            try
+            {
+                var options = ConfigurationOptions.Parse(_connectionString);
+                options.ConnectTimeout = (int)_timeout.TotalMilliseconds;
+                options.SyncTimeout = (int)_timeout.TotalMilliseconds;
+                options.AbortOnConnectFail = false;
+
+                connection = await ConnectionMultiplexer.ConnectAsync(options);
+
+                if (!connection.IsConnected)
+                {
+                    return HealthCheckResult.Unhealthy("Redis connection is not established");
+                }
+
+                var database = connection.GetDatabase();
+                await database.PingAsync();
+
+                return HealthCheckResult.Healthy("Redis connection is healthy");
+            }
+            catch (Exception ex)
+            {
+                return HealthCheckResult.Unhealthy($"Redis connection failed: {ex.Message}", ex);
+            }
+            finally
+            {
+                connection?.Dispose();
+            }
+        }
+    }
+}

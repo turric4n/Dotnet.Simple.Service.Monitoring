@@ -1,8 +1,8 @@
 # Service Types
 
-Simple Service Monitoring supports **26 service types** for comprehensive monitoring of your entire infrastructure.
+Kythr supports **26 service types** for comprehensive monitoring of your entire infrastructure.
 
-> **Full reference with all types**: See [docs/service-monitors.md](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/blob/master/docs/service-monitors.md)
+> **Full reference with all types**: See [docs/service-monitors.md](https://github.com/turric4n/Dotnet.Kythr/blob/master/docs/service-monitors.md)
 
 ## All Service Types
 

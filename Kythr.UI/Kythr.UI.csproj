@@ -1,0 +1,83 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Description>Kythr UI - Health check dashboard for internal or external services made in C#
+    
+     - Added SQL/MySQL query healthCheck and result</Description>
+		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Kythr</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/turric4n/Dotnet.Kythr</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Version>1.0.22</Version>
+		<AssemblyVersion>1.0.22</AssemblyVersion>
+		<FileVersion>1.0.22</FileVersion>
+		<Authors>Turrican aka Enrique Fuentes</Authors>
+		<Company>Turrican Software</Company>
+		<PackageTags>HealthChecks, Monitoring, .NET, C#</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Title>Kythr UI</Title>
+    <Copyright>Turrican 2026</Copyright>
+    <PackageIcon>icon.png</PackageIcon>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\**\*" />
+  </ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="package-lock.json" />
+	  <Content Remove="package.json" />
+	  <Content Remove="tsconfig.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Kythr.Library\Kythr.Library.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Front\src\services\" />
+		<Folder Include="Helpers\" />
+		<None Include="package-lock.json" />
+		<None Include="package.json">
+		  <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</None>
+    <None Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="tsconfig.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.66" />
+		<PackageReference Include="LiteDB" Version="5.0.21" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<Target Name="WebpackDevelopment" BeforeTargets="Build" Condition="'$(Configuration)' == 'Debug'">
+		<Message Text="Running webpack in development mode..." Importance="high" />
+		<Exec Command="npm run build:dev" ContinueOnError="false" />
+	</Target>
+
+	<Target Name="WebpackProduction" BeforeTargets="Build" Condition="'$(Configuration)' == 'Release'">
+		<Message Text="Running webpack in production mode with minification..." Importance="high" />
+		<Exec Command="npm run build" ContinueOnError="false" />
+	</Target>
+
+	<Target Name="WebpackClean" BeforeTargets="Clean">
+		<Message Text="Cleaning webpack output..." Importance="high" />
+		<Exec Command="npm run clean" ContinueOnError="true" />
+	</Target>
+
+</Project>

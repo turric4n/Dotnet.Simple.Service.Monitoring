@@ -22,14 +22,14 @@ v2.0 is **fully backward compatible** with v1.x configurations. All existing hea
 ### 1. Update Packages
 
 ```bash
-dotnet add package Simple.Service.Monitoring.Extensions --version 2.0.0
-dotnet add package Simple.Service.Monitoring.UI.Extensions --version 2.0.0
+dotnet add package Kythr.Extensions --version 2.0.0
+dotnet add package Kythr.UI.Extensions --version 2.0.0
 ```
 
 ### 2. Rebuild the UI (if using from source)
 
 ```bash
-cd Simple.Service.Monitoring.UI
+cd Kythr.UI
 npm install
 npm run build
 ```
@@ -109,7 +109,7 @@ AlertBehaviour:
 Run the test suite to confirm everything works:
 
 ```bash
-dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj
+dotnet test Kythr.Tests/Kythr.Tests.csproj
 ```
 
 ## Breaking Changes

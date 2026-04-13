@@ -1,0 +1,129 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using Kythr.Extensions;
+using Kythr.UI.Hubs;
+using Kythr.UI.Models;
+using Kythr.UI.Options;
+using Kythr.UI.Repositories;
+using Kythr.UI.Repositories.LiteDb;
+using Kythr.UI.Repositories.Memory;
+using Kythr.UI.Repositories.SQL;
+using Kythr.UI.Services;
+using System;
+
+namespace Microsoft.Extensions.DependencyInjection
+{
+    public static class ServiceMonitoringUiExtensions
+    {
+        public static IServiceMonitoringConfigurationService WithServiceMonitoringUi(this IServiceMonitoringConfigurationService monitoringConfigurationService, 
+            IServiceCollection services, IConfiguration configuration)
+        {
+            if (monitoringConfigurationService == null)
+            {
+                throw new ArgumentNullException(nameof(monitoringConfigurationService), "ServiceMonitoringConfigurationService cannot be null");
+            }
+
+            services.AddSignalR();
+
+            services.AddSingleton<IMonitoringDataService, MonitoringDataService>();
+
+            var monitoringSection = configuration.GetSection("MonitoringUi");
+
+            services
+                .AddOptions<MonitoringUiOptions>()
+                .Bind(monitoringSection)
+                .ValidateOnStart();
+
+            services.AddSingleton<IMonitoringDataRepositoryLocator, MonitoringDataRepositoryLocator>();
+
+            services.AddRazorPages()
+                .AddApplicationPart(typeof(IndexModel).Assembly);
+
+            services.AddControllers()
+                .AddApplicationPart(typeof(IndexModel).Assembly);
+
+            services.AddKeyedSingleton<IMonitoringDataRepository, SqlMonitoringDataRepository>("Sql");
+
+            services.AddKeyedSingleton<IMonitoringDataRepository, LiteDbMonitoringDatarepository>("LiteDb");
+
+            services.AddKeyedSingleton<IMonitoringDataRepository, InMemoryMonitoringDataRepository>("InMemory");
+
+            return monitoringConfigurationService;
+        }
+
+        public static IApplicationBuilder UseServiceMonitoringUi(this IApplicationBuilder app, IWebHostEnvironment webHostEnvironment)
+        {
+            // Serve static files from the UI project
+            var uiAssembly = typeof(IndexModel).Assembly;
+            var embeddedFileProvider = new EmbeddedFileProvider(
+                uiAssembly, "Kythr.UI.wwwroot");
+
+            if (webHostEnvironment.IsDevelopment())
+            {
+                Kythr.UI.Helpers.AssetHelper.EnableCaching = false;
+            }
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = embeddedFileProvider,
+                RequestPath = "/monitoring-static",
+                OnPrepareResponse = ctx =>
+                {
+                    var path = ctx.File.Name;
+                    var headers = ctx.Context.Response.GetTypedHeaders();
+
+                    // Content-hashed files (e.g. main.abc123.js) get long cache
+                    // Non-hashed files (e.g. asset-manifest.json) get no-cache
+                    if (IsContentHashedFile(path))
+                    {
+                        headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                        {
+                            Public = true,
+                            MaxAge = TimeSpan.FromDays(365)
+                        };
+                    }
+                    else
+                    {
+                        headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+                        {
+                            NoCache = true,
+                            NoStore = true
+                        };
+                    }
+                }
+            });
+
+            app
+                .ApplicationServices
+                .GetService<IMonitoringDataService>()?.Init();
+
+            return app;
+        }
+
+        public static IEndpointRouteBuilder MapServiceMonitoringUi(this IEndpointRouteBuilder endpoints)
+        {
+            // Map Razor Pages
+            endpoints.MapRazorPages();
+
+            // Map REST API controllers
+            endpoints.MapControllers();
+
+            // Map SignalR Hub
+            endpoints.MapHub<MonitoringHub>("/monitoringhub");
+
+            return endpoints;
+        }
+
+        private static bool IsContentHashedFile(string fileName)
+        {
+            // Webpack outputs content-hashed files like main.abc12345.js or main.abc12345.css
+            var parts = fileName.Split('.');
+            return parts.Length >= 3 && parts[^2].Length >= 8;
+        }
+    }
+}

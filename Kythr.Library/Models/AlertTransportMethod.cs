@@ -1,0 +1,30 @@
+namespace Kythr.Library.Models
+{
+    public enum AlertTransportMethod
+    {
+        Dummy,
+        Email,
+        Telegram,
+        Influx,
+        Slack,
+        CustomApi,
+        SignalR,
+        Teams,
+        Discord,
+        PagerDuty,
+        Opsgenie,
+        Datadog,
+        Prometheus,
+        CloudWatch,
+        AppInsights,
+        Elasticsearch,
+        GoogleChat,
+        Mattermost,
+        Console,
+        FileLog,
+        RabbitMq,
+        KafkaTransport,
+        Webhook,
+        RedisTransport,
+    }
+}

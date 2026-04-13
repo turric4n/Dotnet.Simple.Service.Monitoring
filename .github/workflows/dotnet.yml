@@ -27,14 +27,14 @@ jobs:
         ls -ltra
         
     - name: Restore dependencies
-      run: dotnet restore Simple.Service.Monitoring/Simple.Service.Monitoring.csproj
+      run: dotnet restore Kythr/Kythr.csproj
       
     - name: Build Solution
-      run: dotnet build --no-restore Simple.Service.Monitoring/Simple.Service.Monitoring.csproj --configuration Release
+      run: dotnet build --no-restore Kythr/Kythr.csproj --configuration Release
       
     - name: Run Tests
       run: |
-        dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj \
+        dotnet test Kythr.Tests/Kythr.Tests.csproj \
           --no-build \
           --configuration Release \
           --verbosity normal \

@@ -1,5 +1,5 @@
 # =============================================================================
-# Simple.Service.Monitoring - Docker Image Build Script (Windows)
+# Kythr - Docker Image Build Script (Windows)
 # =============================================================================
 # Usage:
 #   .\build-docker.ps1                              # builds with :latest tag
@@ -10,7 +10,7 @@
 
 param(
     [string]$Tag = "latest",
-    [string]$ImageName = "turric4n/simple-service-monitoring",
+    [string]$ImageName = "turric4n/kythr",
     [switch]$Push,
     [string]$Configuration = "Release",
     [string]$PublishDir = "./publish"
@@ -19,11 +19,11 @@ param(
 $ErrorActionPreference = "Stop"
 
 $FullImageTag = "${ImageName}:${Tag}"
-$ProjectPath = "Simple.Service.Monitoring/Simple.Service.Monitoring.csproj"
-$DockerfilePath = "Simple.Service.Monitoring/Dockerfile"
+$ProjectPath = "Kythr/Kythr.csproj"
+$DockerfilePath = "Kythr/Dockerfile"
 
 Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host " Simple.Service.Monitoring - Docker Build" -ForegroundColor Cyan
+Write-Host " Kythr - Docker Build" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Image:          $FullImageTag" -ForegroundColor Yellow

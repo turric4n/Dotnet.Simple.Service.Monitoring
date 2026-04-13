@@ -1,5 +1,5 @@
 # =============================================================================
-# Simple.Service.Monitoring - Standalone Deployment
+# Kythr - Standalone Deployment
 # =============================================================================
 # Deploy the monitoring suite as a standalone Docker container.
 #
@@ -14,8 +14,8 @@
 
 services:
   monitoring:
-    image: turric4n/simple-service-monitoring:latest
-    container_name: simple-service-monitoring
+    image: turric4n/kythr:latest
+    container_name: kythr
     restart: unless-stopped
 
     ports:

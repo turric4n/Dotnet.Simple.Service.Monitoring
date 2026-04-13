@@ -6,20 +6,20 @@
 ┌────────────────────────────────────────────────────────────────────┐
 │                      Your .NET Application                         │
 ├────────────────────────────────────────────────────────────────────┤
-│         Simple.Service.Monitoring.Extensions                       │
+│         Kythr.Extensions                       │
 │    ┌──────────────────────────────────────────────────────────┐    │
 │    │            AddServiceMonitoring(Configuration)            │    │
 │    │            WithServiceMonitoringUi(services, config)      │    │
 │    └──────────────────────────────────────────────────────────┘    │
 ├────────────────────────────────────────────────────────────────────┤
-│              Simple.Service.Monitoring.Library                      │
+│              Kythr.Library                      │
 │    ┌──────────────┐  ┌──────────────┐  ┌───────────────────┐     │
 │    │  26 Service   │  │ 24 Transport │  │  Data Repository  │     │
 │    │   Monitors    │  │  Publishers  │  │ (InMem/LiteDb/Sql)│     │
 │    └──────────────┘  └──────────────┘  └───────────────────┘     │
 ├────────────────────────────────────────────────────────────────────┤
-│    Simple.Service.Monitoring.UI         (React 18 SPA)             │
-│    Simple.Service.Monitoring.UI.Extensions (Middleware)             │
+│    Kythr.UI         (React 18 SPA)             │
+│    Kythr.UI.Extensions (Middleware)             │
 │    ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
 │    │  Dashboard   │  │  SignalR Hub │  │  REST API    │          │
 │    │  (React SPA) │  │  (Real-time) │  │  (Data API)  │          │
@@ -70,10 +70,10 @@ A single-page application served via `EmbeddedFileProvider` middleware. Built wi
 
 ```
 Your Application
-├── Simple.Service.Monitoring.Extensions
-│   └── Simple.Service.Monitoring.Library
+├── Kythr.Extensions
+│   └── Kythr.Library
 │       ├── Microsoft.Extensions.Diagnostics.HealthChecks
 │       └── AspNetCore.Diagnostics.HealthChecks.*
-└── Simple.Service.Monitoring.UI.Extensions
-    └── Simple.Service.Monitoring.UI (embedded React SPA)
+└── Kythr.UI.Extensions
+    └── Kythr.UI (embedded React SPA)
 ```

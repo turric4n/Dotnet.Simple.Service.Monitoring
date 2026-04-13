@@ -4,18 +4,18 @@
 
 ### Using the Included Dockerfile
 
-The project ships with a `Dockerfile` in the `Simple.Service.Monitoring/` directory.
+The project ships with a `Dockerfile` in the `Kythr/` directory.
 
 ```bash
 # Build the image
-docker build -t simple-service-monitoring -f Simple.Service.Monitoring/Dockerfile .
+docker build -t kythr -f Kythr/Dockerfile .
 
 # Run with a mounted config
 docker run -d \
   -p 5000:80 \
   -v $(pwd)/appsettings.yml:/app/appsettings.yml:ro \
   --name monitoring \
-  simple-service-monitoring
+  kythr
 ```
 
 ### Docker Compose (Local Development)
@@ -47,7 +47,7 @@ services:
   monitoring:
     build:
       context: .
-      dockerfile: Simple.Service.Monitoring/Dockerfile
+      dockerfile: Kythr/Dockerfile
     ports:
       - "5000:80"
     environment:
@@ -86,7 +86,7 @@ spec:
     spec:
       containers:
         - name: monitoring
-          image: your-registry/simple-service-monitoring:2.0.0
+          image: your-registry/kythr:2.0.0
           ports:
             - containerPort: 80
           env:
@@ -208,7 +208,7 @@ Store transport credentials in Key Vault and reference them in configuration:
 
 1. Publish the application:
    ```bash
-   dotnet publish Simple.Service.Monitoring/Simple.Service.Monitoring.csproj -c Release -o ./publish
+   dotnet publish Kythr/Kythr.csproj -c Release -o ./publish
    ```
 2. Create an IIS site pointing to the `./publish` directory
 3. Ensure the application pool uses `.NET CLR Version: No Managed Code` (runs as out-of-process)

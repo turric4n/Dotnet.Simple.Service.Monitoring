@@ -1,4 +1,4 @@
-# Contributing to Dotnet.Simple.Service.Monitoring
+# Contributing to Dotnet.Kythr
 
 Thank you for your interest in contributing! This guide will help you get started.
 
@@ -15,15 +15,15 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ```bash
 # Clone the repository
-git clone https://github.com/turric4n/Dotnet.Simple.Service.Monitoring.git
-cd Dotnet.Simple.Service.Monitoring
+git clone https://github.com/turric4n/Dotnet.Kythr.git
+cd Dotnet.Kythr
 
 # Restore and build
-dotnet restore Simple.Service.Monitoring/Simple.Service.Monitoring.sln
-dotnet build Simple.Service.Monitoring/Simple.Service.Monitoring.sln
+dotnet restore Kythr/Kythr.sln
+dotnet build Kythr/Kythr.sln
 
 # Run tests
-dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj
+dotnet test Kythr.Tests/Kythr.Tests.csproj
 
 # (Optional) Start infrastructure for integration tests
 docker-compose up -d
@@ -32,7 +32,7 @@ docker-compose up -d
 ### UI Development
 
 ```bash
-cd Simple.Service.Monitoring.UI
+cd Kythr.UI
 npm install
 npm run watch    # Dev mode with hot reload
 npm run build    # Production build
@@ -42,7 +42,7 @@ npm run build    # Production build
 
 ### Reporting Bugs
 
-1. Check [existing issues](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues) to avoid duplicates
+1. Check [existing issues](https://github.com/turric4n/Dotnet.Kythr/issues) to avoid duplicates
 2. Open a new issue using the **Bug Report** template
 3. Include: .NET version, OS, configuration (sanitized), steps to reproduce, expected vs actual behavior
 
@@ -63,7 +63,7 @@ npm run build    # Production build
 4. Add or update tests as needed
 5. Ensure all tests pass:
    ```bash
-   dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj
+   dotnet test Kythr.Tests/Kythr.Tests.csproj
    ```
 6. Commit with a clear message:
    ```bash
@@ -79,8 +79,8 @@ npm run build    # Production build
 - Follow standard C# naming conventions (PascalCase for public members, camelCase for private)
 - Use `async/await` for I/O operations
 - Add XML doc comments for public APIs
-- Keep monitor implementations in `Simple.Service.Monitoring.Library/Monitoring/Implementations/`
-- Keep publisher implementations in `Simple.Service.Monitoring.Library/Monitoring/Implementations/Publishers/`
+- Keep monitor implementations in `Kythr.Library/Monitoring/Implementations/`
+- Keep publisher implementations in `Kythr.Library/Monitoring/Implementations/Publishers/`
 
 ### Adding a New Monitor
 
@@ -88,7 +88,7 @@ npm run build    # Production build
 2. Create `YourServiceMonitoring.cs` in `Monitoring/Implementations/`
 3. Inherit from `ServiceMonitoringBase` and implement `SetUpMonitoring()`
 4. Register in `StandardStackMonitoring.cs`
-5. Add tests in `Simple.Service.Monitoring.Tests/Monitors/`
+5. Add tests in `Kythr.Tests/Monitors/`
 6. Update documentation
 
 ### Adding a New Publisher
@@ -121,12 +121,12 @@ test(redis): add concurrency safety tests
 
 | Directory | Purpose |
 |-----------|---------|
-| `Simple.Service.Monitoring/` | Host application |
-| `Simple.Service.Monitoring.Library/` | Core library (monitors, publishers, models) |
-| `Simple.Service.Monitoring.Extensions/` | DI extension methods |
-| `Simple.Service.Monitoring.UI/` | React SPA dashboard |
-| `Simple.Service.Monitoring.UI.Extensions/` | UI middleware |
-| `Simple.Service.Monitoring.Tests/` | All tests |
+| `Kythr/` | Host application |
+| `Kythr.Library/` | Core library (monitors, publishers, models) |
+| `Kythr.Extensions/` | DI extension methods |
+| `Kythr.UI/` | React SPA dashboard |
+| `Kythr.UI.Extensions/` | UI middleware |
+| `Kythr.Tests/` | All tests |
 | `docs/` | Additional documentation |
 | `wiki/` | GitHub Wiki source |
 

@@ -1,24 +1,36 @@
 <div align="center">
 
-# Dotnet.Simple.Service.Monitoring
+<img src="Kythr.UI/wwwroot/images/kythr-logo.svg" alt="Kythr Logo" width="128" />
+
+# Dotnet.Kythr
+
+### **K**eeps **Y**our **T**hings **H**ealthy & **R**eliable
 
 **Enterprise-Grade Health Monitoring & Alerting for .NET**
 
-[![.NET](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/actions/workflows/dotnet.yml/badge.svg)](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/actions/workflows/dotnet.yml)
+[![.NET](https://github.com/turric4n/Dotnet.Kythr/actions/workflows/dotnet.yml/badge.svg)](https://github.com/turric4n/Dotnet.Kythr/actions/workflows/dotnet.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
 
 Monitor **26 service types** across your infrastructure, alert through **24 transport channels**, and visualize everything in a **React-based real-time dashboard** — all driven by configuration.
 
-[Quick Start](#-quick-start) · [Documentation](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/wiki) · [Examples](docs/examples/) · [Contributing](CONTRIBUTING.md)
+[Quick Start](#-quick-start) · [Documentation](https://github.com/turric4n/Dotnet.Kythr/wiki) · [Examples](docs/examples/) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
 ---
 
+## Dashboard Preview
+
+| Light Mode | Dark Mode |
+|:---:|:---:|
+| ![Dashboard Light](docs/screenshots/dashboard-light.png) | ![Dashboard Dark](docs/screenshots/dashboard-dark.png) |
+
+---
+
 ## Overview
 
-Dotnet.Simple.Service.Monitoring is a comprehensive health monitoring solution for .NET applications. Built on the .NET HealthChecks framework, it provides enterprise-grade monitoring, intelligent alerting, and a modern web dashboard — all with minimal code and configuration-first design.
+Dotnet.Kythr is a comprehensive health monitoring solution for .NET applications. Built on the .NET HealthChecks framework, it provides enterprise-grade monitoring, intelligent alerting, and a modern web dashboard — all with minimal code and configuration-first design.
 
 ## Key Features
 
@@ -65,27 +77,27 @@ Dotnet.Simple.Service.Monitoring is a comprehensive health monitoring solution f
 ## Project Structure
 
 ```
-Simple.Service.Monitoring/           # Core host application
-Simple.Service.Monitoring.Library/   # Business logic, monitors, publishers, models
-Simple.Service.Monitoring.Extensions/# Integration extension methods
-Simple.Service.Monitoring.UI/        # React SPA dashboard (Webpack 5)
-Simple.Service.Monitoring.UI.Extensions/ # UI middleware extensions
-Simple.Service.Monitoring.Config.Generator/ # WinForms configuration tool
-Simple.Service.Monitoring.Sample.API/# Example implementation
-Simple.Service.Monitoring.Tests/     # Unit & integration tests
+Kythr/           # Core host application
+Kythr.Library/   # Business logic, monitors, publishers, models
+Kythr.Extensions/# Integration extension methods
+Kythr.UI/        # React SPA dashboard (Webpack 5)
+Kythr.UI.Extensions/ # UI middleware extensions
+Kythr.Config.Generator/ # WinForms configuration tool
+Kythr.Sample.API/# Example implementation
+Kythr.Tests/     # Unit & integration tests
 ```
 
 ## Installation
 
 ```bash
-dotnet add package Simple.Service.Monitoring.Extensions
-dotnet add package Simple.Service.Monitoring.UI.Extensions
+dotnet add package Kythr.Extensions
+dotnet add package Kythr.UI.Extensions
 ```
 
 Or clone and reference directly:
 
 ```bash
-git clone https://github.com/turric4n/Dotnet.Simple.Service.Monitoring.git
+git clone https://github.com/turric4n/Dotnet.Kythr.git
 ```
 
 ## Quick Start
@@ -487,7 +499,7 @@ Starts: SQL Server, MySQL, PostgreSQL, Redis, RabbitMQ, Elasticsearch, Hangfire 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "Simple.Service.Monitoring.dll"]
+ENTRYPOINT ["dotnet", "Kythr.dll"]
 ```
 
 ## Dashboard
@@ -590,8 +602,8 @@ Monitoring:
 
 | Tool | Description |
 |------|-------------|
-| **Config Generator** (`Simple.Service.Monitoring.Config.Generator`) | WinForms app for visual health check configuration with JSON/YAML export |
-| **Sample API** (`Simple.Service.Monitoring.Sample.API`) | Reference implementation with custom health checks and transport configs |
+| **Config Generator** (`Kythr.Config.Generator`) | WinForms app for visual health check configuration with JSON/YAML export |
+| **Sample API** (`Kythr.Sample.API`) | Reference implementation with custom health checks and transport configs |
 
 ## Configuration Reference
 
@@ -633,18 +645,18 @@ Monitoring:
 - **Active Services Filter** — hide inactive monitors from the timeline
 - **Bug Fixes** — duration reporting accuracy, Redis concurrency safety, credential security
 
-See [RELEASE_NOTES_v2.0.0.md](Simple.Service.Monitoring/RELEASE_NOTES_v2.0.0.md) for full details.
+See [RELEASE_NOTES_v2.0.0.md](Kythr/RELEASE_NOTES_v2.0.0.md) for full details.
 
 ## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
-git clone https://github.com/turric4n/Dotnet.Simple.Service.Monitoring.git
-cd Dotnet.Simple.Service.Monitoring
-dotnet restore Simple.Service.Monitoring/Simple.Service.Monitoring.sln
-dotnet build Simple.Service.Monitoring/Simple.Service.Monitoring.sln
-dotnet test Simple.Service.Monitoring.Tests/Simple.Service.Monitoring.Tests.csproj
+git clone https://github.com/turric4n/Dotnet.Kythr.git
+cd Dotnet.Kythr
+dotnet restore Kythr/Kythr.sln
+dotnet build Kythr/Kythr.sln
+dotnet test Kythr.Tests/Kythr.Tests.csproj
 ```
 
 ## License
@@ -653,9 +665,9 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ## Support
 
-- [GitHub Issues](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues) — bug reports & feature requests
-- [GitHub Discussions](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/discussions) — questions & ideas
-- [Wiki](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/wiki) — full documentation
+- [GitHub Issues](https://github.com/turric4n/Dotnet.Kythr/issues) — bug reports & feature requests
+- [GitHub Discussions](https://github.com/turric4n/Dotnet.Kythr/discussions) — questions & ideas
+- [Wiki](https://github.com/turric4n/Dotnet.Kythr/wiki) — full documentation
 
 ---
 

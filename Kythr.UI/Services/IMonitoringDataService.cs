@@ -1,0 +1,24 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Kythr.Library.Models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using HealthStatus = Kythr.Library.Models.HealthStatus;
+
+namespace Kythr.UI.Services
+{
+    public interface IMonitoringDataService
+    {
+        Task<Models.HealthReport> GetHealthCheckReport();
+        Task<HealthStatus> GetOverallStatus();
+        Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimeline(int hours = 24);
+        Task<Dictionary<string, List<HealthCheckTimelineSegment>>> GetHealthCheckTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60);
+        Task SendHealthCheckTimeline(int hours = 24);
+        Task SendHealthCheckTimelineGroupedByService(int hours = 24, bool activeOnly = false, int activeThresholdMinutes = 60);
+        Task<Models.HealthReport> GetHealthReportByDateRange(DateTime from, DateTime to);
+        Task AddHealthReport(HealthReport report);
+        Task AddHealthCheckData(HealthCheckData healthCheckData);
+        Task AddHealthChecksData(List<HealthCheckData> healthChecksData);
+        void Init();
+    }
+}

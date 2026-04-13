@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Simple.Service.Monitoring/Simple.Service.Monitoring.sln",
+                "${workspaceFolder}/Kythr/Kythr.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/Simple.Service.Monitoring/Simple.Service.Monitoring.sln",
+                "${workspaceFolder}/Kythr/Kythr.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/Simple.Service.Monitoring/Simple.Service.Monitoring.csproj"
+                "${workspaceFolder}/Kythr/Kythr.csproj"
             ],
             "problemMatcher": "$msCompile"
         },
@@ -49,7 +49,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "${workspaceFolder}/Simple.Service.Monitoring.UI"
+                "cwd": "${workspaceFolder}/Kythr.UI"
             },
             "problemMatcher": []
         },
@@ -67,7 +67,7 @@
                 "panel": "shared"
             },
             "options": {
-                "cwd": "${workspaceFolder}/Simple.Service.Monitoring.UI"
+                "cwd": "${workspaceFolder}/Kythr.UI"
             },
             "problemMatcher": []
         }

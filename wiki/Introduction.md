@@ -1,8 +1,8 @@
 # Introduction
 
-## What is Simple Service Monitoring?
+## What is Kythr?
 
-**Simple Service Monitoring** is an enterprise-grade health monitoring and alerting system for .NET applications. It provides **26 service monitors**, **24 transport publishers**, a **React-based real-time dashboard**, and intelligent alerting — all driven by configuration (JSON/YAML).
+**Kythr** is an enterprise-grade health monitoring and alerting system for .NET applications. It provides **26 service monitors**, **24 transport publishers**, a **React-based real-time dashboard**, and intelligent alerting — all driven by configuration (JSON/YAML).
 
 ## Key Features
 
@@ -56,15 +56,15 @@ Built on the .NET HealthChecks framework, leveraging [AspNetCore.Diagnostics.Hea
 ┌────────────────────────────────────────────────────────────┐
 │                   Your .NET Application                     │
 ├────────────────────────────────────────────────────────────┤
-│  Simple.Service.Monitoring.Extensions (Integration Layer)   │
+│  Kythr.Extensions (Integration Layer)   │
 ├────────────────────────────────────────────────────────────┤
-│         Simple.Service.Monitoring.Library (Core)            │
+│         Kythr.Library (Core)            │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐    │
 │  │  26 Service  │  │ 24 Transport │  │   Storage    │    │
 │  │   Monitors   │  │  Publishers  │  │  Repository  │    │
 │  └──────────────┘  └──────────────┘  └──────────────┘    │
 ├────────────────────────────────────────────────────────────┤
-│  Simple.Service.Monitoring.UI (React SPA Dashboard)        │
+│  Kythr.UI (React SPA Dashboard)        │
 └────────────────────────────────────────────────────────────┘
 ```
 
@@ -83,5 +83,5 @@ Ready to start? See the [Quick Start Guide](Quick-Start-Guide.md) to be up and r
 ## Questions?
 
 - Check the [FAQ](FAQ.md)
-- [Open an issue](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues) on GitHub
-- Start a [Discussion](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/discussions)
+- [Open an issue](https://github.com/turric4n/Dotnet.Kythr/issues) on GitHub
+- Start a [Discussion](https://github.com/turric4n/Dotnet.Kythr/discussions)

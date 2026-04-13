@@ -2,13 +2,13 @@
 
 ## General Questions
 
-### What is Simple Service Monitoring?
+### What is Kythr?
 
-Simple Service Monitoring is an enterprise-grade health monitoring and alerting system for .NET applications. It provides real-time monitoring, intelligent alerting, and a web-based dashboard for tracking the health of your services.
+Kythr is an enterprise-grade health monitoring and alerting system for .NET applications. It provides real-time monitoring, intelligent alerting, and a web-based dashboard for tracking the health of your services.
 
 ### Is it free to use?
 
-Yes! Simple Service Monitoring is open source and licensed under the MIT License. You can use it freely in both commercial and non-commercial projects.
+Yes! Kythr is open source and licensed under the MIT License. You can use it freely in both commercial and non-commercial projects.
 
 ### What .NET versions are supported?
 
@@ -27,8 +27,8 @@ No! You can use the LiteDB storage option which requires no external database. F
 Install via NuGet:
 
 ```bash
-dotnet add package Simple.Service.Monitoring.Extensions
-dotnet add package Simple.Service.Monitoring.UI.Extensions
+dotnet add package Kythr.Extensions
+dotnet add package Kythr.UI.Extensions
 ```
 
 See the [Quick Start Guide](Quick-Start-Guide.md) for complete setup instructions.
@@ -391,7 +391,7 @@ See the [Contributing Guide](Contributing-Guide.md) for details on:
 
 ### I found a bug, what should I do?
 
-[Open an issue](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues) on GitHub with:
+[Open an issue](https://github.com/turric4n/Dotnet.Kythr/issues) on GitHub with:
 - Description of the problem
 - Steps to reproduce
 - Expected vs actual behavior
@@ -403,5 +403,5 @@ See the [Contributing Guide](Contributing-Guide.md) for details on:
 
 - Check [Common Issues](Common-Issues.md)
 - Review [Troubleshooting](Common-Issues.md)
-- [Open a discussion](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/discussions) on GitHub
-- [Report an issue](https://github.com/turric4n/Dotnet.Simple.Service.Monitoring/issues)
+- [Open a discussion](https://github.com/turric4n/Dotnet.Kythr/discussions) on GitHub
+- [Report an issue](https://github.com/turric4n/Dotnet.Kythr/issues)

@@ -1,0 +1,848 @@
+# =============================================================================
+# Kythr - Complete Docker Configuration Template
+# =============================================================================
+#
+# This file documents EVERY configurable option for the monitoring suite.
+# Copy this file, uncomment and adjust the sections you need.
+#
+# CONFIGURATION PRIORITY (highest wins):
+#   1. Environment variables    (e.g. MONITORING_SETTINGS_USEGLOBALSERVICENAME=MyApp)
+#   2. appsettings.{Env}.yml   (e.g. appsettings.Production.yml)
+#   3. appsettings.yml          (base config)
+#   4. Defaults
+#
+# ENVIRONMENT VARIABLE NAMING:
+#   Use UPPERCASE with single underscores (_) as section separators.
+#   Arrays use zero-based index: _0_, _1_, etc.
+#
+#   Examples:
+#     MONITORINGUI_COMPANYNAME=ACME Corp
+#     MONITORINGUI_DATAREPOSITORYTYPE=InMemory
+#     MONITORING_SETTINGS_USEGLOBALSERVICENAME=Production
+#     MONITORING_HEALTHCHECKS_0_NAME=My HTTP Check
+#     MONITORING_HEALTHCHECKS_0_SERVICETYPE=Http
+#     MONITORING_HEALTHCHECKS_0_ENDPOINTORHOST=https://api.example.com/health
+#     MONITORING_HEALTHCHECKS_0_ALERT=true
+#     MONITORING_HEALTHCHECKS_0_HEALTHCHECKCONDITIONS_HTTPBEHAVIOUR_HTTPEXPECTEDCODE=200
+#     MONITORING_HEALTHCHECKS_0_ALERTBEHAVIOUR_0_TRANSPORTMETHOD=Email
+#     MONITORING_HEALTHCHECKS_0_ALERTBEHAVIOUR_0_TRANSPORTNAME=PrimaryEmail
+#     MONITORING_EMAILTRANSPORTSETTINGS_0_NAME=PrimaryEmail
+#     MONITORING_EMAILTRANSPORTSETTINGS_0_PASSWORD=secret
+#
+# =============================================================================
+
+Logging:
+  LogLevel:
+    Default: Information
+    Microsoft: Warning
+    Microsoft.Hosting.Lifetime: Information
+
+AllowedHosts: "*"
+
+# =============================================================================
+# MONITORING UI CONFIGURATION
+# =============================================================================
+# Section bound via configuration.GetSection("MonitoringUi")
+#
+# Env var examples:
+#   MONITORINGUI_COMPANYNAME=ACME Corp
+#   MONITORINGUI_HEADERLOGOURL=https://example.com/logo.png
+#   MONITORINGUI_DATAREPOSITORYTYPE=LiteDb
+#   MONITORINGUI_SQLCONNECTIONSTRING=Server=...
+# =============================================================================
+MonitoringUi:
+  # Company name displayed in the dashboard header
+  CompanyName: "My Company"
+
+  # Optional: Custom logo URL for the dashboard header
+  HeaderLogoUrl: ""
+
+  # Data storage backend for the UI dashboard
+  # Options: InMemory, LiteDb, Sql
+  # - InMemory: No persistence, data lost on restart
+  # - LiteDb: File-based storage at /app/data/ (recommended for Docker)
+  # - Sql: SQL Server storage (requires SqlConnectionString)
+  DataRepositoryType: LiteDb
+
+  # Required only when DataRepositoryType is Sql
+  # SqlConnectionString: "Server=sqlserver;Database=MonitoringUI;User Id=sa;Password=YourPassword;"
+
+# =============================================================================
+# MONITORING CONFIGURATION
+# =============================================================================
+# Section bound via configuration.GetSection("Monitoring") -> MonitorOptions
+#
+# Env var examples:
+#   MONITORING_SETTINGS_USEGLOBALSERVICENAME=Production Services
+# =============================================================================
+Monitoring:
+  # ---------------------------------------------------------------------------
+  # Global Settings
+  # ---------------------------------------------------------------------------
+  Settings:
+    # Optional: Set a global service name prefix for all health checks
+    UseGlobalServiceName: "Docker Monitoring"
+
+  # ---------------------------------------------------------------------------
+  # HEALTH CHECKS
+  # ---------------------------------------------------------------------------
+  # Define all service monitors here. Each entry creates a health check.
+  #
+  # Common fields for ALL service types:
+  #   Name:                    string   - Unique name for this monitor
+  #   ServiceType:             enum     - See below for all 26 types
+  #   EndpointOrHost:          string   - Target host/URL (for HTTP, Ping, TCP, DNS, etc.)
+  #   ConnectionString:        string   - Connection string (for databases, queues, etc.)
+  #   Alert:                   bool     - Enable alerting for this monitor
+  #   AlertBehaviour:          array    - Alert rules (see AlertBehaviour section below)
+  #   HealthCheckConditions:   object   - Service-specific configuration
+  #   AdditionalTags:          array    - Custom tags for categorization
+  #   ExcludedInterceptionNames: array  - Interceptors to exclude
+  #   FullClassName:           string   - Required for ServiceType: Custom
+  #
+  # ServiceType options (26 types):
+  #   Http, Ping, Tcp, Dns, SslCertificate, Ftp, Smtp,
+  #   MsSql, MySql, PostgreSql, Oracle, Sqlite,
+  #   Redis, Memcached, MongoDb, CosmosDb,
+  #   Rmq, Kafka, AzureServiceBus, AwsSqs,
+  #   ElasticSearch, Hangfire, Grpc, Docker,
+  #   Custom, Interceptor
+  # ---------------------------------------------------------------------------
+  HealthChecks:
+
+    # =========================================================================
+    # HTTP SERVICE MONITORING
+    # =========================================================================
+    # Env var: Monitoring__HealthChecks__0__*
+    - Name: "HTTP API Health"
+      ServiceType: Http
+      EndpointOrHost: "https://api.example.com/health"
+      Alert: true
+      AdditionalTags:
+        - "production"
+        - "critical"
+      HealthCheckConditions:
+        HttpBehaviour:
+          HttpExpectedCode: 200           # Expected HTTP status code
+          HttpTimeoutMs: 5000             # Request timeout in milliseconds
+          HttpVerb: Get                   # Options: Get, Post, Put, Delete
+          # Custom HTTP headers (e.g. authentication, API keys)
+          # CustomHttpHeaders:
+          #   Authorization: "Bearer your-token-here"
+          #   X-API-Key: "your-api-key"
+        ServiceReach: true
+        ServiceConnectionEstablished: true
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:05:00"
+          AlertByFailCount: 3
+          PublishAllResults: false
+          IncludeEnvironment: true
+          Timezone: "UTC"
+          # UsePeriodicAlerting: true
+          # StartAlertingOn: "08:00:00"
+          # StopAlertingOn: "18:00:00"
+
+    # =========================================================================
+    # PING MONITORING
+    # =========================================================================
+    # Env var: Monitoring__HealthChecks__1__*
+    - Name: "Server Ping"
+      ServiceType: Ping
+      EndpointOrHost: "google.com"
+      Alert: true
+      AdditionalTags:
+        - "network"
+      HealthCheckConditions:
+        PingBehaviour:
+          TimeOutMs: 5000
+        ServiceReach: true
+        ServiceConnectionEstablished: true
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # TCP MONITORING
+    # =========================================================================
+    - Name: "TCP Service"
+      ServiceType: Tcp
+      EndpointOrHost: "server.example.com"
+      Alert: true
+      HealthCheckConditions:
+        TcpBehaviour:
+          Port: 8080
+          TimeOutMs: 5000
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # DNS MONITORING
+    # =========================================================================
+    - Name: "DNS Resolution"
+      ServiceType: Dns
+      EndpointOrHost: "example.com"
+      Alert: true
+      HealthCheckConditions:
+        DnsBehaviour:
+          ExpectedIpAddress: "93.184.216.34"
+          TimeOutMs: 5000
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # SSL CERTIFICATE MONITORING
+    # =========================================================================
+    - Name: "SSL Certificate"
+      ServiceType: SslCertificate
+      EndpointOrHost: "example.com"
+      Alert: true
+      HealthCheckConditions:
+        SslCertificateBehaviour:
+          WarningDaysBeforeExpiry: 30
+          Port: 443
+          TimeOutMs: 10000
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # FTP MONITORING
+    # =========================================================================
+    - Name: "FTP Server"
+      ServiceType: Ftp
+      EndpointOrHost: "ftp.example.com"
+      Alert: true
+      HealthCheckConditions:
+        FtpBehaviour:
+          Port: 21
+          UseSftp: false
+          TimeOutMs: 10000
+          # Username: "ftpuser"
+          # Password: "ftppassword"
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # SMTP MONITORING
+    # =========================================================================
+    - Name: "SMTP Server"
+      ServiceType: Smtp
+      EndpointOrHost: "smtp.example.com"
+      Alert: true
+      HealthCheckConditions:
+        SmtpBehaviour:
+          Port: 587
+          UseTls: true
+          TimeOutMs: 10000
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # MICROSOFT SQL SERVER MONITORING
+    # =========================================================================
+    - Name: "SQL Server Database"
+      ServiceType: MsSql
+      ConnectionString: "Server=sqlserver;Database=MyApp;User Id=sa;Password=YourPassword;"
+      Alert: true
+      AdditionalTags:
+        - "database"
+      HealthCheckConditions:
+        SqlBehaviour:
+          Query: "SELECT 1"
+          ResultExpression: Equal          # Options: Equal, NotEqual, GreaterThan, LessThan
+          SqlResultDataType: Int           # Options: String, Int, Bool, DateTime
+          ExpectedResult: 1
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: false
+          AlertOnServiceRecovered: true
+          AlertEvery: "00:10:00"
+
+    # =========================================================================
+    # MYSQL MONITORING
+    # =========================================================================
+    - Name: "MySQL Database"
+      ServiceType: MySql
+      ConnectionString: "Server=mysql;Database=myapp;Uid=root;Pwd=rootpassword;"
+      Alert: true
+      AdditionalTags:
+        - "database"
+      HealthCheckConditions:
+        SqlBehaviour:
+          Query: "SELECT 1"
+          ResultExpression: Equal
+          SqlResultDataType: Int
+          ExpectedResult: 1
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # POSTGRESQL MONITORING
+    # =========================================================================
+    - Name: "PostgreSQL Database"
+      ServiceType: PostgreSql
+      ConnectionString: "Host=postgres;Database=myapp;Username=user;Password=password;"
+      Alert: true
+      AdditionalTags:
+        - "database"
+      HealthCheckConditions:
+        SqlBehaviour:
+          Query: "SELECT 1"
+          ResultExpression: Equal
+          SqlResultDataType: Int
+          ExpectedResult: 1
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # ORACLE MONITORING
+    # =========================================================================
+    # - Name: "Oracle Database"
+    #   ServiceType: Oracle
+    #   ConnectionString: "Data Source=oracle:1521/ORCL;User Id=system;Password=oracle;"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     SqlBehaviour:
+    #       Query: "SELECT 1 FROM DUAL"
+    #       ResultExpression: Equal
+    #       SqlResultDataType: Int
+    #       ExpectedResult: 1
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # SQLITE MONITORING
+    # =========================================================================
+    # - Name: "SQLite Database"
+    #   ServiceType: Sqlite
+    #   ConnectionString: "Data Source=/app/data/mydb.sqlite;"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     SqlBehaviour:
+    #       Query: "SELECT 1"
+    #       ResultExpression: Equal
+    #       SqlResultDataType: Int
+    #       ExpectedResult: 1
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # REDIS MONITORING
+    # =========================================================================
+    - Name: "Redis Cache"
+      ServiceType: Redis
+      ConnectionString: "redis:6379"
+      Alert: true
+      AdditionalTags:
+        - "cache"
+      HealthCheckConditions:
+        RedisBehaviour:
+          TimeOutMs: 3000
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # MEMCACHED MONITORING
+    # =========================================================================
+    # - Name: "Memcached"
+    #   ServiceType: Memcached
+    #   EndpointOrHost: "memcached"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     MemcachedBehaviour:
+    #       TimeOutMs: 3000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # MONGODB MONITORING
+    # =========================================================================
+    # - Name: "MongoDB"
+    #   ServiceType: MongoDb
+    #   ConnectionString: "mongodb://mongo:27017"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     MongoDbBehaviour:
+    #       DatabaseName: "mydb"
+    #       TimeOutMs: 5000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # COSMOSDB MONITORING
+    # =========================================================================
+    # - Name: "CosmosDB"
+    #   ServiceType: CosmosDb
+    #   ConnectionString: "AccountEndpoint=https://cosmos.documents.azure.com:443/;AccountKey=your-key;"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     CosmosDbBehaviour:
+    #       DatabaseId: "mydb"
+    #       ContainerId: "mycontainer"
+    #       TimeOutMs: 10000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # RABBITMQ MONITORING
+    # =========================================================================
+    - Name: "RabbitMQ"
+      ServiceType: Rmq
+      ConnectionString: "amqp://guest:guest@rabbitmq:5672/"
+      Alert: true
+      AdditionalTags:
+        - "messaging"
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # KAFKA MONITORING
+    # =========================================================================
+    # - Name: "Kafka Broker"
+    #   ServiceType: Kafka
+    #   EndpointOrHost: "kafka:9092"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     KafkaBehaviour:
+    #       TopicName: "health-check"
+    #       TimeOutMs: 10000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # AZURE SERVICE BUS MONITORING
+    # =========================================================================
+    # - Name: "Azure Service Bus"
+    #   ServiceType: AzureServiceBus
+    #   ConnectionString: "Endpoint=sb://your-namespace.servicebus.windows.net/;SharedAccessKeyName=...;SharedAccessKey=..."
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     AzureServiceBusBehaviour:
+    #       QueueOrTopicName: "my-queue"
+    #       TimeOutMs: 10000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # AWS SQS MONITORING
+    # =========================================================================
+    # - Name: "AWS SQS Queue"
+    #   ServiceType: AwsSqs
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     AwsSqsBehaviour:
+    #       QueueUrl: "https://sqs.us-east-1.amazonaws.com/123456789/my-queue"
+    #       Region: "us-east-1"
+    #       AccessKey: "your-access-key"
+    #       SecretKey: "your-secret-key"
+    #       TimeOutMs: 10000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # ELASTICSEARCH MONITORING
+    # =========================================================================
+    - Name: "Elasticsearch Cluster"
+      ServiceType: ElasticSearch
+      EndpointOrHost: "http://elasticsearch:9200"
+      Alert: true
+      AdditionalTags:
+        - "search"
+      AlertBehaviour:
+        - TransportMethod: Console
+          TransportName: "DefaultConsole"
+          AlertOnce: true
+          AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # HANGFIRE MONITORING
+    # =========================================================================
+    # - Name: "Hangfire Jobs"
+    #   ServiceType: Hangfire
+    #   ConnectionString: "Server=sqlserver;Database=HangfireDb;User Id=sa;Password=YourPassword;"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     HangfireBehaviour:
+    #       MaximumJobsFailed: 10
+    #       MinimumAvailableServers: 1
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # GRPC MONITORING
+    # =========================================================================
+    # - Name: "gRPC Service"
+    #   ServiceType: Grpc
+    #   EndpointOrHost: "https://grpc-server:5001"
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     GrpcBehaviour:
+    #       UseHealthCheckProtocol: true
+    #       TimeOutMs: 5000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # DOCKER CONTAINER MONITORING
+    # =========================================================================
+    # - Name: "Docker Container"
+    #   ServiceType: Docker
+    #   Alert: true
+    #   HealthCheckConditions:
+    #     DockerBehaviour:
+    #       ContainerNameOrId: "my-container"
+    #       DockerEndpoint: "unix:///var/run/docker.sock"
+    #       TimeOutMs: 5000
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # CUSTOM HEALTH CHECK
+    # =========================================================================
+    # - Name: "Custom Business Logic"
+    #   ServiceType: Custom
+    #   FullClassName: "MyApp.HealthChecks.CustomBusinessLogicHealthCheck"
+    #   Alert: true
+    #   AlertBehaviour:
+    #     - TransportMethod: Console
+    #       TransportName: "DefaultConsole"
+    #       AlertOnce: true
+    #       AlertOnServiceRecovered: true
+
+    # =========================================================================
+    # INTERCEPTOR MONITORING
+    # =========================================================================
+    # - Name: "Interceptor"
+    #   ServiceType: Interceptor
+    #   Alert: false
+    #   ExcludedInterceptionNames:
+    #     - "HealthCheck"
+    #     - "Metrics"
+
+  # ===========================================================================
+  # ALERT BEHAVIOUR REFERENCE
+  # ===========================================================================
+  # Each health check can have multiple AlertBehaviour entries.
+  # Each entry maps to a transport (publisher) by TransportMethod + TransportName.
+  #
+  # Fields:
+  #   TransportMethod:         enum     - See AlertTransportMethod values below
+  #   TransportName:           string   - Must match a Name in the corresponding transport settings
+  #   AlertOnce:               bool     - Alert only on first failure (reset when recovered)
+  #   AlertOnServiceRecovered: bool     - Send alert when service recovers to healthy
+  #   AlertEvery:              TimeSpan - Minimum interval between alerts (e.g. "00:05:00")
+  #   UsePeriodicAlerting:     bool     - Enable time-window-based alerting
+  #   StartAlertingOn:         TimeSpan - Start of alert window (e.g. "08:00:00")
+  #   StopAlertingOn:          TimeSpan - End of alert window (e.g. "18:00:00")
+  #   AlertByFailCount:        int      - Number of consecutive failures before alerting
+  #   PublishAllResults:        bool     - Publish every check result (not just failures)
+  #   IncludeEnvironment:      bool     - Include environment name in alert messages
+  #   Timezone:                string   - Timezone for alert scheduling (e.g. "UTC", "Europe/Madrid")
+  #
+  # AlertTransportMethod options (24 methods):
+  #   Email, Slack, Telegram, Influx, CustomApi, SignalR, Teams, Discord,
+  #   PagerDuty, Opsgenie, Datadog, Prometheus, CloudWatch, AppInsights,
+  #   Elasticsearch, GoogleChat, Mattermost, Console, FileLog,
+  #   RabbitMq, KafkaTransport, Webhook, RedisTransport, Dummy
+  # ===========================================================================
+
+  # ===========================================================================
+  # TRANSPORT SETTINGS
+  # ===========================================================================
+  # Each transport type has its own settings array. The Name field links to
+  # AlertBehaviour.TransportName in the health check definitions above.
+  # ===========================================================================
+
+  # ---------------------------------------------------------------------------
+  # EMAIL TRANSPORT
+  # ---------------------------------------------------------------------------
+  # Env var examples:
+  #   Monitoring__EmailTransportSettings__0__Name=PrimaryEmail
+  #   Monitoring__EmailTransportSettings__0__SmtpHost=smtp.example.com
+  #   Monitoring__EmailTransportSettings__0__Password=secret   <-- use env var for secrets!
+  # ---------------------------------------------------------------------------
+  EmailTransportSettings:
+    - Name: "PrimaryEmail"
+      From: "monitoring@example.com"
+      DisplayName: "Service Monitor"
+      To: "devops@example.com"
+      SmtpHost: "smtp.example.com"
+      SmtpPort: 587
+      Authentication: true
+      Username: "monitoring@example.com"
+      Password: "your-email-password"
+
+  # ---------------------------------------------------------------------------
+  # SLACK TRANSPORT
+  # ---------------------------------------------------------------------------
+  SlackTransportSettings:
+    - Name: "DevOpsSlack"
+      Token: "xoxb-your-slack-bot-token"
+      Channel: "#devops-alerts"
+      Username: "Health Monitor Bot"
+
+  # ---------------------------------------------------------------------------
+  # TELEGRAM TRANSPORT
+  # ---------------------------------------------------------------------------
+  TelegramTransportSettings:
+    - Name: "AlertsTelegram"
+      BotApiToken: "123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+      ChatId: "-1001234567890"
+
+  # ---------------------------------------------------------------------------
+  # INFLUXDB TRANSPORT
+  # ---------------------------------------------------------------------------
+  InfluxDbTransportSettings:
+    - Name: "MetricsInflux"
+      Host: "http://influxdb:8086"
+      Database: "health_checks"
+      AutoCreateDatabase: true
+      # RetentionPolicy: ""
+      # RetentionDuration: ""
+      Version: V1                        # Options: V1, V2
+      # Token: ""                        # Required for V2
+      # Organization: ""                 # Required for V2
+
+  # ---------------------------------------------------------------------------
+  # CUSTOM NOTIFICATION API TRANSPORT
+  # ---------------------------------------------------------------------------
+  CustomNotificationTransportSettings:
+    - Name: "CustomAPI"
+      BaseEndpoint: "https://api.example.com/notifications"
+      ApiKey: "your-api-key"
+      ProjectName: "Monitoring"
+      Environment: "Production"
+
+  # ---------------------------------------------------------------------------
+  # SIGNALR TRANSPORT
+  # ---------------------------------------------------------------------------
+  SignalRTransportSettings:
+    - Name: "RealtimeHub"
+      HubUrl: "https://app.example.com/notificationhub"
+      HubMethod: "ReceiveHealthAlert"
+
+  # ---------------------------------------------------------------------------
+  # MICROSOFT TEAMS TRANSPORT
+  # ---------------------------------------------------------------------------
+  TeamsTransportSettings:
+    - Name: "DevOpsTeams"
+      WebhookUrl: "https://outlook.office.com/webhook/your-webhook-url"
+
+  # ---------------------------------------------------------------------------
+  # DISCORD TRANSPORT
+  # ---------------------------------------------------------------------------
+  DiscordTransportSettings:
+    - Name: "AlertsDiscord"
+      WebhookUrl: "https://discord.com/api/webhooks/your-webhook-url"
+      Username: "Health Monitor Bot"
+      AvatarUrl: ""
+
+  # ---------------------------------------------------------------------------
+  # PAGERDUTY TRANSPORT
+  # ---------------------------------------------------------------------------
+  PagerDutyTransportSettings:
+    - Name: "CriticalPagerDuty"
+      RoutingKey: "your-pagerduty-routing-key"
+      Severity: "error"                  # Options: critical, error, warning, info
+
+  # ---------------------------------------------------------------------------
+  # OPSGENIE TRANSPORT
+  # ---------------------------------------------------------------------------
+  OpsgenieTransportSettings:
+    - Name: "AlertsOpsgenie"
+      ApiKey: "your-opsgenie-api-key"
+      Priority: "P3"                     # Options: P1, P2, P3, P4, P5
+
+  # ---------------------------------------------------------------------------
+  # DATADOG TRANSPORT
+  # ---------------------------------------------------------------------------
+  DatadogTransportSettings:
+    - Name: "MetricsDatadog"
+      ApiKey: "your-datadog-api-key"
+      ApplicationKey: "your-datadog-app-key"
+      Site: "datadoghq.com"              # Options: datadoghq.com, datadoghq.eu, etc.
+
+  # ---------------------------------------------------------------------------
+  # PROMETHEUS TRANSPORT
+  # ---------------------------------------------------------------------------
+  PrometheusTransportSettings:
+    - Name: "MetricsPrometheus"
+      PushgatewayUrl: "http://pushgateway:9091"
+      JobName: "health_checks"
+
+  # ---------------------------------------------------------------------------
+  # AWS CLOUDWATCH TRANSPORT
+  # ---------------------------------------------------------------------------
+  CloudWatchTransportSettings:
+    - Name: "MetricsCloudWatch"
+      Region: "us-east-1"
+      AccessKey: "your-aws-access-key"
+      SecretKey: "your-aws-secret-key"
+      Namespace: "HealthChecks"
+
+  # ---------------------------------------------------------------------------
+  # APPLICATION INSIGHTS TRANSPORT
+  # ---------------------------------------------------------------------------
+  AppInsightsTransportSettings:
+    - Name: "MetricsAppInsights"
+      ConnectionString: "InstrumentationKey=your-key;IngestionEndpoint=https://dc.services.visualstudio.com"
+      InstrumentationKey: "your-instrumentation-key"
+
+  # ---------------------------------------------------------------------------
+  # ELASTICSEARCH TRANSPORT (for alert indexing)
+  # ---------------------------------------------------------------------------
+  ElasticsearchTransportSettings:
+    - Name: "AlertsElasticsearch"
+      Nodes:
+        - "http://elasticsearch:9200"
+      IndexPrefix: "health-checks"
+      # Username: "elastic"
+      # Password: "your-password"
+
+  # ---------------------------------------------------------------------------
+  # GOOGLE CHAT TRANSPORT
+  # ---------------------------------------------------------------------------
+  GoogleChatTransportSettings:
+    - Name: "AlertsGoogleChat"
+      WebhookUrl: "https://chat.googleapis.com/v1/spaces/xxx/messages?key=yyy&token=zzz"
+
+  # ---------------------------------------------------------------------------
+  # MATTERMOST TRANSPORT
+  # ---------------------------------------------------------------------------
+  MattermostTransportSettings:
+    - Name: "AlertsMattermost"
+      WebhookUrl: "https://mattermost.example.com/hooks/xxx"
+      Channel: "devops-alerts"
+      Username: "Health Monitor"
+      IconUrl: ""
+
+  # ---------------------------------------------------------------------------
+  # CONSOLE TRANSPORT (stdout logging)
+  # ---------------------------------------------------------------------------
+  ConsoleTransportSettings:
+    - Name: "DefaultConsole"
+      UseColors: true
+      OutputFormat: "text"               # Options: text, json
+
+  # ---------------------------------------------------------------------------
+  # FILE LOG TRANSPORT
+  # ---------------------------------------------------------------------------
+  FileTransportSettings:
+    - Name: "AlertsFileLog"
+      FilePath: "/app/data/health-alerts.log"
+      MaxFileSizeBytes: 10485760         # 10MB
+      RollingPolicy: "daily"             # Options: daily, size
+
+  # ---------------------------------------------------------------------------
+  # RABBITMQ TRANSPORT (publish alerts to queue)
+  # ---------------------------------------------------------------------------
+  RmqTransportSettings:
+    - Name: "AlertsRmq"
+      ConnectionString: "amqp://guest:guest@rabbitmq:5672/"
+      Exchange: "health_checks"
+      RoutingKey: "health.check.result"
+      QueueName: "health-alerts"
+
+  # ---------------------------------------------------------------------------
+  # KAFKA TRANSPORT (publish alerts to topic)
+  # ---------------------------------------------------------------------------
+  KafkaTransportSettings:
+    - Name: "AlertsKafka"
+      BootstrapServers: "kafka:9092"
+      Topic: "health-checks"
+      ClientId: "health-check-publisher"
+
+  # ---------------------------------------------------------------------------
+  # WEBHOOK TRANSPORT (generic HTTP POST)
+  # ---------------------------------------------------------------------------
+  WebhookTransportSettings:
+    - Name: "GenericWebhook"
+      WebhookUrl: "https://hooks.example.com/health-alerts"
+      HttpBehaviour:
+        HttpExpectedCode: 200
+        HttpTimeoutMs: 10000
+        HttpVerb: Post
+      Headers:
+        Authorization: "Bearer your-webhook-token"
+        Content-Type: "application/json"
+
+  # ---------------------------------------------------------------------------
+  # REDIS TRANSPORT (publish alerts to channel)
+  # ---------------------------------------------------------------------------
+  RedisTransportSettings:
+    - Name: "AlertsRedis"
+      Host: "redis"
+      Port: 6379
+      DatabaseNumber: 0
+
+  # ---------------------------------------------------------------------------
+  # DICTIONARY TRANSPORT (in-memory, for testing)
+  # ---------------------------------------------------------------------------
+  # DictionaryTransportSettings:
+  #   - Name: "InMemoryTransport"

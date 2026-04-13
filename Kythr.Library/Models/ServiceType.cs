@@ -1,0 +1,32 @@
+namespace Kythr.Library.Models
+{
+    public enum ServiceType
+    {
+        Custom,
+        Http,
+        ElasticSearch,
+        MsSql,
+        Rmq,
+        Hangfire,
+        Ping,
+        Redis,
+        MySql,
+        PostgreSql,
+        Interceptor,
+        MongoDb,
+        CosmosDb,
+        Kafka,
+        Grpc,
+        Tcp,
+        Dns,
+        SslCertificate,
+        Ftp,
+        Smtp,
+        AzureServiceBus,
+        Memcached,
+        Oracle,
+        Sqlite,
+        Docker,
+        AwsSqs
+    }
+}

@@ -6,7 +6,7 @@
             "request": "launch",
             "type": "msedge",
             "url": "https://localhost:7001/monitoring",
-            "webRoot": "${workspaceFolder}/Simple.Service.Monitoring.UI",
+            "webRoot": "${workspaceFolder}/Kythr.UI",
             "sourceMaps": true,
             "smartStep": true,
             "skipFiles": [
@@ -30,7 +30,7 @@
             "port": 9222,
             "request": "attach",
             "type": "msedge",
-            "webRoot": "${workspaceFolder}/Simple.Service.Monitoring.UI",
+            "webRoot": "${workspaceFolder}/Kythr.UI",
             "sourceMaps": true,
             "sourceMapPathOverrides": {
                 "webpack:///./*": "${webRoot}/*",
@@ -43,7 +43,7 @@
             "request": "launch",
             "type": "chrome",
             "url": "https://localhost:7001/monitoring",
-            "webRoot": "${workspaceFolder}/Simple.Service.Monitoring.UI",
+            "webRoot": "${workspaceFolder}/Kythr.UI",
             "sourceMaps": true,
             "smartStep": true,
             "skipFiles": [
@@ -61,9 +61,9 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Simple.Service.Monitoring/bin/Debug/net8.0/Simple.Service.Monitoring.dll",
+            "program": "${workspaceFolder}/Kythr/bin/Debug/net10.0/Kythr.dll",
             "args": [],
-            "cwd": "${workspaceFolder}/Simple.Service.Monitoring",
+            "cwd": "${workspaceFolder}/Kythr",
             "stopAtEntry": false,
             "serverReadyAction": {
                 "action": "openExternally",

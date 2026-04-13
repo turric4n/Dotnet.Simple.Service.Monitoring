@@ -1,6 +1,6 @@
 # Docker Deployment Guide
 
-Deploy Simple.Service.Monitoring as a standalone Docker container with the full monitoring suite and dashboard UI.
+Deploy Kythr as a standalone Docker container with the full monitoring suite and dashboard UI.
 
 ## Overview
 
@@ -43,20 +43,20 @@ chmod +x build-docker.sh
 
 ```bash
 # Step 1: Publish the application
-dotnet publish Simple.Service.Monitoring/Simple.Service.Monitoring.csproj \
+dotnet publish Kythr/Kythr.csproj \
     -c Release -o ./publish /p:UseAppHost=false
 
 # Step 2: Build the Docker image (context = publish folder)
-docker build -t turric4n/simple-service-monitoring:latest \
-    -f Simple.Service.Monitoring/Dockerfile ./publish
+docker build -t turric4n/kythr:latest \
+    -f Kythr/Dockerfile ./publish
 ```
 
 ### Publishing to Docker Hub
 
 ```bash
 docker login
-docker push turric4n/simple-service-monitoring:latest
-docker push turric4n/simple-service-monitoring:2.0.0
+docker push turric4n/kythr:latest
+docker push turric4n/kythr:2.0.0
 ```
 
 ---
@@ -66,7 +66,7 @@ docker push turric4n/simple-service-monitoring:2.0.0
 ### Quick start (defaults only)
 
 ```bash
-docker run -p 5000:5000 turric4n/simple-service-monitoring:latest
+docker run -p 5000:5000 turric4n/kythr:latest
 ```
 
 The dashboard UI is available at `http://localhost:5000`.
@@ -75,7 +75,7 @@ The dashboard UI is available at `http://localhost:5000`.
 
 ```bash
 # 1. Copy the template
-cp Simple.Service.Monitoring/appsettings.docker.yml ./config/appsettings.yml
+cp Kythr/appsettings.docker.yml ./config/appsettings.yml
 
 # 2. Edit config/appsettings.yml with your monitors and transports
 
@@ -83,7 +83,7 @@ cp Simple.Service.Monitoring/appsettings.docker.yml ./config/appsettings.yml
 docker run -p 5000:5000 \
     -v $(pwd)/config/appsettings.yml:/app/appsettings.yml:ro \
     -v monitoring-data:/app/data \
-    turric4n/simple-service-monitoring:latest
+    turric4n/kythr:latest
 ```
 
 ### With environment variables only
@@ -102,7 +102,7 @@ docker run -p 5000:5000 \
     -e "MONITORING_HEALTHCHECKS_0_ALERTBEHAVIOUR_0_ALERTONSERVICERECOVERED=true" \
     -e "MONITORING_CONSOLETRANSPORTSETTINGS_0_NAME=DefaultConsole" \
     -e "MONITORING_CONSOLETRANSPORTSETTINGS_0_USECOLORS=true" \
-    turric4n/simple-service-monitoring:latest
+    turric4n/kythr:latest
 ```
 
 ### With Docker Compose (recommended)
@@ -110,7 +110,7 @@ docker run -p 5000:5000 \
 ```bash
 # 1. Copy and customize the config
 mkdir -p config
-cp Simple.Service.Monitoring/appsettings.docker.yml config/appsettings.yml
+cp Kythr/appsettings.docker.yml config/appsettings.yml
 
 # 2. Start the container
 docker-compose -f docker-compose.monitoring.yml up -d
@@ -135,7 +135,7 @@ docker run -p 5000:5000 \
     -e "MONITORING_TELEGRAMTRANSPORTSETTINGS_0_BOTAPITOKEN=real-bot-token" \
     -e "MONITORING_PAGERDUTYTRANSPORTSETTINGS_0_ROUTINGKEY=real-key" \
     -e "MONITORING_HEALTHCHECKS_3_CONNECTIONSTRING=Server=prod-sql;Password=real-password" \
-    turric4n/simple-service-monitoring:latest
+    turric4n/kythr:latest
 ```
 
 ---
@@ -384,7 +384,7 @@ docker run -p 5000:5000 \
     -e "MONITORING_HEALTHCHECKS_1_CONNECTIONSTRING=Server=db.internal;Database=MyApp;User Id=monitor;Password=RealSecret123" \
     -e "MONITORING_EMAILTRANSPORTSETTINGS_0_PASSWORD=real-smtp-password" \
     -e "MONITORING_SLACKTRANSPORTSETTINGS_0_TOKEN=xoxb-real-slack-token" \
-    turric4n/simple-service-monitoring:latest
+    turric4n/kythr:latest
 ```
 
 ---
