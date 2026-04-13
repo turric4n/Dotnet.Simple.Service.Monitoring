@@ -1,6 +1,6 @@
 # Kythr.UI
 
-A user interface component for the Dotnet.Kythr system, providing visualization and interaction with monitored services.
+A user interface component for the Kythr system, providing visualization and interaction with monitored services.
 
 ## Overview
 
@@ -25,12 +25,12 @@ Kythr.UI provides a user-friendly dashboard for monitoring services in real-time
 
 1. Clone the repository:
     ```
-    git clone https://github.com/yourusername/Dotnet.Kythr.git
+    git clone https://github.com/yourusername/Kythr.git
     ```
 
 2. Navigate to the UI project:
     ```
-    cd Dotnet.Kythr/Kythr.UI
+    cd Kythr/Kythr.UI
     ```
 
 3. Restore dependencies:

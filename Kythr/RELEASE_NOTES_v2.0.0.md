@@ -420,14 +420,14 @@ Special thanks to everyone who contributed to this release!
 ## 📞 Support & Feedback
 
 ### Report Issues
-- GitHub Issues: https://github.com/turric4n/Dotnet.Kythr/issues
+- GitHub Issues: https://github.com/turric4n/Kythr/issues
 
 ### Documentation
-- Wiki: https://github.com/turric4n/Dotnet.Kythr/wiki
+- Wiki: https://github.com/turric4n/Kythr/wiki
 - README: [README.md](./README.md)
 
 ### Community
-- Discussions: https://github.com/turric4n/Dotnet.Kythr/discussions
+- Discussions: https://github.com/turric4n/Kythr/discussions
 
 ---
 

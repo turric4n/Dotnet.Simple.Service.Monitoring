@@ -262,7 +262,7 @@ Now that you have the basics working, explore:
 
 - Review [Common Issues](Common-Issues.md)
 - Check the [FAQ](FAQ.md)
-- [Open an issue](https://github.com/turric4n/Dotnet.Kythr/issues) on GitHub
+- [Open an issue](https://github.com/turric4n/Kythr/issues) on GitHub
 
 ---
 

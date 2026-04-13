@@ -7,7 +7,7 @@
 
 - Added SQL/MySQL query healthCheck and result</Description>
 		<Copyright>Turrican Software</Copyright>
-		<PackageProjectUrl>https://github.com/turric4n/Dotnet.Kythr</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/turric4n/Kythr</PackageProjectUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>1.0.27</Version>
     <AssemblyVersion>1.0.27</AssemblyVersion>

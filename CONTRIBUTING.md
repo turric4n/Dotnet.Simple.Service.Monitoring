@@ -1,4 +1,4 @@
-# Contributing to Dotnet.Kythr
+# Contributing to Kythr
 
 Thank you for your interest in contributing! This guide will help you get started.
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing! This guide will help you get starte
 
 ```bash
 # Clone the repository
-git clone https://github.com/turric4n/Dotnet.Kythr.git
-cd Dotnet.Kythr
+git clone https://github.com/turric4n/Kythr.git
+cd Kythr
 
 # Restore and build
 dotnet restore Kythr/Kythr.sln
@@ -42,7 +42,7 @@ npm run build    # Production build
 
 ### Reporting Bugs
 
-1. Check [existing issues](https://github.com/turric4n/Dotnet.Kythr/issues) to avoid duplicates
+1. Check [existing issues](https://github.com/turric4n/Kythr/issues) to avoid duplicates
 2. Open a new issue using the **Bug Report** template
 3. Include: .NET version, OS, configuration (sanitized), steps to reproduce, expected vs actual behavior
 

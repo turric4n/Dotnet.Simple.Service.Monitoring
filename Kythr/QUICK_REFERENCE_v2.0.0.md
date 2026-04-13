@@ -134,7 +134,7 @@ Alerts automatically show which failed!
 
 ## 🔗 Links
 
-- **GitHub**: https://github.com/turric4n/Dotnet.Kythr
+- **GitHub**: https://github.com/turric4n/Kythr
 - **Release Notes**: [RELEASE_NOTES_v2.0.0.md](./RELEASE_NOTES_v2.0.0.md)
 - **Full Summary**: [PROJECT_ENHANCEMENT_SUMMARY.md](./PROJECT_ENHANCEMENT_SUMMARY.md)
 

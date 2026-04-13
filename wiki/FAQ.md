@@ -391,7 +391,7 @@ See the [Contributing Guide](Contributing-Guide.md) for details on:
 
 ### I found a bug, what should I do?
 
-[Open an issue](https://github.com/turric4n/Dotnet.Kythr/issues) on GitHub with:
+[Open an issue](https://github.com/turric4n/Kythr/issues) on GitHub with:
 - Description of the problem
 - Steps to reproduce
 - Expected vs actual behavior
@@ -403,5 +403,5 @@ See the [Contributing Guide](Contributing-Guide.md) for details on:
 
 - Check [Common Issues](Common-Issues.md)
 - Review [Troubleshooting](Common-Issues.md)
-- [Open a discussion](https://github.com/turric4n/Dotnet.Kythr/discussions) on GitHub
-- [Report an issue](https://github.com/turric4n/Dotnet.Kythr/issues)
+- [Open a discussion](https://github.com/turric4n/Kythr/discussions) on GitHub
+- [Report an issue](https://github.com/turric4n/Kythr/issues)

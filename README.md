@@ -1,20 +1,20 @@
 <div align="center">
 
-<img src="Kythr.UI/wwwroot/images/kythr-logo.svg" alt="Kythr Logo" width="128" />
+<img src="kythr-logo.svg" alt="Kythr Logo" width="128" />
 
-# Dotnet.Kythr
+# Kythr
 
 ### **K**eeps **Y**our **T**hings **H**ealthy & **R**eliable
 
 **Enterprise-Grade Health Monitoring & Alerting for .NET**
 
-[![.NET](https://github.com/turric4n/Dotnet.Kythr/actions/workflows/dotnet.yml/badge.svg)](https://github.com/turric4n/Dotnet.Kythr/actions/workflows/dotnet.yml)
+[![.NET](https://github.com/turric4n/Kythr/actions/workflows/dotnet.yml/badge.svg)](https://github.com/turric4n/Kythr/actions/workflows/dotnet.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-purple.svg)](https://dotnet.microsoft.com/)
 
 Monitor **26 service types** across your infrastructure, alert through **24 transport channels**, and visualize everything in a **React-based real-time dashboard** — all driven by configuration.
 
-[Quick Start](#-quick-start) · [Documentation](https://github.com/turric4n/Dotnet.Kythr/wiki) · [Examples](docs/examples/) · [Contributing](CONTRIBUTING.md)
+[Quick Start](#-quick-start) · [Documentation](https://github.com/turric4n/Kythr/wiki) · [Examples](docs/examples/) · [Contributing](CONTRIBUTING.md)
 
 </div>
 
@@ -30,7 +30,7 @@ Monitor **26 service types** across your infrastructure, alert through **24 tran
 
 ## Overview
 
-Dotnet.Kythr is a comprehensive health monitoring solution for .NET applications. Built on the .NET HealthChecks framework, it provides enterprise-grade monitoring, intelligent alerting, and a modern web dashboard — all with minimal code and configuration-first design.
+Kythr is a comprehensive health monitoring solution for .NET applications. Built on the .NET HealthChecks framework, it provides enterprise-grade monitoring, intelligent alerting, and a modern web dashboard — all with minimal code and configuration-first design.
 
 ## Key Features
 
@@ -97,7 +97,7 @@ dotnet add package Kythr.UI.Extensions
 Or clone and reference directly:
 
 ```bash
-git clone https://github.com/turric4n/Dotnet.Kythr.git
+git clone https://github.com/turric4n/Kythr.git
 ```
 
 ## Quick Start
@@ -652,8 +652,8 @@ See [RELEASE_NOTES_v2.0.0.md](Kythr/RELEASE_NOTES_v2.0.0.md) for full details.
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
-git clone https://github.com/turric4n/Dotnet.Kythr.git
-cd Dotnet.Kythr
+git clone https://github.com/turric4n/Kythr.git
+cd Kythr
 dotnet restore Kythr/Kythr.sln
 dotnet build Kythr/Kythr.sln
 dotnet test Kythr.Tests/Kythr.Tests.csproj
@@ -665,9 +665,9 @@ MIT — see [LICENSE](LICENSE) for details.
 
 ## Support
 
-- [GitHub Issues](https://github.com/turric4n/Dotnet.Kythr/issues) — bug reports & feature requests
-- [GitHub Discussions](https://github.com/turric4n/Dotnet.Kythr/discussions) — questions & ideas
-- [Wiki](https://github.com/turric4n/Dotnet.Kythr/wiki) — full documentation
+- [GitHub Issues](https://github.com/turric4n/Kythr/issues) — bug reports & feature requests
+- [GitHub Discussions](https://github.com/turric4n/Kythr/discussions) — questions & ideas
+- [Wiki](https://github.com/turric4n/Kythr/wiki) — full documentation
 
 ---
 

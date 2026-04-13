@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers all configuration options for Dotnet.Kythr v2.0, including new features like HTTP custom headers and detailed alert results.
+This guide covers all configuration options for Kythr v2.0, including new features like HTTP custom headers and detailed alert results.
 
 ---
 

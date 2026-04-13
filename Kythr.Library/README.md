@@ -81,4 +81,4 @@ MIT
 
 ## Repository
 
-[https://github.com/turric4n/Dotnet.Kythr](https://github.com/turric4n/Dotnet.Kythr)
+[https://github.com/turric4n/Kythr](https://github.com/turric4n/Kythr)

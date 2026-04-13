@@ -19,7 +19,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 # OCI Image Labels
 LABEL org.opencontainers.image.title="Kythr"
 LABEL org.opencontainers.image.description="Standalone service monitoring suite with dashboard UI. Supports HTTP, TCP, DNS, SQL, Redis, RabbitMQ, Kafka, gRPC, and 20+ more service types with 24 alert transport channels."
-LABEL org.opencontainers.image.source="https://github.com/turric4n/Dotnet.Kythr"
+LABEL org.opencontainers.image.source="https://github.com/turric4n/Kythr"
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.authors="Turrican aka Enrique Fuentes"
 LABEL org.opencontainers.image.vendor="Turrican Software"

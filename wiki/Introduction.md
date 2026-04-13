@@ -83,5 +83,5 @@ Ready to start? See the [Quick Start Guide](Quick-Start-Guide.md) to be up and r
 ## Questions?
 
 - Check the [FAQ](FAQ.md)
-- [Open an issue](https://github.com/turric4n/Dotnet.Kythr/issues) on GitHub
-- Start a [Discussion](https://github.com/turric4n/Dotnet.Kythr/discussions)
+- [Open an issue](https://github.com/turric4n/Kythr/issues) on GitHub
+- Start a [Discussion](https://github.com/turric4n/Kythr/discussions)
