@@ -2,7 +2,7 @@
 
 <img src="Kythr.UI/wwwroot/images/kythr-logo.svg" alt="Kythr Logo" width="128" />
 
-# Dotnet.Kythr
+# Kythr
 
 ### **K**eeps **Y**our **T**hings **H**ealthy & **R**eliable
 
